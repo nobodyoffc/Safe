@@ -350,4 +350,5 @@
     <string name="json_converter">JSON Converter</string>
     <string name="menu_json_converter">JSON Convert</string>
     <string name="input_json">Input JSON string</string>
+    <string name="safe_v_by_no1_nrc7">Safe v0.10 By No1_NrC7</string>
 </resources>

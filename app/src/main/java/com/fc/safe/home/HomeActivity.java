@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -19,6 +20,7 @@ import com.fc.safe.db.DatabaseManager;
 import com.fc.safe.initiate.ConfigureManager;
 import com.fc.safe.utils.IconCreator;
 import com.fc.safe.ui.PopupMenuHelper;
+import com.fc.safe.ui.RemindDialog;
 
 
 public class HomeActivity extends AppCompatActivity {
@@ -53,6 +55,15 @@ public class HomeActivity extends AppCompatActivity {
             // Set the content view
             setContentView(R.layout.activity_home);
             TimberLogger.d(TAG, "Content view set successfully");
+
+            // Set up click listener for Safe text
+            TextView safeTextView = findViewById(R.id.safe_text);
+            if (safeTextView != null) {
+                safeTextView.setOnClickListener(v -> {
+                    RemindDialog dialog = new RemindDialog(this, getString(R.string.safe_v_by_no1_nrc7));
+                    dialog.show();
+                });
+            }
 
             // Generate icons for all menu items
             generateMenuIcons();
