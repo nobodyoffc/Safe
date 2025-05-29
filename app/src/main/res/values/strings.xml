@@ -1,0 +1,353 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Safe</string>
+    <string name="scan">Scan</string>
+    <string name="make">Make</string>
+    <string name="clear">Clear</string>
+    <string name="copy">Copy</string>
+    <string name="from_gallery">From Gallery</string>
+    <string name="text_hint">Text from QR code or to be made into QR code</string>
+    <string name="decode_input_hint">Please input the text to be decoded.</string>
+    <string name="scan_notification">Click the Scan button to scan QR code</string>
+    <string name="error_scanning_qr">Error scanning QR code</string>
+    <string name="error_creating_qr">No text to create QR code</string>
+    <string name="error_saving_qr">Error saving QR code</string>
+    <string name="qr_saved">QR code saved</string>
+    <string name="qr_saved_count">%d QR codes saved</string>
+    <string name="no_qr_detected">No QR code detected</string>
+    <string name="permission_camera_rationale">Camera permission is needed for QR code scanning</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+    <string name="qr_code">QR Code</string>
+    <string name="permission_storage_rationale">Storage permission is needed to load images</string>
+    <string name="save">Save</string>
+    <string name="decode">Decode</string>
+    
+    <!-- CheckPassword Activity -->
+    <string name="enter_password">Enter Password</string>
+    <string name="password_hint">Password</string>
+    <string name="confirm">Confirm</string>
+    <string name="please_enter_password">Please enter password</string>
+    <string name="incorrect_password">Incorrect password</string>
+
+    <!-- CreatePassword Activity -->
+    <string name="create_password">Create Password</string>
+    <string name="confirm_password_hint">Confirm Password</string>
+    <string name="create">Create</string>
+
+    <!-- CreateSettings Activity -->
+    <string name="create_settings_title">Create New Settings</string>
+    <string name="settings_name_hint">Enter Settings Name</string>
+    <string name="create_settings">Create Settings</string>
+    <string name="please_enter_settings_name">Please enter a settings name</string>
+
+    <!-- Home Menu Items -->
+    <string name="menu_my_keys">My Keys</string>
+    <string name="menu_secrets">Secrets</string>
+    <string name="menu_convert">Convert</string>
+    <string name="menu_sign_tx">Sign TX</string>
+    <string name="menu_multi_sign">Multi Sign</string>
+    <string name="menu_sign_words">Sign Words</string>
+    <string name="menu_verify">Verify</string>
+    <string name="menu_encrypt">Encrypt</string>
+    <string name="menu_decrypt">Decrypt</string>
+    <string name="menu_hash">Hash</string>
+    <string name="menu_decode">Decode</string>
+    <string name="menu_qr_code">QR Code</string>
+    <string name="menu_settings">Settings</string>
+    <string name="menu_test">Test</string>
+    <string name="home_slogan">protect your passwords, keys, secrets and privacy with cryptography.</string>
+    <string name="failed_decode">Could not decode. Please check the text.</string>
+    <string name="hash_input_hint">Enter text to be hashed</string>
+    <string name="failed_hash">Failed to hash input</string>
+    <string name="hash">Hash</string>
+    <string name="find_a_nice_fid">Find a Nice FID</string>
+    <string name="random_keys">Random Keys</string>
+    <string name="input_fid">Input FID</string>
+    <string name="Input_prikey">Input PriKey</string>
+    <string name="Input_prikey_cipher">Input PriKey Cipher</string>
+    <string name="Input_pubkey">Input PubKey</string>
+    <string name="return_string">Return String</string>
+
+    <!-- Encrypt Activity -->
+    <string name="symkey">Symkey</string>
+    <string name="password">Password</string>
+    <string name="pubkey">Pubkey</string>
+    <string name="encrypt">Encrypt</string>
+    <string name="decrypt">Decrypt</string>
+    <string name="encrypted_result">Encrypted Result</string>
+    <string name="input_text_to_be_encrypted">Input text to be encrypted</string>
+    <string name="input_key">Input the key</string>
+    <string name="input_text_to_be_decrypted">Input text to be decrypted</string>
+    <string name="input_cipher">Input cipher</string>
+    <string name="input_text_to_be_hashed">Input text to be hashed</string>
+    <string name="input_text_to_be_decoded">Input text to be decoded</string>
+    <string name="input_text_to_be_verified">Input text to be verified</string>
+    <string name="input_text_to_be_signed">Input text to be signed</string>
+    <string name="input_text_to_be_multi_signed">Input text to be multi-signed</string>
+    <string name="result">Result</string>
+    <string name="input_text_to_be_operated">Input the text to be operated</string>
+
+    <!-- SignMsg Activity -->
+    <string name="sign">Sign</string>
+    <string name="sign_msg">Sign Words</string>
+    <string name="input_the_symmetric_key">Input the symmetric Key</string>
+    <string name="input_the_private_key">Input the private Key</string>
+    <string name="please_input_message">Please input message to sign</string>
+    <string name="please_input_key">Please input key</string>
+    <string name="copied">Copied to clipboard</string>
+
+    <string name="sym_key_has_to_be_a_hex_of_32_bytes">SymKey has to be a hex string of 32 bytes</string>
+
+    <string name="verify">Verify</string>
+
+    <string name="scan_qr_code">Scan QR Code</string>
+    <string name="more">More</string>
+    <string name="input_phrase">Input Phrase</string>
+
+    <string name="menu_random">Random</string>
+    <string name="menu_private_key_converter">Private Key Converter</string>
+    <string name="menu_public_key_converter">Public Key Converter</string>
+    <string name="menu_address_converter">Address Converter</string>
+
+
+    <string name="number_of_bytes">Number of bytes</string>
+    <string name="new_str">New</string>
+    <string name="format_hex">Hex</string>
+    <string name="format_integer">Integer</string>
+    <string name="format_base58">Base58</string>
+    <string name="format_base64">Base64</string>
+    <string name="too_large_for_integer">Too large for integer format</string>
+
+    <string name="create_multisign_fid">Create Multisign FID</string>
+    <string name="create_multisign_tx">Create Multisign TX</string>
+    <string name="sign_multisign_tx">Sign Multisign TX</string>
+    <string name="build_multisign_tx">Build Multisign TX</string>
+    <string name="required_signer_number">Required signer number</string>
+    <string name="ending_with">Ending with</string>
+    <string name="input_the_pubkey">Input the pubkey</string>
+    <string name="input_the_prikey">Input the PriKey</string>
+    <string name="input_the_text_to_be_decoded">Input the text to be decoded</string>
+    <string name="input_the_cipher">Input the cipher</string>
+    <string name="input_the_text_to_be_encrypted">Input the text to be encrypted</string>
+    <string name="input_the_signature">Input the signature</string>
+    <string name="input_the_fid">Input the FID</string>
+    <string name="input_the_label">Input the label</string>
+    <string name="input_the_phrase">Input the phrase</string>
+    <string name="input_the_prikeycipher">Input the priKeyCipher</string>
+    <string name="input_the_password">Input the password</string>
+    <string name="cipher">Cipher</string>
+    <string name="signature">Signature</string>
+    <string name="delete">Delete</string>
+    <string name="preview">Preview</string>
+    <string name="input_the_pubkey_or_address">Input the pubkey or address</string>
+    <string name="only_for_sym_key_sign">Only for SymKey sign</string>
+    <string name="verification_result">Verification result</string>
+    <string name="input_the_key">Input the key</string>
+    <string name="add_member">Add Member</string>
+    <string name="done">Done</string>
+    <string name="import_tx">Import</string>
+    <string name="add">Add</string>
+    <string name="input_the_text_carved_on_chain">Input the text carved on chain</string>
+    <string name="sender_from_script_or_p2sh">Sender from script or P2SH</string>
+    <string name="pay_to">Pay to</string>
+    <string name="add_cash_to_spend">Add cash to spend</string>
+    <string name="please_input_required_signer_number">Please input required signer number</string>
+    <string name="invalid_signer_number">Invalid signer number</string>
+    <string name="no_enough_members">No enough members</string>
+    <string name="the_members_can_t_more_than_16">The members can\'t more than 16</string>
+    <string name="please_input_a_public_key">Please input a public key</string>
+    <string name="invalid_public_key">Invalid public key</string>
+    <string name="txid">TxId</string>
+    <string name="index">Index</string>
+    <string name="amount">Amount</string>
+    <string name="fid">FID</string>
+    <string name="avatar">Avatar</string>
+
+    <string name="choose_multisign_id">Choose Multisign ID</string>
+    <string name="no_multisign_found">No multisign found</string>
+    <string name="signed">Signed</string>
+    <string name="sender">Sender</string>
+    <string name="spending">Spending</string>
+    <string name="send_to">Send to</string>
+    <string name="unsigned">Unsigned</string>
+
+    <string name="confirm_multisign_tx">Confirm Multisign TX</string>
+
+    <string name="as_hex">Bytes in Hex</string>
+
+    <string name="people">People</string>
+    <string name="import_the_tx_json">Import the TX JSON</string>
+    <string name="copy_tx">Copy TX</string>
+    <string name="create_tx">Create TX</string>
+    <string name="make_qr">Make QR</string>
+    <string name="carving">Carving</string>
+    <string name="m_n">m/n</string>
+    <string name="need_signs">Need Signs</string>
+
+    <string name="import_multisign_tx">Import Multisign TX</string>
+
+    <string name="build">Build</string>
+    <string name="copy_result">Copy Result</string>
+    <string name="built_you_can_broadcast_it">Built! You can broadcast it.</string>
+    <string name="failed_to_build_multisign_tx">Failed to build multisign TX.</string>
+    <string name="add_to_fid_list">Add to FID list</string>
+    <string name="clear_fid_list">Clear FID list</string>
+    <string name="added_to_fid_list">Added to FID list.</string>
+    <string name="fid_list_cleared">FID list cleared</string>
+    <string name="failed_to_create_avatar">Failed to create avatar</string>
+    <string name="sign_tx">Sign Transaction</string>
+
+    <string name="pay_to_each">Pay to each:</string>
+
+    <string name="spending_cash_ids">Spending cash IDs</string>
+    <string name="sum">Sum</string>
+    <string name="fee">Fee</string>
+    <string name="cdd">CDD</string>
+    <string name="no_tx_to_copy">No TX to copy</string>
+    <string name="tx_json_copied_to_clipboard">TX JSON copied to clipboard</string>
+    <string name="no_tx_to_sign">No TX to Sign.</string>
+
+    <string name="field_name_format">%1$s: </string>
+    <string name="activity_create_secret">CreateSecretActivity</string>
+    <string name="error_title_required">Title is required</string>
+    <string name="error_content_required">Content is required</string>
+    <string name="secret_existed_title">Secret existed.</string>
+    <string name="replace">Replace</string>
+    <string name="secret_already_exists_message">This secret has been existed. Replace it?</string>
+    <string name="secret_saved_successfully">Secret saved!</string>
+    <string name="secrets_saved_successfully">%d secrets saved!</string>
+    <string name="keys_saved_successfully">Key saved!</string>
+    <string name="input_the_title">Input the title</string>
+    <string name="input_the_content">Input the content</string>
+    <string name="input_the_memo">Input the memo</string>
+    <string name="select_the_type">Select the type</string>
+    <string name="please_fill_required_fields">Please fill all required fields</string>
+    <string name="input_or_choose_the_type">Input or choose the type</string>
+    <string name="invalid_type_selected">Invalid type selected</string>
+
+    <string name="random_in_base32">Random in Base32</string>
+
+    <string name="menu_totp">TOTP</string>
+    <string name="time_based_one_time_password">Time-Based One-Time Password</string>
+    <string name="export_tx">Export</string>
+    <string name="export_secrets">Export Secrets</string>
+
+    <string name="action_settings">Settings</string>
+    <string name="title_activity_kimera" translatable="false">KimeraActivity</string>
+    <string name="select_encryption_method">Please select an encryption method.</string>
+
+    <string name="input_dialog_prompt_default">Enter text:</string>
+    <string name="show_input_dialog">Show Input Dialog</string>
+
+    <string name="key_tools_create_new_key">Create New Key</string>
+    <string name="input_the_secret_json">Input the secret JSON</string>
+    <string name="no_secret_found">No secret found.</string>
+
+    <string name="import_keys">Import keys</string>
+    <string name="input_the_key_info_json">Input the key JSON.</string>
+    <string name="no_key_info_found">No key found.</string>
+    <string name="security_guidelines">Security Guidelines</string>
+    <string name="secrets_loaded">%d secrets loaded.</string>
+    <string name="security_guidelines_text">
+        1. Keep the device offline at all times, meaning it should not be connected to any other devices via cables, mobile networks, Wi-Fi, Bluetooth, NFC, or any other means.\n\n2. Ensure that private keys and passphrases are never leaked or lost. A passphrase can always generate a private key, but a private key cannot be used to derive a passphrase.\n\n3. When displaying private keys or passphrases on the screen, make sure the surroundings are secure, with no one watching or any cameras recording.\n\n4. It is recommended to use an offline QR code scanning device for physical backup of private keys and passphrases, with at least two separate backups stored in different locations and regularly checked.\n\n5. If this device is lost or suspected to be compromised, immediately transfer assets to a secure address using a backup private key.\n\n6. When generating a private key from a passphrase, the passphrase should be as long and complex as possible, containing multiple types of characters. Do not use famous quotes or poems. Remember, you are up against hackers worldwide with immense computing power and advanced skills.\n\n7. This device generates private keys from passphrases using the SHA-256 hash algorithm. You can test this using third-party tools, but do not store assets with test-generated private keys, and never test an asset-storing passphrase online.\n\n8. You can generate a private key on a secure and trusted external device and import it into the system via scanning or manual entry. The security of this step depends on the source of the private key and your operational precautions.\n\n9. Mnemonics add complexity to private key security strategies; therefore, this system does not support mnemonic phrases. You can import a private key exported from a third-party device instead.\n\n10. Once again: Private keys and passphrases must never be leaked or lost, and the device must remain offline. This is the core purpose of this system.\n\n11. This application does not connect to the internet or collect any user or application data; therefore, it is not responsible for any data leaks. Users must ensure the security of their devices. \n\n
+    </string>
+
+    <string name="stop">Stop</string>
+    <string name="no">No</string>
+    <string name="yes">Yes</string>
+    <string name="base32">Base32</string>
+    <string name="return_text">Return</string>
+    <string name="sha256" translatable="false">SHA256</string>
+    <string name="sha256x2" translatable="false">SHA256x2</string>
+    <string name="md5" translatable="false">MD5</string>
+    <string name="sha1" translatable="false">SHA1</string>
+    <string name="sha3" translatable="false">SHA3</string>
+    <string name="ripemd160" translatable="false">RIPEMD160</string>
+    <string name="to_list">To List</string>
+    <string name="show_detail">Show Detail</string>
+    <string name="shown_in">Shown in:</string>
+    <string name="safe">Safe</string>
+    <string name="error_initializing_camera">"Error initializing camera: "</string>
+    <string name="cannot_open_image">Cannot open image</string>
+    <string name="cannot_decode_image">Cannot decode image</string>
+    <string name="invalid_transaction_data">Invalid TX data</string>
+    <string name="the_tx_is_empty">The TX is empty.</string>
+    <string name="file_loaded_import_it">File loaded. Import it.</string>
+    <string name="you_are_clear_all_the_data_of_safe_do_you_sure_to_do_it">You are clear all the data of Safe. Do you sure to do it?</string>
+    <string name="cleared_data_cannot_be_recovered_are_you_sure_to_clear_all_data">Cleared data cannot be recovered. Are you sure to clear all data?</string>
+    <string name="change_password">Change password</string>
+    <string name="backup_all_keys">Backup all keys</string>
+    <string name="backup_all_secrets">Backup all secrets</string>
+    <string name="import_secrets">Import secrets</string>
+    <string name="clear_all_data">Clear all data</string>
+    <string name="menu_list">FID List</string>
+    <string name="hex" translatable="false">Hex</string>
+    <string name="add_fid">Add FID</string>
+    <string name="import_the_fid">Please input the FID</string>
+    <string name="invalid_fid">Invalid FID</string>
+    <string name="input_fid_or_fid_list_separated_by_comma_or_space">Input FID or FID list separated by comma or space</string>
+    <string name="fid_list">FID List</string>
+    <string name="please_input_amount">Please input amount</string>
+    <string name="fid_list_is_empty">FID list is empty</string>
+    <string name="total_amount_exceeds_available_balance">Total amount exceeds available balance</string>
+    <string name="amount_must_be_between">Amount must be between %1$f and %2$f</string>
+    <string name="please_input_all_fields">Please input all fields</string>
+    <string name="invalid_qr_code_content">Invalid QR code content</string>
+    <string name="failed">Failed</string>
+    <string name="failed_to_scan_qr_code">Failed to scan QR code</string>
+    <string name="no_items_selected">No items selected</string>
+    <string name="deleted">Deleted</string>
+    <string name="some_fids_added_to_list">%d FIDs added to list</string>
+    <string name="input_value_must_be_greater_than_0">Input value must be greater than 0.</string>
+    <string name="invalid_txid">Invalid txid.</string>
+    <string name="invalid_index">Invalid index.</string>
+    <string name="inputs_cannot_be_empty">Inputs cannot be empty.</string>
+    <string name="inputs_are_not_enough_to_cover_the_fee">Inputs are not enough to cover the fee.</string>
+    <string name="paying">Paying</string>
+    <string name="convert">Convert</string>
+    <string name="start">Start</string>
+    <string name="multisign">Multisign</string>
+    <string name="multisign_detail">Multisign Detail</string>
+    <string name="my_keys">My Keys</string>
+    <string name="my_secrets">My Secrets</string>
+    <string name="sign_words">Sign Words</string>
+    <string name="verify_signature">Verify Signature</string>
+    <string name="choose_key">Choose Key</string>
+    <string name="create_key_by_fid">Create key by FID</string>
+    <string name="create_key_by_phrase">Create key by phrase</string>
+    <string name="create_key_by_prikey">Create key by priKey</string>
+    <string name="create_key_by_prikey_cipher">Create key by priKey cipher</string>
+    <string name="create_key_by_pubkey">Create key by pubkey</string>
+    <string name="create_secret">Create Secret</string>
+    <string name="address_converter">Address Converter</string>
+    <string name="private_key_converter">Private Key Converter</string>
+    <string name="public_key_converter">Public Key Converter</string>
+    <string name="random_bytes_generator">Random Bytes Generator</string>
+    <string name="input">Input</string>
+    <string name="unknown">Unknown</string>
+    <string name="utf_8" translatable="false">UTF-8</string>
+    <string name="please_verify_your_password">Please verify your password</string>
+    <string name="exported">Exported.</string>
+    <string name="failed_to_load_avatar">Failed to load avatar.</string>
+    <string name="failed_to_save_key">Failed to save key</string>
+    <string name="remember_backup_keys">Remember: all keys and secrets must be backed up.</string>
+    <string name="remove_me">Remove me</string>
+    <string name="all_data_cleared_successfully">All data cleared successfully</string>
+    <string name="password_changed">Password changed.</string>
+    <string name="no_more_secrets">No more secrets</string>
+    <string name="check_password">Check Password</string>
+    <string name="password_verification_cancelled">Password verification cancelled</string>
+    <string name="please_enter_matching_characters">Please enter matching characters</string>
+    <string name="stop_finding_progress_first">Stop finding progress first</string>
+    <string name="no_totp_found">No TOTP found</string>
+    <string name="no_multisigns_found">No multisigns found.</string>
+    <string name="please_input_text">Please input text</string>
+    <string name="no_content_to_generate_qr_code">No content to generate QR code</string>
+    <string name="no_key_available">No key available</string>
+    <string name="offline_notation">Only offline data is truly safe data. Please keep your device offline. Turn off WIFI, mobile data, Bluetooth, etc.</string>
+    <string name="detail">Detail</string>
+    <string name="json_converter">JSON Converter</string>
+    <string name="menu_json_converter">JSON Convert</string>
+    <string name="input_json">Input JSON string</string>
+</resources>

@@ -1,0 +1,543 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="8dp">
+
+    <!-- Title and Settings Row -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/safe"
+            android:textStyle="bold"
+            android:textSize="32sp"
+            android:textColor="@color/colorAccent"/>
+
+        <ImageButton
+            android:id="@+id/menu_settings"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_gear"
+            android:contentDescription="@string/menu_settings"
+            />
+    </LinearLayout>
+
+    <!-- Top Info Container (1/4 of screen) -->
+    <FrameLayout
+        android:id="@+id/infoContainer"
+        android:layout_width="match_parent"
+        android:layout_height="130dp"
+        >
+
+        <!-- Info Text Box -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_margin="8dp"
+            android:background="@drawable/rounded_textbox_background"
+            android:padding="8dp"
+            android:text="@string/home_slogan"
+            android:textAlignment="center"
+            android:gravity="center"
+            android:textSize="24sp"
+            android:textColor="@color/text_color"/>
+
+    </FrameLayout>
+
+    <!-- Bottom Icon Container (3/4 of screen) -->
+
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/iconContainer"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="3"
+        android:fillViewport="true"
+        android:scrollbars="vertical"
+        android:fadeScrollbars="false"
+        android:overScrollMode="always">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+<!--            <View-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="300dp"/>-->
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="300dp"
+                android:layout_margin="8dp"
+                android:padding="8dp"
+                android:text="@string/offline_notation"
+                android:gravity="center"
+                android:textSize="24sp"
+                android:textColor="@color/text_color"
+                />
+
+            <GridLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="16dp"
+                android:columnCount="3"
+                android:rowCount="6"
+                android:alignmentMode="alignMargins"
+                android:useDefaultMargins="true">
+
+
+                <!-- List (first row left) -->
+                <LinearLayout
+                    android:id="@+id/menu_list"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_row="0"
+                    android:layout_column="0"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:padding="8dp"
+                    android:background="?attr/selectableItemBackground">
+
+                    <ImageView
+                        android:layout_width="82dp"
+                        android:layout_height="82dp"
+                        android:tag="icon"
+                        android:contentDescription="@string/menu_list"
+                        android:background="@drawable/icon_background"
+                        android:padding="12dp"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="@string/menu_list"
+                        android:textAlignment="center"/>
+
+                </LinearLayout>
+
+                <!-- QR Code (new first row left) -->
+                <LinearLayout
+                    android:id="@+id/menu_qr_code"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_row="4"
+                    android:layout_column="0"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:padding="8dp"
+                    android:background="?attr/selectableItemBackground">
+
+                    <ImageView
+                        android:layout_width="82dp"
+                        android:layout_height="82dp"
+                        android:tag="icon"
+                        android:contentDescription="@string/menu_qr_code"
+                        android:background="@drawable/icon_background"
+                        android:padding="12dp"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="@string/menu_qr_code"
+                        android:textAlignment="center"/>
+                </LinearLayout>
+
+                <!-- Random (first row middle) -->
+                <LinearLayout
+                    android:id="@+id/menu_random"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_row="0"
+                    android:layout_column="1"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:padding="8dp"
+                    android:background="?attr/selectableItemBackground">
+
+                    <ImageView
+                        android:layout_width="82dp"
+                        android:layout_height="82dp"
+                        android:tag="icon"
+                        android:contentDescription="@string/menu_random"
+                        android:background="@drawable/icon_background"
+                        android:padding="12dp"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="@string/menu_random"
+                        android:textAlignment="center"/>
+
+                </LinearLayout>
+
+                <!-- Multi Sign (second row left) -->
+                <LinearLayout
+                    android:id="@+id/menu_multisign"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_row="2"
+                    android:layout_column="2"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:padding="8dp"
+                    android:background="?attr/selectableItemBackground">
+
+                    <ImageView
+                        android:layout_width="82dp"
+                        android:layout_height="82dp"
+                        android:tag="icon"
+                        android:contentDescription="@string/menu_multi_sign"
+                        android:background="@drawable/icon_background"
+                        android:padding="12dp"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="@string/menu_multi_sign"
+                        android:textAlignment="center"/>
+                </LinearLayout>
+
+                <!-- Sign Words (second row middle) -->
+                <LinearLayout
+                    android:id="@+id/menu_sign_message"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_row="1"
+                    android:layout_column="0"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:padding="8dp"
+                    android:background="?attr/selectableItemBackground">
+
+                    <ImageView
+                        android:layout_width="82dp"
+                        android:layout_height="82dp"
+                        android:tag="icon"
+                        android:contentDescription="@string/menu_sign_words"
+                        android:background="@drawable/icon_background"
+                        android:padding="12dp"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="@string/menu_sign_words"
+                        android:textAlignment="center"/>
+                </LinearLayout>
+
+                <!-- Verify Message (second row right) -->
+                <LinearLayout
+                    android:id="@+id/menu_verify_message"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_row="1"
+                    android:layout_column="1"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:padding="8dp"
+                    android:background="?attr/selectableItemBackground">
+
+                    <ImageView
+                        android:layout_width="82dp"
+                        android:layout_height="82dp"
+                        android:tag="icon"
+                        android:contentDescription="@string/menu_verify"
+                        android:background="@drawable/icon_background"
+                        android:padding="12dp"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="@string/menu_verify"
+                        android:textAlignment="center"/>
+                </LinearLayout>
+
+                <!-- Decrypt (third row left) -->
+                <LinearLayout
+                    android:id="@+id/menu_decrypt"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_row="2"
+                    android:layout_column="1"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:padding="8dp"
+                    android:background="?attr/selectableItemBackground">
+
+                    <ImageView
+                        android:layout_width="82dp"
+                        android:layout_height="82dp"
+                        android:tag="icon"
+                        android:contentDescription="@string/menu_decrypt"
+                        android:background="@drawable/icon_background"
+                        android:padding="12dp"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="@string/menu_decrypt"
+                        android:textAlignment="center"/>
+                </LinearLayout>
+
+                <!-- Encrypt (third row middle) -->
+                <LinearLayout
+                    android:id="@+id/menu_encrypt"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_row="2"
+                    android:layout_column="0"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:padding="8dp"
+                    android:background="?attr/selectableItemBackground">
+
+                    <ImageView
+                        android:layout_width="82dp"
+                        android:layout_height="82dp"
+                        android:tag="icon"
+                        android:contentDescription="@string/menu_encrypt"
+                        android:background="@drawable/icon_background"
+                        android:padding="12dp"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="@string/menu_encrypt"
+                        android:textAlignment="center"/>
+                </LinearLayout>
+
+                <!-- Decode (third row right) -->
+                <LinearLayout
+                    android:id="@+id/menu_decode"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_row="0"
+                    android:layout_column="2"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:padding="8dp"
+                    android:background="?attr/selectableItemBackground">
+
+                    <ImageView
+                        android:layout_width="82dp"
+                        android:layout_height="82dp"
+                        android:tag="icon"
+                        android:contentDescription="@string/menu_decode"
+                        android:background="@drawable/icon_background"
+                        android:padding="12dp"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="@string/menu_decode"
+                        android:textAlignment="center"/>
+                </LinearLayout>
+
+                <!-- TOTP (fourth row left) -->
+                <LinearLayout
+                    android:id="@+id/menu_totp"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_row="3"
+                    android:layout_column="1"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:padding="8dp"
+                    android:background="?attr/selectableItemBackground">
+
+                    <ImageView
+                        android:layout_width="82dp"
+                        android:layout_height="82dp"
+                        android:tag="icon"
+                        android:contentDescription="@string/time_based_one_time_password"
+                        android:background="@drawable/icon_background"
+                        android:padding="12dp"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="@string/menu_totp"
+                        android:textAlignment="center"/>
+                </LinearLayout>
+
+                <!-- Hash (fourth row middle) -->
+                <LinearLayout
+                    android:id="@+id/menu_hash"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_row="3"
+                    android:layout_column="0"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:padding="8dp"
+                    android:background="?attr/selectableItemBackground">
+
+                    <ImageView
+                        android:layout_width="82dp"
+                        android:layout_height="82dp"
+                        android:tag="icon"
+                        android:contentDescription="@string/menu_hash"
+                        android:background="@drawable/icon_background"
+                        android:padding="12dp"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="@string/menu_hash"
+                        android:textAlignment="center"/>
+                </LinearLayout>
+
+                <!-- Sign TX (fourth row right) -->
+                <LinearLayout
+                    android:id="@+id/menu_sign_tx"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_row="3"
+                    android:layout_column="2"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:padding="8dp"
+                    android:background="?attr/selectableItemBackground">
+
+                    <ImageView
+                        android:layout_width="82dp"
+                        android:layout_height="82dp"
+                        android:tag="icon"
+                        android:contentDescription="@string/menu_sign_tx"
+                        android:background="@drawable/icon_background"
+                        android:padding="12dp"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="@string/menu_sign_tx"
+                        android:textAlignment="center"/>
+                </LinearLayout>
+
+                <!-- Convert(fifth row left) -->
+                <LinearLayout
+                    android:id="@+id/menu_convert"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_row="1"
+                    android:layout_column="2"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:padding="8dp"
+                    android:background="?attr/selectableItemBackground">
+
+                    <ImageView
+                        android:layout_width="82dp"
+                        android:layout_height="82dp"
+                        android:tag="icon"
+                        android:contentDescription="@string/menu_convert"
+                        android:background="@drawable/icon_background"
+                        android:padding="12dp"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="@string/menu_convert"
+                        android:textAlignment="center"/>
+                </LinearLayout>
+
+                <!-- Secrets (fifth row middle) -->
+                <LinearLayout
+                    android:id="@+id/menu_secrets"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_row="4"
+                    android:layout_column="1"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:padding="8dp"
+                    android:background="?attr/selectableItemBackground">
+
+                    <ImageView
+                        android:layout_width="82dp"
+                        android:layout_height="82dp"
+                        android:tag="icon"
+                        android:contentDescription="@string/menu_secrets"
+                        android:background="@drawable/icon_background"
+                        android:padding="12dp"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="@string/menu_secrets"
+                        android:textAlignment="center"/>
+                </LinearLayout>
+
+                <!-- My Keys (fifth row right) -->
+                <LinearLayout
+                    android:id="@+id/menu_my_keys"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_row="4"
+                    android:layout_column="2"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:padding="8dp"
+                    android:background="?attr/selectableItemBackground">
+
+                    <ImageView
+                        android:layout_width="82dp"
+                        android:layout_height="82dp"
+                        android:tag="icon"
+                        android:contentDescription="@string/menu_my_keys"
+                        android:background="@drawable/icon_background"
+                        android:padding="12dp"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="@string/menu_my_keys"
+                        android:textAlignment="center"/>
+                </LinearLayout>
+
+
+            </GridLayout>
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+</LinearLayout> 

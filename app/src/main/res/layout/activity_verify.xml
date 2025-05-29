@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/main_background">
+
+    <include layout="@layout/common_toolbar" />
+
+    <!-- Main Content -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- Result Container  -->
+        <LinearLayout
+            android:id="@+id/resultContainer"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:layout_weight="3"
+            android:padding="16dp">
+
+            <ImageView
+                android:id="@+id/resultIcon"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_verify_default"
+                android:contentDescription="@string/verification_result" />
+
+        </LinearLayout>
+
+        <!-- Text Container  -->
+        <include
+            android:id="@+id/textView"
+            layout="@layout/layout_text_input_with_scan"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="3"
+            android:layout_marginTop="8dp" />
+
+        <!-- Key Container -->
+        <include
+            android:id="@+id/keyView"
+            layout="@layout/layout_text_input_with_scan"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/two_line_height"
+            android:layout_marginTop="8dp" />
+
+        <!-- Button Container  -->
+        <LinearLayout
+            android:id="@+id/buttonContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp">
+
+            <Button
+                android:id="@+id/clearButton"
+                style="@style/ButtonStyle"
+                android:text="@string/clear" />
+
+            <Button
+                android:id="@+id/verifyButton"
+                style="@style/ButtonStyle"
+                android:text="@string/verify" />
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout> 

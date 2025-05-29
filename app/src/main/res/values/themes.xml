@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="Base.Theme.Freer" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">#2196F3</item>
+        <item name="colorAccent">#2196F3</item>
+        <item name="android:windowBackground">#FFFFFF</item>
+        <!-- Edge-to-Edge support -->
+        <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>
+        <item name="android:enforceNavigationBarContrast">false</item>
+        <item name="android:enforceStatusBarContrast">false</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowLightNavigationBar">true</item>
+    </style>
+
+    <style name="Theme.Freer" parent="Base.Theme.Freer" />
+
+    <!-- Custom Toolbar Theme -->
+    <style name="ThemeOverlay.Freer.Toolbar" parent="ThemeOverlay.AppCompat.ActionBar">
+        <item name="android:textColorPrimary">@color/main_background</item>
+        <item name="android:textColorSecondary">@color/main_background</item>
+    </style>
+
+    <!-- Custom Dialog Theme -->
+    <style name="Theme.Freer.Dialog" parent="ThemeOverlay.Material3.MaterialAlertDialog">
+        <item name="android:windowBackground">@android:color/white</item>
+        <item name="buttonBarPositiveButtonStyle">@style/Widget.Freer.Button</item>
+        <item name="android:background">#F5F5F5</item>
+    </style>
+
+    <style name="Widget.Freer.Button" parent="Widget.Material3.Button.TextButton.Dialog">
+        <item name="android:textColor">#FFFFFF</item>
+    </style>
+    
+    <!-- Custom style for buttons with reduced text padding -->
+    <style name="Widget.Freer.Button.Compact" parent="Widget.Material3.Button">
+        <item name="android:paddingStart">4dp</item>
+        <item name="android:paddingEnd">4dp</item>
+    </style>
+</resources>

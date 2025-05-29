@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/main_background">
+
+    <include layout="@layout/common_toolbar" />
+
+    <!-- Main Content -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- Result View (4/9) -->
+        <include
+            android:id="@+id/resultView"
+            layout="@layout/layout_text_box_with_make_qr"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="4" />
+
+        <!-- Text View (3/9) -->
+        <include
+            android:id="@+id/textView"
+            layout="@layout/layout_text_input_with_scan"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="3"
+            android:layout_marginTop="8dp" />
+
+        <!-- Key View (2/9) -->
+        <include
+            android:id="@+id/keyView"
+            layout="@layout/layout_key_input_with_people_and_scan"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="2"
+            android:layout_marginTop="8dp" />
+
+        <!-- Option Container (1/8) -->
+        <RadioGroup
+            android:id="@+id/optionContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="8dp">
+
+            <RadioButton
+                android:id="@+id/ecdsaOption"
+                style="@style/EncryptOptionRadioButton"
+                android:checked="true"
+                android:text="ECDSA" />
+
+            <RadioButton
+                android:id="@+id/schnorrOption"
+                style="@style/EncryptOptionRadioButton"
+                android:text="Schnorr" />
+
+            <RadioButton
+                android:id="@+id/symKeyOption"
+                style="@style/EncryptOptionRadioButton"
+                android:text="SHA256" />
+        </RadioGroup>
+
+        <!-- Button Container (1/8) -->
+        <LinearLayout
+            android:id="@+id/buttonContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp">
+
+            <Button
+                android:id="@+id/clearButton"
+                style="@style/ButtonStyle"
+                android:text="@string/clear" />
+
+            <Button
+                android:id="@+id/copyButton"
+                style="@style/ButtonStyle"
+                android:text="@string/copy" />
+
+            <Button
+                android:id="@+id/signButton"
+                style="@style/ButtonStyle"
+                android:text="@string/sign" />
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout> 

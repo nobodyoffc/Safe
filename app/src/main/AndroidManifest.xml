@@ -1,0 +1,304 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.fc.safe">
+
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" 
+                     android:maxSdkVersion="28" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
+                     android:maxSdkVersion="32" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-feature android:name="android.hardware.camera" android:required="true" />
+
+    <application
+        android:name="com.fc.safe.SafeApplication"
+        android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.Freer"
+        tools:targetApi="31">
+        
+        <activity
+            android:name="com.fc.safe.MainActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        
+        <activity
+            android:name="com.fc.safe.initiate.CreatePasswordActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+            
+        <activity
+            android:name="com.fc.safe.initiate.CheckPasswordActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
+<!--        <activity-->
+<!--            android:name=".CreateSettingsActivity"-->
+<!--            android:exported="false" />-->
+
+        <activity
+            android:name="com.fc.safe.home.HomeActivity"
+            android:exported="true">
+        </activity>
+            
+        <activity
+            android:name="com.fc.safe.qr.QrCodeActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+            
+        <activity
+            android:name="com.fc.safe.home.DecodeActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name="com.fc.safe.home.HashActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+            
+        <activity
+            android:name="com.fc.safe.home.MyKeysActivity"
+            android:exported="false" />
+            
+        <activity
+            android:name="com.fc.safe.home.SecretActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+            
+        <activity
+            android:name="com.fc.safe.myKeys.CreateSecretActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+            
+        <activity
+            android:name="com.fc.safe.CreateKeyInfoByPrikeyActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+            
+        <activity
+            android:name="com.fc.safe.ui.DetailActivity"
+            android:exported="false" />
+            
+        <activity
+            android:name="com.fc.safe.home.DecryptActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+            
+        <activity
+            android:name="com.fc.safe.home.TestActivity"
+            android:exported="false" />
+
+        <activity
+            android:name="com.fc.safe.home.EncryptActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
+            android:name="com.fc.safe.home.SignMsgActivity"
+            android:exported="false"
+            android:label="Sign Words"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
+            android:name="com.fc.safe.home.VerifyActivity"
+            android:exported="false"
+            android:label="Verify Words"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
+            android:name="com.fc.safe.myKeys.ChooseKeyInfoActivity"
+            android:label="Choose Key"
+            android:theme="@style/Theme.Freer" />
+
+        <activity
+            android:name="com.fc.safe.myKeys.CreateKeyByPubkeyActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
+            android:name="com.fc.safe.myKeys.CreateKeyByFidActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
+            android:name="com.fc.safe.myKeys.CreateKeyByPrikeyActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
+            android:name="com.fc.safe.myKeys.CreateKeyByPrikeyCipherActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
+            android:name="com.fc.safe.myKeys.RandomNewKeysActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
+            android:name="com.fc.safe.myKeys.CreateKeyByPhraseActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
+            android:name="com.fc.safe.myKeys.FindNiceKeysActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
+            android:name="com.fc.safe.tools.RandomBytesGeneratorActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
+            android:name="com.fc.safe.tools.PrikeyConverterActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
+            android:name="com.fc.safe.tools.PubkeyConverterActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
+            android:name="com.fc.safe.tools.AddressConverterActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
+            android:name="com.fc.safe.home.MultisignActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
+            android:name="com.fc.safe.multisign.CreateMultisignIdActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
+            android:name="com.fc.safe.home.MultisignDetailActivity"
+            android:exported="false" />
+
+        <activity
+            android:name="com.fc.safe.multisign.CreateMultisignTxActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
+            android:name="com.fc.safe.multisign.ChooseMultisignIdActivity"
+            android:exported="false"
+            android:label="@string/choose_multisign_id"
+            android:theme="@style/Theme.Freer" />
+
+        <activity
+            android:name="com.fc.safe.tx.ImportTxInfoActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
+            android:name="com.fc.safe.multisign.ImportMultisignTxActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
+            android:name="com.fc.safe.multisign.SignMultisignTxActivity"
+            android:exported="false" 
+            android:windowSoftInputMode="adjustResize"/>
+
+        <activity
+            android:name="com.fc.safe.multisign.BuildMultisignTxActivity"
+            android:exported="false"
+            android:label="Build Multisign TX"
+            android:screenOrientation="portrait" />
+
+        <activity
+            android:name="com.fc.safe.home.CreateTxActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
+            android:name="com.fc.safe.tx.SignTxActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
+            android:name="com.fc.safe.secret.ImportSecretActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
+            android:name="com.fc.safe.secret.ImportTotpActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
+            android:name="com.fc.safe.secret.ExportSecretActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity android:name="com.fc.safe.home.TotpActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity android:name="com.fc.safe.ui.SingleInputActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize"  />
+
+        <activity
+            android:name="com.fc.safe.myKeys.ExportKeysActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
+            android:name="com.fc.safe.myKeys.BackupKeysActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
+            android:name="com.fc.safe.myKeys.ImportKeyInfoActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
+            android:name="com.fc.safe.home.ArticleDisplayActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
+            android:name="com.fc.safe.secret.BackupSecretsActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
+            android:name="com.fc.safe.ui.ChangePasswordActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
+            android:name=".home.FidListActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
+            android:name=".home.AddFidActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
+            android:name=".tools.JsonConvertActivity"
+            android:exported="false" 
+            android:windowSoftInputMode="adjustResize"/>
+
+    </application>
+
+</manifest>

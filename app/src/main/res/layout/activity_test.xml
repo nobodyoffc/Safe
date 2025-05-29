@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".home.TestActivity">
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/title_bar_height"
+        android:background="?attr/colorPrimary"
+        android:elevation="4dp"
+        android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
+        app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Circle Image Generator"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="16dp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="This activity demonstrates the makeCircleImageFromData method which generates a circular image from 32 bytes of data."
+                android:layout_marginBottom="16dp" />
+
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="8dp"
+                app:cardElevation="4dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Generated Image"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="8dp" />
+
+                    <ImageView
+                        android:id="@+id/imageView"
+                        android:layout_width="200dp"
+                        android:layout_height="200dp"
+                        android:layout_gravity="center_horizontal"
+                        android:scaleType="fitCenter"
+                        android:contentDescription="Generated Circle Image" />
+
+                </LinearLayout>
+
+            </androidx.cardview.widget.CardView>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="16dp">
+
+                <Button
+                    android:id="@+id/generateButton"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Generate New Image"
+                    android:layout_marginEnd="8dp" />
+
+                <Button
+                    android:id="@+id/saveButton"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Save Image" />
+
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/generateKeysButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Generate Keys"
+                android:layout_marginTop="16dp" />
+
+            <Button
+                android:id="@+id/checkAvatarButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Check Avatars"
+                android:layout_marginTop="16dp" />
+
+            <Button
+                android:id="@+id/showInputDialogButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/show_input_dialog"
+                android:layout_marginTop="16dp" />
+
+            <Button
+                android:id="@+id/showUserConfirmDialogButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Show User Confirm Dialog"
+                android:layout_marginTop="16dp" />
+
+            <Button
+                android:id="@+id/testSquareIconButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Test Square Icon"
+                android:layout_marginTop="16dp" />
+
+            <Button
+                android:id="@+id/testRoundIconButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Test Round Icon"
+                android:layout_marginTop="16dp" />
+
+            <Button
+                android:id="@+id/testSquareIconFilesButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Test Square Icon Files"
+                android:layout_marginTop="16dp" />
+
+            <Button
+                android:id="@+id/testRoundIconFilesButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Test Round Icon Files"
+                android:layout_marginTop="16dp" />
+
+
+        </LinearLayout>
+
+    </ScrollView>
+
+</LinearLayout> 

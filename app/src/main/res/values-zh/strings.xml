@@ -1,0 +1,338 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">密库</string>
+    <string name="scan_notification">点击扫描按钮开始扫描二维码。</string>
+    <string name="make">生成</string>
+    <string name="clear">清除</string>
+    <string name="copy">复制</string>
+    <string name="scan">扫描</string>
+    <string name="text_hint">二维码内容</string>
+    <string name="from_gallery">从相册</string>
+    <string name="permission_camera_rationale">扫描二维码需要相机权限</string>
+    <string name="permission_storage_rationale">加载图片需要存储权限</string>
+    <string name="ok">确定</string>
+    <string name="cancel">取消</string>
+    <string name="qr_saved">二维码已保存</string>
+    <string name="qr_saved_count">已保存 %d 个二维码</string>
+    <string name="error_saving_qr">保存二维码时出错</string>
+    <string name="error_creating_qr">内容为空</string>
+    <string name="error_scanning_qr">扫描二维码时出错</string>
+    <string name="no_qr_detected">未检测到二维码</string>
+    <string name="qr_code">二维码</string>
+    <string name="save">保存</string>
+
+    <!-- CheckPassword Activity -->
+    <string name="enter_password">输入密码</string>
+    <string name="password_hint">密码</string>
+    <string name="confirm">验证</string>
+    <string name="please_enter_password">请输入密码</string>
+    <string name="incorrect_password">密码错误</string>
+
+    <!-- CreatePassword Activity -->
+    <string name="create_password">创建密码</string>
+    <string name="confirm_password_hint">确认密码</string>
+    <string name="create">创建</string>
+
+    <!-- CreateSettings Activity -->
+    <string name="create_settings_title">创建新设置</string>
+    <string name="settings_name_hint">设置名称提示</string>
+    <string name="create_settings">创建设置</string>
+    <string name="please_enter_settings_name">请输入设置名称</string>
+
+    <!-- Home Menu Items -->
+    <string name="menu_my_keys">密钥</string>
+    <string name="menu_secrets">秘密</string>
+    <string name="menu_convert">转换</string>
+    <string name="menu_sign_tx">交易</string>
+    <string name="menu_multi_sign">多签</string>
+    <string name="menu_sign_words">签名</string>
+    <string name="menu_verify">验签</string>
+    <string name="menu_encrypt">加密</string>
+    <string name="menu_decrypt">解密</string>
+    <string name="menu_hash">哈希</string>
+    <string name="menu_decode">解码</string>
+    <string name="menu_qr_code">二维码</string>
+    <string name="menu_settings">设置</string>
+    <string name="random_in_base32">Base32随机数</string>
+    <string name="menu_totp">验证码</string>
+
+    <string name="menu_test">测试</string>
+    <string name="home_slogan">用密码技术保护您的密钥、密码、秘密和隐私。</string>
+    <string name="failed_decode">无法解码，请检查文本。</string>
+    <string name="hash_input_hint">输入需要哈希的文本</string>
+    <string name="failed_hash">哈希失败</string>
+    <string name="hash">哈希</string>
+    <string name="decode">解码</string>
+    <string name="decode_input_hint">请输入要解码的文本</string>
+
+    <string name="find_a_nice_fid">搜索靓名</string>
+    <string name="input_fid">输入FID</string>
+    <string name="Input_prikey">输入私钥</string>
+    <string name="Input_prikey_cipher">解密私钥</string>
+    <string name="Input_pubkey">输入公钥</string>
+    <string name="return_string">返回内容</string>
+
+
+    <!-- Encrypt Activity -->
+    <string name="symkey">对称密钥</string>
+    <string name="password">密码</string>
+    <string name="pubkey">公钥</string>
+    <string name="encrypt">加密</string>
+    <string name="decrypt">解密</string>
+    <string name="encrypted_result">加密结果</string>
+    <string name="input_text_to_be_encrypted">输入需要加密的文本</string>
+    <string name="input_key">输入密钥</string>
+    <string name="input_text_to_be_decrypted">输入需要解密的文本</string>
+    <string name="input_cipher">输入密文</string>
+    <string name="input_text_to_be_hashed">输入需要哈希的文本</string>
+    <string name="input_text_to_be_decoded">输入需要解码的文本</string>
+    <string name="input_text_to_be_verified">输入需要验证的文本</string>
+    <string name="input_text_to_be_signed">输入需要签名的文本</string>
+    <string name="input_text_to_be_multi_signed">输入需要多签的文本</string>
+    <string name="result">结果</string>
+    <string name="input_text_to_be_operated">输入要操作的文本</string>
+
+    <!-- SignMsg Activity -->
+    <string name="sign">签名</string>
+    <string name="sign_msg">签署消息</string>
+    <string name="input_the_symmetric_key">对称密钥</string>
+    <string name="input_the_private_key">私钥</string>
+    <string name="please_input_message">请输入要签名的消息</string>
+    <string name="please_input_key">请输入密钥</string>
+    <string name="copied">已复制到剪贴板</string>
+
+    <string name="sym_key_has_to_be_a_hex_of_32_bytes">对称密码必须是32字节的HEX</string>
+    <string name="verify">验证</string>
+    <string name="random_keys">随机创建</string>
+
+    <string name="scan_qr_code">扫描二维码</string>
+    <string name="more">更多</string>
+    <string name="input_phrase">密语生成</string>
+    <string name="menu_random">随机数</string>
+    <string name="menu_private_key_converter">私钥转换</string>
+    <string name="menu_public_key_converter">公钥转换</string>
+    <string name="menu_address_converter">地址转换</string>
+    <string name="number_of_bytes">字节数</string>
+    <string name="new_str">新建</string>
+    <string name="format_hex">Hex</string>
+    <string name="format_integer">整数</string>
+    <string name="format_base58">Base58</string>
+    <string name="format_base64">Base64</string>
+    <string name="too_large_for_integer">超出整数范围</string>
+
+    <string name="create_multisign_fid">新建多签地址</string>
+    <string name="create_multisign_tx">新建多签交易</string>
+    <string name="sign_multisign_tx">签署多签交易</string>
+    <string name="build_multisign_tx">完成多签交易</string>
+
+    <string name="required_signer_number">所需签名人数</string>
+    <string name="ending_with">尾部字符</string>
+    <string name="input_the_pubkey">输入公钥</string>
+    <string name="input_the_prikey">输入私钥</string>
+    <string name="input_the_text_to_be_decoded">输入要解码的文本</string>
+    <string name="input_the_cipher">输入密文</string>
+    <string name="input_the_text_to_be_encrypted">输入要加密的文本</string>
+    <string name="input_the_signature">输入签名</string>
+    <string name="input_the_fid">输入FID</string>
+    <string name="input_the_label">输入标签</string>
+    <string name="input_the_phrase">输入密语</string>
+    <string name="input_the_prikeycipher">输入私钥密文</string>
+    <string name="input_the_password">输入密码</string>
+    <string name="cipher">密文</string>
+    <string name="signature">签名</string>
+    <string name="delete">删除</string>
+    <string name="preview">预览</string>
+    <string name="input_the_pubkey_or_address">输入公钥或地址</string>
+    <string name="only_for_sym_key_sign">只用于对称密钥</string>
+    <string name="verification_result">验证结果</string>
+    <string name="input_the_key">输入密钥</string>
+    <string name="add_member">添加成员</string>
+    <string name="done">完成</string>
+    <string name="import_tx">导入</string>
+    <string name="add">添加</string>
+    <string name="input_the_text_carved_on_chain">输入要刻在链上的文本</string>
+    <string name="sender_from_script_or_p2sh">多签地址的Script或P2SH</string>
+    <string name="add_cash_to_spend">添加现钞</string>
+    <string name="please_input_required_signer_number">请输入必需的签名数量</string>
+    <string name="invalid_signer_number">输入签名者总人数</string>
+    <string name="no_enough_members">没有足够的成员</string>
+    <string name="the_members_can_t_more_than_16">成员不能超过16人</string>
+    <string name="please_input_a_public_key">请输入公钥</string>
+    <string name="invalid_public_key">非法公钥</string>
+    <string name="txid">TxId</string>
+    <string name="index">Index</string>
+    <string name="amount">Amount</string>
+    <string name="fid">FID</string>
+    <string name="avatar">头像</string>
+    <string name="no_multisign_found">没有发现多签</string>
+    <string name="signed">已签</string>
+    <string name="sender">发送者</string>
+    <string name="spending">总额</string>
+    <string name="send_to">付给</string>
+    <string name="unsigned">未签名者</string>
+    <string name="confirm_multisign_tx">确认多重签名</string>
+    <string name="people">身份</string>
+    <string name="import_the_tx_json">导入交易JSON</string>
+    <string name="copy_tx">复制交易</string>
+    <string name="create_tx">创建交易</string>
+    <string name="make_qr">转二维码</string>
+    <string name="carving">刻字</string>
+    <string name="m_n">m/n</string>
+    <string name="need_signs">还需签名</string>
+    <string name="pay_to">付给</string>
+    <string name="choose_multisign_id">选择多签身份</string>
+    <string name="as_hex">先转为字节</string>
+    <string name="import_multisign_tx">导入多签交易</string>
+    <string name="copy_result">复制交易</string>
+    <string name="built_you_can_broadcast_it">成功！可以广播交易了</string>
+    <string name="failed_to_build_multisign_tx">构建多签交易失败</string>
+    <string name="build">组装</string>
+    <string name="add_to_fid_list">加入名单</string>
+    <string name="clear_fid_list">清空名单</string>
+    <string name="added_to_fid_list">已加入名单</string>
+    <string name="fid_list_cleared">以创建名单</string>
+    <string name="failed_to_create_avatar">生成头像失败</string>
+    <string name="sign_tx">签署交易</string>
+    <string name="cdd">币天销毁</string>
+    <string name="no_tx_to_copy">无交易可用</string>
+    <string name="tx_json_copied_to_clipboard">交易已拷贝</string>
+    <string name="no_tx_to_sign">无交易可签署</string>
+    <string name="activity_create_secret">创建秘密</string>
+    <string name="error_title_required">Title 是必需的</string>
+    <string name="error_content_required">Content 是必需的</string>
+    <string name="secret_existed_title">该秘密已存在</string>
+    <string name="replace">替换</string>
+    <string name="secret_already_exists_message">该秘密已存在，替换吗？</string>
+    <string name="secret_saved_successfully">秘密已保存</string>
+    <string name="secrets_saved_successfully">%d 秘密已保存</string>
+    <string name="input_the_title">输入标题</string>
+    <string name="input_the_content">输入内容</string>
+    <string name="input_the_memo">输入备忘</string>
+    <string name="select_the_type">选择类型</string>
+    <string name="please_fill_required_fields">请填写必填项</string>
+    <string name="input_or_choose_the_type">输入或选择类型</string>
+    <string name="invalid_type_selected">选择的类型无效</string>
+    <string name="time_based_one_time_password">动态口令</string>
+    <string name="export_tx">导出</string>
+    <string name="export_secrets">导出秘密</string>
+    <string name="key_tools_create_new_key">创建新密钥</string>
+    <string name="input_the_secret_json">输入秘密的JSON</string>
+    <string name="no_secret_found">没有秘密</string>
+    <string name="import_keys">导入密钥</string>
+    <string name="input_the_key_info_json">输入密钥的JSON</string>
+    <string name="no_key_info_found">没发现密钥</string>
+    <string name="security_guidelines">安全提示</string>
+    <string name="security_guidelines_text">
+        1. 请保持设备离线，即不以线缆、移动网络、wifi、蓝牙、NFC等任何方式与其他设备相连。\n\n
+2. 务必保证私钥、密语绝不泄露或丢失。密语可随时产生私钥，但私钥不能反推密语。\n\n
+3. 在屏幕显示私钥、密语时，应确保周边安全，没有他人视野、摄像头等。\n\n
+4. 建议使用无网的扫描二维码设备，物理备份私钥、密语，至少2个备份并分别放置，定期检查。\n\n
+5. 一旦本设备遗失或可能被刺探破解，请立即使用备份私钥将资产转移到安全的地址上。\n\n
+6. 采用密语生成私钥时，密语应尽量长、复杂、包含多种类型字符，切勿使用名言诗句等。记住，您面对的是全世界拥有巨大算力和高超技能的黑客。\n\n
+7. 本设备密语产生私钥的算法为SHA256哈希计算得到，您可以用第三方工具上测试，但且勿使用测试私钥保存资产，切勿用存资产的密语做在线测试。\n\n
+8. 您可以在安全可信的外部设备中产生私钥，通过扫描或手工输入的方式导入密库。这个环节的安全性将取决于私钥的来源和您的操作。\n\n
+9. 助记词使私钥安全策略更加复杂，因此，密库不支持助记词，可将第三方设备上导出的私钥导入密库使用。\n\n
+10. 再次强调：私钥、密语绝不可泄露或丢失，设备必须离线，这是密库存在的意义。\n\n
+11. 本应用不联网，不收集任何用户和应用数据，因而不对任何数据泄漏负责，用户务必保证设备安全。\n\n
+    </string>
+    <string name="base32">Base32</string>
+    <string name="return_text">返回</string>
+    <string name="pay_to_each">付给每人：</string>
+    <string name="spending_cash_ids">花费钞票ID</string>
+    <string name="sum">总值</string>
+    <string name="fee">交易费</string>
+    <string name="field_name_format">"%1$s: "</string>
+    <string name="action_settings">设置</string>
+    <string name="select_encryption_method">请选择加密方法</string>
+    <string name="input_dialog_prompt_default">输入文本：</string>
+    <string name="show_input_dialog">显示输入对话框</string>
+    <string name="stop">中止</string>
+    <string name="no">否</string>
+    <string name="yes">是</string>
+    <string name="to_list">加入名单</string>
+    <string name="show_detail">显示详情</string>
+    <string name="shown_in">显示为：</string>
+    <string name="safe">密库</string>
+    <string name="error_initializing_camera">初始化相机错误：</string>
+    <string name="cannot_open_image">无法打开图片</string>
+    <string name="cannot_decode_image">无法从图片解析二维码</string>
+    <string name="invalid_transaction_data">无效的交易数据</string>
+    <string name="the_tx_is_empty">交易没有数据</string>
+    <string name="file_loaded_import_it">文件已加载，请导入。</string>
+    <string name="you_are_clear_all_the_data_of_safe_do_you_sure_to_do_it">你确认要清除所有数据吗？</string>
+    <string name="cleared_data_cannot_be_recovered_are_you_sure_to_clear_all_data">数据一旦清除无法恢复，确定要清除吗？</string>
+    <string name="backup_all_keys">备份所有密钥</string>
+    <string name="backup_all_secrets">备份所有秘密</string>
+    <string name="import_secrets">导入秘密</string>
+    <string name="clear_all_data">清除所有数据</string>
+    <string name="change_password">修改密码</string>
+    <string name="menu_list">名单</string>
+    <string name="add_fid">添加FID</string>
+    <string name="import_the_fid">输入FID或以逗号分隔的FID列表</string>
+    <string name="invalid_fid">无效的FID</string>
+    <string name="input_fid_or_fid_list_separated_by_comma_or_space">输入FID或以逗号空格等分割的FID列表</string>
+    <string name="fid_list">名单</string>
+    <string name="please_input_amount">请输入金额</string>
+    <string name="fid_list_is_empty">FID名单为空</string>
+    <string name="total_amount_exceeds_available_balance">支出超过了可用金额</string>
+    <string name="amount_must_be_between">金额必须在 %1$f 与 %2$f 之间</string>
+    <string name="please_input_all_fields">请输入必填项</string>
+    <string name="invalid_qr_code_content">无效的二维码</string>
+    <string name="failed">失败</string>
+    <string name="failed_to_scan_qr_code">扫描二维码失败</string>
+    <string name="no_items_selected">请选择</string>
+    <string name="deleted">已删除</string>
+    <string name="some_fids_added_to_list">%d 个FID已加入名单</string>
+    <string name="input_value_must_be_greater_than_0">Input value must be greater than 0.</string>
+    <string name="invalid_txid">Invalid txid.</string>
+    <string name="invalid_index">Invalid index.</string>
+    <string name="inputs_cannot_be_empty">Inputs cannot be empty.</string>
+    <string name="inputs_are_not_enough_to_cover_the_fee">Inputs are not enough to cover the fee.</string>
+    <string name="paying">支付</string>
+    <string name="convert">转换</string>
+    <string name="start">开始</string>
+    <string name="multisign">多签</string>
+    <string name="multisign_detail">多签详情</string>
+    <string name="my_keys">我的密钥</string>
+    <string name="my_secrets">我的秘密</string>
+    <string name="sign_words">签署消息</string>
+    <string name="verify_signature">验证签名</string>
+    <string name="choose_key">选择密钥</string>
+    <string name="create_key_by_fid">仅添加FID</string>
+    <string name="create_key_by_phrase">密语创建</string>
+    <string name="create_key_by_prikey">输入私钥</string>
+    <string name="create_key_by_prikey_cipher">解密私钥</string>
+    <string name="create_key_by_pubkey">输入公钥</string>
+    <string name="create_secret">新建秘密</string>
+    <string name="address_converter">地址转换</string>
+    <string name="private_key_converter">私钥转换</string>
+    <string name="public_key_converter">公钥转换</string>
+    <string name="random_bytes_generator">生成随机数</string>
+    <string name="input">输入</string>
+    <string name="unknown">未知</string>
+    <string name="please_verify_your_password">请输入您的密码</string>
+    <string name="exported">已备份.</string>
+    <string name="failed_to_load_avatar">加载头像失败</string>
+    <string name="keys_saved_successfully">密钥已保存</string>
+    <string name="failed_to_save_key">保存密钥失败！</string>
+    <string name="remember_backup_keys">请记住：所有密钥和秘密都必须备份。</string>
+    <string name="remove_me">删除本号</string>
+    <string name="all_data_cleared_successfully">所有数据已被清除</string>
+    <string name="password_changed">密码已更新.</string>
+    <string name="no_more_secrets">没有更多了</string>
+    <string name="secrets_loaded">%d 个秘密已加载.</string>
+    <string name="check_password">验证密码</string>
+    <string name="password_verification_cancelled">密码验证已取消</string>
+    <string name="please_enter_matching_characters">请输入匹配字符</string>
+    <string name="stop_finding_progress_first">请先停止搜索</string>
+    <string name="no_totp_found">没有验证码</string>
+    <string name="no_multisigns_found">No multisigns found.</string>
+    <string name="please_input_text">Please input text</string>
+    <string name="no_content_to_generate_qr_code">No content to generate QR code</string>
+    <string name="no_key_available">No key available</string>
+    <string name="offline_notation">只有离线的数据才是安全的数据。请保持设备离线。关闭WIFI，移动数据，蓝牙等。</string>
+    <string name="detail">详情</string>
+    <string name="menu_json_converter">JSON 转换</string>
+    <string name="input_json">输入JSON内容</string>
+
+</resources>

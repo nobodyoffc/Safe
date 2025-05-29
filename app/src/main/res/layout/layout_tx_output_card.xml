@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="4dp"
+    android:background="@color/main_background"
+    app:cardCornerRadius="8dp"
+    app:cardElevation="4dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:background="@color/main_background"
+        android:padding="4dp"
+        >
+
+        <!-- Avatar -->
+        <ImageView
+            android:id="@+id/avatarImage"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_gravity="center_vertical"
+            android:layout_marginEnd="8dp"
+            android:contentDescription="@string/avatar" />
+
+        <!-- Left side: Output Area -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <!-- Row 1: FID -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/fid"
+                    android:textColor="@color/field_name"
+                    android:layout_marginEnd="4dp"
+                    android:textStyle="bold"
+                    android:textSize="14sp" />
+
+                <EditText
+                    android:id="@+id/fidText"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:textSize="14sp"
+                    android:textColor="@color/text_color"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:background="@drawable/edit_text_background"
+                    android:inputType="text"
+                    android:imeOptions="actionNext"
+                    android:maxLines="1"
+                    android:padding="4dp" />
+
+            </LinearLayout>
+
+            <!-- Row 2: Amount -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/amount"
+                    android:textColor="@color/field_name"
+                    android:layout_marginEnd="4dp"
+                    android:textStyle="bold"
+                    android:textSize="14sp" />
+
+                <EditText
+                    android:id="@+id/amountText"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:textSize="14sp"
+                    android:textColor="@color/text_color"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:background="@drawable/edit_text_background"
+                    android:inputType="numberDecimal"
+                    android:imeOptions="actionDone"
+                    android:maxLines="1"
+                    android:padding="4dp" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <!-- Right side: Delete Button -->
+        <ImageButton
+            android:id="@+id/deleteButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end|bottom"
+            android:layout_marginTop="2dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/delete"
+            android:padding="2dp"
+            android:src="@drawable/ic_clear" />
+
+    </LinearLayout>
+
+</androidx.cardview.widget.CardView> 

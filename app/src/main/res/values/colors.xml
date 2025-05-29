@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="background_light">#FFFFFF</color>
+    <color name="background_dark">#333333</color>
+    <color name="main_background">#F5F5F5</color>
+    <color name="text_area_background">#F0F0F0</color>
+    <color name="text_color">#000000</color>
+    <color name="hint">#777777</color>
+    <color name="disabled">#AAAAAA</color>
+    <color name="error">#FF0000</color>
+    <color name="outline">#CCCCCC</color>
+    <color name="stroke_color">#DDDDDD</color>
+    <color name="outline_color">#222222</color>
+    <color name="colorAccent">#2196F3</color>
+    <color name="colorPrimary">#1976D2</color>
+    <color name="headerBackground">#908C8C</color>
+    <color name="field_name">#225555</color>
+    <color name="input_field_background">#FFFFFF</color>
+</resources>

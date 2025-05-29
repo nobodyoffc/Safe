@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/main_background"
+    android:windowSoftInputMode="adjustPan"
+    tools:context=".ui.SingleInputActivity">
+
+    <include layout="@layout/common_toolbar" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+        <!-- Promote TextView -->
+        <TextView
+            android:id="@+id/promoteTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Promote"
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+            android:layout_marginBottom="8dp" />
+
+        <!-- Input View -->
+        <include
+            android:id="@+id/inputView"
+            layout="@layout/layout_text_input_with_scan"
+            android:layout_width="match_parent"
+            android:layout_height="70dp"
+            android:layout_marginTop="8dp" />
+
+        <!-- Button Container -->
+        <LinearLayout
+            android:id="@+id/buttonContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp">
+
+            <Button
+                android:id="@+id/clearButton"
+                style="@style/ButtonStyle"
+                android:text="@string/clear" />
+
+            <Button
+                android:id="@+id/copyButton"
+                style="@style/ButtonStyle"
+                android:text="@string/copy" />
+
+            <Button
+                android:id="@+id/doneButton"
+                style="@style/ButtonStyle"
+                android:text="@string/done" />
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout> 

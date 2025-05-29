@@ -1,0 +1,6 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+when passing all the parameters or results which entent FcEntity, make it to json string first by fcEntity.toJson().

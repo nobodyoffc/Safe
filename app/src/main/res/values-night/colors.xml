@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="main_background">#333333</color>
+    <color name="text_area_background">#424242</color>
+    <color name="text_color">#DDDDDD</color>
+    <color name="hint">#AAAAAA</color>
+    <color name="disabled">#666666</color>
+    <color name="stroke_color">#666666</color>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="background_light">#FFFFFF</color>
+    <color name="background_dark">#333333</color>
+    <color name="outline_color">#999999</color>
+    <color name="colorAccent">#2196F3</color>
+    <color name="colorPrimary">#1976D2</color>
+    <color name="headerBackground">#646665</color>
+    <color name="field_name">#DDDDAA</color>
+    <color name="input_field_background">#2A2A2A</color>
+</resources> 

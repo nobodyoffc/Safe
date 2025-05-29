@@ -1,0 +1,6 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+please apply @style/ButtonStyle when creating buttons.

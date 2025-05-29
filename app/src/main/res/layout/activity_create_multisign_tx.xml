@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/main_background">
+
+    <include layout="@layout/common_toolbar" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- txContainer (7/9) -->
+        <LinearLayout
+            android:id="@+id/txContainer"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="8"
+            android:orientation="vertical">
+
+            <!-- inputCardsContainer (3/7) -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="3"
+                android:background="@drawable/container_outline"
+                android:padding="8dp">
+
+                <ScrollView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@color/main_background"
+                    android:fillViewport="true">
+
+                    <LinearLayout
+                        android:id="@+id/inputCardsContainer"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/inputHint"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/add_cash_to_spend"
+                            android:textColor="@color/hint"
+                            android:layout_marginBottom="4dp" />
+
+                    </LinearLayout>
+                </ScrollView>
+            </LinearLayout>
+
+            <include
+                android:id="@+id/plusInputButton"
+                layout="@layout/layout_plus_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:layout_marginTop="-4dp"
+                android:layout_marginEnd="0dp"
+                android:layout_marginBottom="16dp" />
+
+            <TextView
+                android:id="@+id/totalInputText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="-50dp"
+                android:gravity="start"
+                android:textColor="@color/text_color"
+                android:layout_marginBottom="12dp"
+                android:textSize="16sp" />
+
+            <!-- outputCardsContainer (3/7) -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="3"
+                android:layout_marginTop="4dp"
+                android:background="@drawable/container_outline"
+                android:padding="8dp"
+                android:paddingTop="16dp">
+
+                <ScrollView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@color/main_background"
+                    android:fillViewport="true">
+
+                    <LinearLayout
+                        android:id="@+id/outputCardsContainer"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/outputHint"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/pay_to"
+                            android:textColor="@color/hint"
+                            android:layout_marginBottom="4dp" />
+
+                    </LinearLayout>
+                </ScrollView>
+            </LinearLayout>
+
+            <include
+                android:id="@+id/plusOutputButton"
+                layout="@layout/layout_plus_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:layout_marginTop="-4dp"
+                android:layout_marginEnd="0dp"
+                android:layout_marginBottom="8dp" />
+
+            <TextView
+                android:id="@+id/totalAndFeeText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="-44dp"
+                android:gravity="start"
+                android:textColor="@color/text_color"
+                android:layout_marginBottom="16dp"
+                android:textSize="16sp" />
+
+            <!-- opreturnContainer (1/8) -->
+            <LinearLayout
+                android:id="@+id/opreturnContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="0dp"
+                >
+
+                <include
+                    android:id="@+id/opreturnInput"
+                    layout="@layout/layout_text_input_with_scan"
+                    android:layout_width="match_parent"
+                    android:layout_height="70dp"
+                    />
+
+            </LinearLayout>
+
+            <!-- keyContainer-->
+            <LinearLayout
+                android:id="@+id/keyContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                >
+
+                <include
+                    android:id="@+id/multisignIdInput"
+                    layout="@layout/layout_key_input_with_people_and_scan"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    />
+
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- buttonContainer (1/9) -->
+        <LinearLayout
+            android:id="@+id/buttonContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/clearButton"
+                style="@style/ButtonStyle"
+                android:layout_width="wrap_content"
+                android:text="@string/clear" />
+
+            <Button
+                android:id="@+id/copyButton"
+                style="@style/ButtonStyle"
+                android:layout_width="wrap_content"
+                android:text="@string/copy" />
+
+            <Button
+                android:id="@+id/importTxButton"
+                style="@style/ButtonStyle"
+                android:text="@string/import_tx" />
+
+            <Button
+                android:id="@+id/createButton"
+                style="@style/ButtonStyle"
+                android:layout_width="wrap_content"
+                android:text="@string/create" />
+
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout> 

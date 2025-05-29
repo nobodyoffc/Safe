@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <include layout="@layout/common_toolbar" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- Result Container (5/8) -->
+        <FrameLayout
+            android:id="@+id/resultContainer"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="5">
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                >
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/textBoxWithMakeQrLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="top|start"
+                    android:inputType="textMultiLine"
+                    android:maxLines="10"
+                    android:scrollbars="vertical" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.fc.safe.ui.IoIconsView
+                android:id="@+id/makeQrIcon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end|bottom"
+                android:layout_margin="8dp" />
+
+        </FrameLayout>
+
+        <LinearLayout
+            android:id="@+id/inputContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+
+            android:paddingTop="10dp"
+            android:orientation="vertical">
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/number_of_bytes">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/bytesInput"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:minHeight="48dp"
+                    android:paddingBottom="8dp"
+                    android:inputType="number" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+        </LinearLayout>
+
+        <!-- Option Container (1/8) -->
+        <LinearLayout
+            android:id="@+id/optionContainer"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="2"
+            android:minHeight="64dp"
+            android:orientation="vertical">
+
+            <RadioGroup
+                android:id="@+id/bytesOptionGroup"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minHeight="32dp"
+                android:orientation="horizontal">
+
+                <RadioButton
+                    android:id="@+id/bytes1Option"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="1" />
+
+                <RadioButton
+                    android:id="@+id/bytes4Option"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="4" />
+
+                <RadioButton
+                    android:id="@+id/bytes8Option"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="8" />
+
+                <RadioButton
+                    android:id="@+id/bytes16Option"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="16" />
+
+                <RadioButton
+                    android:id="@+id/bytes32Option"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:checked="true"
+                    android:text="32" />
+
+            </RadioGroup>
+
+
+            <TextView
+                android:id="@+id/textView2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/shown_in" />
+
+            <RadioGroup
+                android:id="@+id/formatOptionGroup"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:minHeight="32dp"
+                android:layout_marginTop="0dp">
+
+                <RadioButton
+                    android:id="@+id/formatHexOption"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:checked="true"
+                    android:text="@string/format_hex" />
+
+                <RadioButton
+                    android:id="@+id/formatIntegerOption"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/format_integer" />
+
+                <RadioButton
+                    android:id="@+id/formatBase58Option"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/format_base58" />
+
+                <RadioButton
+                    android:id="@+id/formatBase32Option"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/base32" />
+
+            </RadioGroup>
+        </LinearLayout>
+
+        <!-- Button Container (1/8) -->
+        <LinearLayout
+            android:id="@+id/buttonContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_horizontal"
+            android:layout_marginTop="8dp">
+
+            <Button
+                android:id="@+id/clearButton"
+                style="@style/ButtonStyle"
+                android:text="@string/clear"/>
+
+            <Button
+                android:id="@+id/copyButton"
+                style="@style/ButtonStyle"
+                android:text="@string/copy" />
+
+            <Button
+                android:id="@+id/newButton"
+                style="@style/ButtonStyle"
+                android:text="@string/new_str"/>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</LinearLayout> 

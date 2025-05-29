@@ -1,0 +1,6 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+add each layout of the activity a common toolbar of @+id/toolbar and setup it with ToolbarUtils.setupToolbar(this,<title>).

@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/main_background">
+
+    <include layout="@layout/common_toolbar" />
+
+    <!-- Main Content -->
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <!-- Result View (3/7) -->
+            <include
+                android:id="@+id/resultView"
+                layout="@layout/layout_text_box_with_make_qr"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="3" />
+
+            <!-- Text View (2/7) -->
+            <include
+                android:id="@+id/textView"
+                layout="@layout/layout_text_input_with_scan"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="2"
+                android:layout_marginTop="8dp" />
+
+            <!-- Option Container (1/7) - Merged into a single RadioGroup with 2 rows -->
+
+            <com.google.android.material.checkbox.MaterialCheckBox
+                android:id="@+id/asHexCheckBox"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="0dp"
+                android:layout_marginTop="-8dp"
+                android:text="@string/as_hex"
+                android:textColor="@color/colorAccent"
+                app:buttonTint="@color/colorAccent" />
+
+            <RadioGroup
+                android:id="@+id/optionContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginTop="8dp">
+
+                <!-- First Row -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <RadioButton
+                        android:id="@+id/radioSha256"
+                        style="@style/EncryptOptionRadioButton"
+                        android:checked="true"
+                        android:text="@string/sha256" />
+
+                    <RadioButton
+                        android:id="@+id/radioSha256x2"
+                        style="@style/EncryptOptionRadioButton"
+                        android:text="@string/sha256x2" />
+
+                    <RadioButton
+                        android:id="@+id/radioMd5"
+                        style="@style/EncryptOptionRadioButton"
+                        android:text="@string/md5" />
+                </LinearLayout>
+
+                <!-- Second Row -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginTop="4dp">
+
+                    <RadioButton
+                        android:id="@+id/radioSha1"
+                        style="@style/EncryptOptionRadioButton"
+                        android:text="@string/sha1" />
+
+                    <RadioButton
+                        android:id="@+id/radioSha3"
+                        style="@style/EncryptOptionRadioButton"
+                        android:text="@string/sha3" />
+
+                    <RadioButton
+                        android:id="@+id/radioRipemd160"
+                        style="@style/EncryptOptionRadioButton"
+                        android:text="@string/ripemd160" />
+                </LinearLayout>
+            </RadioGroup>
+
+            <!-- Button Container (1/7) -->
+            <LinearLayout
+                android:id="@+id/buttonContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="8dp">
+
+                <Button
+                    android:id="@+id/clearButton"
+                    style="@style/ButtonStyle"
+                    android:text="@string/clear" />
+
+                <Button
+                    android:id="@+id/copyButton"
+                    style="@style/ButtonStyle"
+                    android:text="@string/copy" />
+
+                <Button
+                    android:id="@+id/hashButton"
+                    style="@style/ButtonStyle"
+                    android:text="@string/hash" />
+            </LinearLayout>
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout> 

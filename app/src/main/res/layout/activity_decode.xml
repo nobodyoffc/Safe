@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/main_background"
+    android:windowSoftInputMode="adjustPan"
+    tools:context=".home.DecodeActivity">
+
+    <include layout="@layout/common_toolbar" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- Result View (3/7) -->
+        <include
+            android:id="@+id/resultView"
+            layout="@layout/layout_text_box_with_make_qr"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="3" />
+
+        <!-- Input View (2/7) -->
+        <include
+            android:id="@+id/inputView"
+            layout="@layout/layout_text_input_with_scan"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="2"
+            android:layout_marginTop="8dp" />
+
+        <!-- First Row of Options (1/7) -->
+        <RadioGroup
+            android:id="@+id/optionContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginTop="8dp">
+
+            <!-- First Row -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <RadioButton
+                    android:id="@+id/radioHex"
+                    style="@style/EncryptOptionRadioButton"
+                    android:text="Hex" />
+
+                <RadioButton
+                    android:id="@+id/radioBase64"
+                    style="@style/EncryptOptionRadioButton"
+                    android:text="Base64" />
+
+                <RadioButton
+                    android:id="@+id/radioBase58"
+                    style="@style/EncryptOptionRadioButton"
+                    android:text="Base58" />
+            </LinearLayout>
+
+            <!-- Second Row -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="4dp">
+
+                <RadioButton
+                    android:id="@+id/radioUtf8"
+                    style="@style/EncryptOptionRadioButton"
+                    android:text="@string/utf_8" />
+
+                <RadioButton
+                    android:id="@+id/radioBase32"
+                    style="@style/EncryptOptionRadioButton"
+                    android:text="@string/base32" />
+
+                <RadioButton
+                    android:id="@+id/radioUnknown"
+                    style="@style/EncryptOptionRadioButton"
+                    android:checked="true"
+                    android:text="@string/unknown" />
+
+
+            </LinearLayout>
+        </RadioGroup>
+
+        <!-- Button Container (1/7) -->
+        <LinearLayout
+            android:id="@+id/buttonContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp">
+
+            <Button
+                android:id="@+id/clearButton"
+                style="@style/ButtonStyle"
+                android:text="@string/clear" />
+
+            <Button
+                android:id="@+id/copyButton"
+                style="@style/ButtonStyle"
+                android:text="@string/copy" />
+
+            <Button
+                android:id="@+id/decodeButton"
+                style="@style/ButtonStyle"
+                android:text="@string/decode" />
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout> 
