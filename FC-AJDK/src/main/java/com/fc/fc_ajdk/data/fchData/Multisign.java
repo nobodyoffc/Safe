@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-public class P2SH extends FcObject {
+public class Multisign extends FcObject {
 	private String redeemScript;
 	private Integer m;
 	private Integer n;
@@ -24,7 +24,7 @@ public class P2SH extends FcObject {
 	private String saveTime;
 	private String label;
 
-	public void parseP2SH(Cash input) throws IOException {
+	public void parseMultisign(Cash input) throws IOException {
         /* Example of multiSig input unlocking script:
 				"00" +
 				"41" +
@@ -48,12 +48,6 @@ public class P2SH extends FcObject {
 				"ae";
 		*/
 		String script = input.getUnlockScript();
-
-//		GetResponse<P2SH> resultGetP2SH = esClient.get(g->g.index(IndicesNames.P2SH).id(input.getOwner()), P2SH.class);
-//
-//		if(resultGetP2SH.found())return;
-//
-//		resultGetP2SH = apipClient.p2shByIds(RequestMethod.POST, AuthType.FC_SIGN_BODY,input.getOwner());
 
 		if(! script.substring(script.length()-2).equals("ae"))return;
 
@@ -126,10 +120,10 @@ public class P2SH extends FcObject {
 		this.setBirthTxId(input.getBirthTxId());
 	}
 
-	public static P2SH parseP2shRedeemScript(String script)  {
-		P2SH p2sh = new P2SH();
+	public static Multisign parseMultisignRedeemScript(String script)  {
+		Multisign multisign = new Multisign();
 
-		p2sh.setId(KeyTools.scriptToMultiAddr(script));
+		multisign.setId(KeyTools.scriptToMultiAddr(script));
 		InputStream scriptIs = new ByteArrayInputStream(BytesUtils.hexToByteArray(script));
 
 		byte[] b = new byte[1];
@@ -167,13 +161,13 @@ public class P2SH extends FcObject {
 			scriptIs.read(b);
 
 			redeemScriptBytesList.add(b.clone());
-			p2sh.setRedeemScript(BytesUtils.bytesToHexStringBE(BytesUtils.bytesMerger(redeemScriptBytesList)));
-			p2sh.setM(m);
-			p2sh.setN(n);
+			multisign.setRedeemScript(BytesUtils.bytesToHexStringBE(BytesUtils.bytesMerger(redeemScriptBytesList)));
+			multisign.setM(m);
+			multisign.setN(n);
 
-			p2sh.setPubKeys(pukList);
-			p2sh.setFids(addrList);
-			return p2sh;
+			multisign.setPubKeys(pukList);
+			multisign.setFids(addrList);
+			return multisign;
 		} catch (IOException e) {
 
 			return null;

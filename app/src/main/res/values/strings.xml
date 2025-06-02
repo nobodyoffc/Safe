@@ -149,7 +149,7 @@
     <string name="import_tx">Import</string>
     <string name="add">Add</string>
     <string name="input_the_text_carved_on_chain">Input the text carved on chain</string>
-    <string name="sender_from_script_or_p2sh">Sender from script or P2SH</string>
+    <string name="sender_from_script_or_multisign">Sender from script or multisign JSON</string>
     <string name="pay_to">Pay to</string>
     <string name="add_cash_to_spend">Add cash to spend</string>
     <string name="please_input_required_signer_number">Please input required signer number</string>

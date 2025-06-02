@@ -6,6 +6,7 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 
+import com.fc.fc_ajdk.data.fchData.Multisign;
 import com.fc.fc_ajdk.db.LocalDB;
 import com.fc.fc_ajdk.utils.TimberLogger;
 import com.fc.safe.R;
@@ -17,7 +18,6 @@ import com.fc.safe.multisign.ImportMultisignTxActivity;
 import com.fc.safe.multisign.SignMultisignTxActivity;
 import com.fc.safe.tx.SignTxActivity;
 import com.fc.safe.multisign.MultisignKeyCardManager;
-import com.fc.fc_ajdk.data.fchData.P2SH;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -91,9 +91,9 @@ public class MultisignActivity extends BaseCryptoActivity {
         isLoading = true;
         TimberLogger.d(TAG, "loadMultisigns: Starting to load multisigns. lastIndex=" + lastIndex);
 
-        List<P2SH> multisigns;
-        LocalDB<P2SH> multisignDB = multisignManager.getMultisignDB();
-        Map<String, P2SH> map;
+        List<Multisign> multisigns;
+        LocalDB<Multisign> multisignDB = multisignManager.getMultisignDB();
+        Map<String, Multisign> map;
         if(multisignDB.getSortType().equals(LocalDB.SortType.NO_SORT)) {
             map = multisignDB.getAll();
             if(map == null){
@@ -164,9 +164,9 @@ public class MultisignActivity extends BaseCryptoActivity {
         startActivity(intent);
     }
 
-    private void showKeyDetail(P2SH p2sh) {
+    private void showKeyDetail(Multisign multisign) {
         Intent intent = new Intent(this, MultisignDetailActivity.class);
-        intent.putExtra("p2sh", p2sh);
+        intent.putExtra("multisign", multisign);
         startActivity(intent);
     }
 

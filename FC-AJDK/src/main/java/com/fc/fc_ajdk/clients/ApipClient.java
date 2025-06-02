@@ -2,6 +2,7 @@ package com.fc.fc_ajdk.clients;
 
 import com.fc.fc_ajdk.core.fch.RawTxInfo;
 import com.fc.fc_ajdk.data.apipData.WebhookRequestBody;
+import com.fc.fc_ajdk.data.fchData.Multisign;
 import com.fc.fc_ajdk.ui.Menu;
 import com.fc.fc_ajdk.core.crypto.Decryptor;
 import com.fc.fc_ajdk.core.crypto.EncryptType;
@@ -27,7 +28,6 @@ import com.fc.fc_ajdk.data.fchData.Cid;
 import com.fc.fc_ajdk.data.fchData.FchChainInfo;
 import com.fc.fc_ajdk.data.fchData.Nobody;
 import com.fc.fc_ajdk.data.fchData.OpReturn;
-import com.fc.fc_ajdk.data.fchData.P2SH;
 import com.fc.fc_ajdk.data.fchData.SendTo;
 import com.fc.fc_ajdk.data.feipData.App;
 import com.fc.fc_ajdk.data.feipData.AppHistory;
@@ -110,10 +110,10 @@ public class ApipClient extends FcClient {
         super(apiProvider,apiAccount,symkey);
     }
 
-    public List<P2SH> myP2SHs(String fid) {
+    public List<Multisign> myMultisigns(String fid) {
         Fcdsl fcdsl = new Fcdsl();
         fcdsl.addNewQuery().addNewTerms().addNewFields(FIDS).addNewValues(fid);
-        return p2shSearch(fcdsl, RequestMethod.POST, AuthType.FC_SIGN_BODY);
+        return multisignSearch(fcdsl, RequestMethod.POST, AuthType.FC_SIGN_BODY);
     }
 
     public void checkMaster(String prikeyCipher,byte[] symkey,BufferedReader br) {
@@ -293,13 +293,13 @@ public class ApipClient extends FcClient {
         return objectToList(data,OpReturn.class);
     }
 
-    public Map<String, P2SH> p2shByIds(RequestMethod requestMethod, AuthType authType, String... ids){
-        Object data = requestByIds(requestMethod, SN_2, VERSION_1, P_2_SH_BY_IDS, authType, ids);
-        return objectToMap(data,String.class,P2SH.class);
+    public Map<String, Multisign> multisignByIds(RequestMethod requestMethod, AuthType authType, String... ids){
+        Object data = requestByIds(requestMethod, SN_2, VERSION_1, MULTISIGN_BY_IDS, authType, ids);
+        return objectToMap(data,String.class, Multisign.class);
     }
-    public List<P2SH> p2shSearch(Fcdsl fcdsl, RequestMethod requestMethod, AuthType authType){
-        Object data = requestJsonByFcdsl(SN_2, VERSION_1, P_2_SH_SEARCH,fcdsl, authType,sessionKey, requestMethod);
-        return objectToList(data,P2SH.class);
+    public List<Multisign> multisignSearch(Fcdsl fcdsl, RequestMethod requestMethod, AuthType authType){
+        Object data = requestJsonByFcdsl(SN_2, VERSION_1, MULTISIGN_SEARCH,fcdsl, authType,sessionKey, requestMethod);
+        return objectToList(data, Multisign.class);
     }
 
     public Map<String, TxInfo> txByIds(RequestMethod requestMethod, AuthType authType, String... ids){
@@ -1407,8 +1407,8 @@ public class ApipClient extends FcClient {
         public static final String NOTICE_FEE_HISTORY = "noticeFeeHistory";
         public static final String REPUTATION_HISTORY = "reputationHistory";
         public static final String NOBODY_SEARCH = "nobodySearch";
-        public static final String P_2_SH_BY_IDS = "p2shByIds";
-        public static final String P_2_SH_SEARCH = "p2shSearch";
+        public static final String MULTISIGN_BY_IDS = "multisignByIds";
+        public static final String MULTISIGN_SEARCH = "multisignSearch";
         public static final String PROTOCOL_BY_IDS = "protocolByIds";
         public static final String PROTOCOL_SEARCH = "protocolSearch";
         public static final String PROTOCOL_OP_HISTORY = "protocolOpHistory";
@@ -1526,7 +1526,7 @@ public class ApipClient extends FcClient {
                     CASH_SEARCH, CASH_BY_IDS,
                     FID_SEARCH, FID_BY_IDS,
                     OP_RETURN_SEARCH, OP_RETURN_BY_IDS,
-                    P_2_SH_SEARCH, P_2_SH_BY_IDS,
+                    MULTISIGN_SEARCH, MULTISIGN_BY_IDS,
                     TX_SEARCH, TX_BY_IDS, TX_BY_FID,
                     CHAIN_INFO, BLOCK_TIME_HISTORY, DIFFICULTY_HISTORY, HASH_RATE_HISTORY
             };

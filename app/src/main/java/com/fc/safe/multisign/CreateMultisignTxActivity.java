@@ -26,7 +26,7 @@ import com.fc.fc_ajdk.core.crypto.KeyTools;
 import com.fc.fc_ajdk.core.fch.RawTxInfo;
 import com.fc.fc_ajdk.core.fch.TxCreator;
 import com.fc.fc_ajdk.data.fchData.Cash;
-import com.fc.fc_ajdk.data.fchData.P2SH;
+import com.fc.fc_ajdk.data.fchData.Multisign;
 import com.fc.fc_ajdk.data.fchData.SendTo;
 import com.fc.fc_ajdk.utils.FchUtils;
 import com.fc.fc_ajdk.utils.Hex;
@@ -74,7 +74,7 @@ public class CreateMultisignTxActivity extends BaseCryptoActivity {
     private List<TxOutputCard> outputCards = new ArrayList<>();
 
     private TextInputEditText opreturnInput;
-    private TextInputEditText p2shInput;
+    private TextInputEditText multisignInput;
     private Button clearButton;
     private Button importTxButton;
     private Button createButton;
@@ -115,10 +115,10 @@ public class CreateMultisignTxActivity extends BaseCryptoActivity {
         rawTxInfo = RawTxInfo.fromJson(txJson,RawTxInfo.class);
         if (rawTxInfo == null) {
             rawTxInfo = new RawTxInfo();
-            // If we have a P2SH in the intent, set it
-            P2SH p2sh = (P2SH) getIntent().getSerializableExtra("p2sh");
-            if (p2sh != null) {
-                rawTxInfo.setP2sh(p2sh);
+            // If we have a Multisign in the intent, set it
+            Multisign multisign = (Multisign) getIntent().getSerializableExtra("multisign");
+            if (multisign != null) {
+                rawTxInfo.setMultisign(multisign);
             }
         }
         TimberLogger.i(TAG, "RawTxInfo initialized");
@@ -182,8 +182,8 @@ public class CreateMultisignTxActivity extends BaseCryptoActivity {
 
         opreturnInput = opreturnContainer.findViewById(R.id.opreturnInput).findViewById(R.id.textInput);
         opreturnInput.setHint(R.string.input_the_text_carved_on_chain);
-        p2shInput = keyContainer.findViewById(R.id.multisignIdInput).findViewById(R.id.keyInput);
-        p2shInput.setHint(R.string.sender_from_script_or_p2sh);
+        multisignInput = keyContainer.findViewById(R.id.multisignIdInput).findViewById(R.id.keyInput);
+        multisignInput.setHint(R.string.sender_from_script_or_multisign);
 
         clearButton = findViewById(R.id.clearButton);
         importTxButton = findViewById(R.id.importTxButton);
@@ -336,7 +336,7 @@ public class CreateMultisignTxActivity extends BaseCryptoActivity {
             }
 
             opreturnInput.setText("");
-            p2shInput.setText("");
+            multisignInput.setText("");
             inputCards.clear();
             outputCards.clear();
             inputHint.setVisibility(View.VISIBLE);
@@ -377,30 +377,30 @@ public class CreateMultisignTxActivity extends BaseCryptoActivity {
         if(opreturnInput.getText()!=null && !opreturnInput.getText().toString().isEmpty())
             rawTxInfo.setOpReturn(opreturnInput.getText().toString());
 
-        if (p2shInput.getText() == null || p2shInput.getText().toString().isEmpty()) {
-            Toast.makeText(this,"Input the script or P2SH. Or select a multisign FID.", SafeApplication.TOAST_LASTING).show();
+        if (multisignInput.getText() == null || multisignInput.getText().toString().isEmpty()) {
+            Toast.makeText(this,"Input the script or Multisign. Or select a multisign FID.", SafeApplication.TOAST_LASTING).show();
             return false;
         }
 
-        String p2shText = p2shInput.getText().toString();
+        String multisignText = multisignInput.getText().toString();
 
-        P2SH p2sh;
-        if(KeyTools.isGoodFid(p2shText)&& p2shText.startsWith("3")){
-            p2sh = rawTxInfo.getP2sh();
-        } else if (Hex.isHexString(p2shText)) {
-            p2sh = P2SH.parseP2shRedeemScript(p2shText);
-            rawTxInfo.setP2sh(p2sh);
-        } else if (JsonUtils.isJson(p2shText)) {
-            p2sh = P2SH.fromJson(p2shText,P2SH.class);
-            rawTxInfo.setP2sh(p2sh);
+        Multisign multisign;
+        if(KeyTools.isGoodFid(multisignText)&& multisignText.startsWith("3")){
+            multisign = rawTxInfo.getMultisign();
+        } else if (Hex.isHexString(multisignText)) {
+            multisign = Multisign.parseMultisignRedeemScript(multisignText);
+            rawTxInfo.setMultisign(multisign);
+        } else if (JsonUtils.isJson(multisignText)) {
+            multisign = Multisign.fromJson(multisignText, Multisign.class);
+            rawTxInfo.setMultisign(multisign);
         }else{
-            Toast.makeText(this,"Failed to parse P2SH.", SafeApplication.TOAST_LASTING).show();
+            Toast.makeText(this,"Failed to parse Multisign.", SafeApplication.TOAST_LASTING).show();
             return false;
         }
 
         if(!goodTxInfo(rawTxInfo)) return false;
 
-        rawTxInfo.setSender(p2sh.getId());
+        rawTxInfo.setSender(multisign.getId());
         return true;
     }
 
@@ -459,8 +459,8 @@ public class CreateMultisignTxActivity extends BaseCryptoActivity {
             }
         }
 
-        if(rawTxInfo.getP2sh()==null){
-            Toast.makeText(this,"Failed to parse P2SH.", SafeApplication.TOAST_LASTING).show();
+        if(rawTxInfo.getMultisign()==null){
+            Toast.makeText(this,"Failed to parse Multisign.", SafeApplication.TOAST_LASTING).show();
             return false;
         }
 
@@ -506,8 +506,8 @@ public class CreateMultisignTxActivity extends BaseCryptoActivity {
         int outputNum = rawTxInfo.getOutputs().size();
 
 
-        int m = rawTxInfo.getP2sh()==null? 2: rawTxInfo.getP2sh().getM();
-        int n = rawTxInfo.getP2sh()==null? 3: rawTxInfo.getP2sh().getN();
+        int m = rawTxInfo.getMultisign()==null? 2: rawTxInfo.getMultisign().getM();
+        int n = rawTxInfo.getMultisign()==null? 3: rawTxInfo.getMultisign().getN();
 
         fee = feeRateLong * TxCreator.calcSizeMultiSign(inputNum, outputNum, opReturnBytesLen, m, n);
         rest = totalInput-totalOutput-fee;
@@ -569,7 +569,7 @@ public class CreateMultisignTxActivity extends BaseCryptoActivity {
 
         // Clear text inputs
         opreturnInput.setText("");
-        p2shInput.setText("");
+        multisignInput.setText("");
 
         // Add input cards
         if (rawTxInfo.getInputs() != null) {
@@ -617,7 +617,7 @@ public class CreateMultisignTxActivity extends BaseCryptoActivity {
         // Set p2sh input
         if (rawTxInfo.getSender() != null) {
             TimberLogger.i(TAG, "Setting p2sh input: " + rawTxInfo.getSender());
-            p2shInput.setText(rawTxInfo.getSender());
+            multisignInput.setText(rawTxInfo.getSender());
         } else {
             TimberLogger.w(TAG, "No sender to set in p2sh input");
         }
@@ -692,7 +692,7 @@ public class CreateMultisignTxActivity extends BaseCryptoActivity {
                 opreturnInput.setText(qrContent);
             } else if (requestCode == QR_SCAN_KEY_REQUEST_CODE) {
                 TimberLogger.i(TAG, "Setting QR content to p2shInput: " + qrContent);
-                p2shInput.setText(qrContent);
+                multisignInput.setText(qrContent);
             } else {
                 TimberLogger.e(TAG, "Unknown request code: " + requestCode);
             }
@@ -701,7 +701,7 @@ public class CreateMultisignTxActivity extends BaseCryptoActivity {
 
     @Override
     protected void handleChooseKeyResult(Intent data) {
-        Map<String, P2SH> resultMap = ChooseMultisignIdActivity.getSelectedP2SHMap(data);
+        Map<String, Multisign> resultMap = ChooseMultisignIdActivity.getSelectedMultisignMap(data);
         if (!resultMap.isEmpty()) {
             // Hide keyboard
             View currentFocus = getCurrentFocus();
@@ -710,11 +710,11 @@ public class CreateMultisignTxActivity extends BaseCryptoActivity {
                 imm.hideSoftInputFromWindow(currentFocus.getWindowToken(), 0);
             }
 
-            // Get the first (and only) P2SH from the map
-            P2SH selectedP2SH = resultMap.values().iterator().next();
-            // Set the P2SH input with the selected P2SH's ID
-            p2shInput.setText(selectedP2SH.getId());
-            rawTxInfo.setP2sh(selectedP2SH);
+            // Get the first (and only) Multisign from the map
+            Multisign selectedMultisign = resultMap.values().iterator().next();
+            // Set the Multisign input with the selected Multisign's ID
+            multisignInput.setText(selectedMultisign.getId());
+            rawTxInfo.setMultisign(selectedMultisign);
         }
     }
 

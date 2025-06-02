@@ -4,7 +4,7 @@ import com.fc.fc_ajdk.core.crypto.Hash;
 import com.fc.fc_ajdk.data.fcData.FcEntity;
 import com.fc.fc_ajdk.data.fcData.KeyInfo;
 import com.fc.fc_ajdk.data.fchData.Cash;
-import com.fc.fc_ajdk.data.fchData.P2SH;
+import com.fc.fc_ajdk.data.fchData.Multisign;
 import com.fc.fc_ajdk.data.fchData.RawTxForCsV1;
 import com.fc.fc_ajdk.data.fchData.SendTo;
 import com.fc.fc_ajdk.utils.FchUtils;
@@ -31,7 +31,7 @@ public class RawTxInfo extends FcEntity {
     private String changeTo;
     private Long lockTime;
     private Long cd;
-    private P2SH p2sh;
+    private Multisign multisign;
     private String ver;
     private KeyInfo senderInfo;
     private Long cdd;
@@ -43,16 +43,16 @@ public class RawTxInfo extends FcEntity {
 
     }
 
-    public RawTxInfo(byte[] rawTx, P2SH p2sh, List<Cash> inputs) {
+    public RawTxInfo(byte[] rawTx, Multisign multisign, List<Cash> inputs) {
 //        this.rawTx = rawTx;
-        this.p2sh = p2sh;
+        this.multisign = multisign;
         this.inputs = inputs;
         this.id = Hex.toHex(Hash.sha256x2(rawTx));
     }
 
     public RawTxInfo(byte[] rawTx, RawTxInfo rawTxInfo) {
 //        this.rawTx = rawTx;
-        this.p2sh = rawTxInfo.getP2sh();
+        this.multisign = rawTxInfo.getMultisign();
         this.inputs = rawTxInfo.getInputs();
         this.id = Hex.toHex(Hash.sha256x2(rawTx));
         this.feeRate = rawTxInfo.getFeeRate();
@@ -61,20 +61,20 @@ public class RawTxInfo extends FcEntity {
         this.lockTime = rawTxInfo.getLockTime();
     }
 
-    public RawTxInfo(String p2SHJson, String cashListJson) {
-        this.p2sh = new Gson().fromJson(p2SHJson, P2SH.class);
+    public RawTxInfo(String multisignJson, String cashListJson) {
+        this.multisign = new Gson().fromJson(multisignJson, Multisign.class);
         this.inputs = ObjectUtils.objectToList(cashListJson,Cash.class);//DataGetter.getCashList(cashList);
     }
 
 
-    public RawTxInfo(String sender, List<Cash> cashList, List<SendTo> sendToList, String opReturn, Long cd, Double feeRate, P2SH p2sh, String ver) {
+    public RawTxInfo(String sender, List<Cash> cashList, List<SendTo> sendToList, String opReturn, Long cd, Double feeRate, Multisign multisign, String ver) {
         super();
         this.sender = sender;
         this.setOutputs(sendToList);
         this.setOpReturn(opReturn);
         this.setCd(cd);
         this.setFeeRate(feeRate);
-        this.setP2sh(p2sh);
+        this.setMultisign(multisign);
         this.setVer(ver);
         this.setInputs(Cash.makeCashListForPay(cashList));
     }
@@ -119,8 +119,8 @@ public class RawTxInfo extends FcEntity {
 //    }
 
     @androidx.annotation.Nullable
-    public static Transaction createMultisignTx(RawTxInfo rawTxInfo, P2SH p2sh, MainNetParams mainNetwork) {
-        rawTxInfo.setP2sh(p2sh);
+    public static Transaction createMultisignTx(RawTxInfo rawTxInfo, Multisign multisign, MainNetParams mainNetwork) {
+        rawTxInfo.setMultisign(multisign);
         return TxCreator.createUnsignedTx(rawTxInfo, mainNetwork);
     }
 
@@ -152,12 +152,12 @@ public class RawTxInfo extends FcEntity {
         this.opReturn = opReturn;
     }
 
-    public P2SH getP2sh() {
-        return p2sh;
+    public Multisign getMultisign() {
+        return multisign;
     }
 
-    public void setP2sh(P2SH p2sh) {
-        this.p2sh = p2sh;
+    public void setMultisign(Multisign multisign) {
+        this.multisign = multisign;
     }
 
     public static RawTxInfo fromUserInput(BufferedReader br, @Nullable String sender) {

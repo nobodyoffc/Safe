@@ -10,7 +10,7 @@ import android.widget.Toast;
 import com.fc.fc_ajdk.core.fch.RawTxInfo;
 import com.fc.fc_ajdk.core.fch.TxCreator;
 import com.fc.fc_ajdk.data.fchData.MultisignTxDetail;
-import com.fc.fc_ajdk.data.fchData.P2SH;
+import com.fc.fc_ajdk.data.fchData.Multisign;
 import com.fc.fc_ajdk.data.fchData.SendTo;
 import com.fc.fc_ajdk.data.fcData.KeyInfo;
 import com.fc.fc_ajdk.utils.Hex;
@@ -94,7 +94,7 @@ public class SignMultisignTxActivity extends BaseCryptoActivity {
                     List<KeyInfo> selectedKeys = ChooseKeyInfoActivity.getSelectedKeyInfo(result.getData(), keyInfoManager);
                     if (selectedKeys != null && !selectedKeys.isEmpty()) {
                         KeyInfo chosenKeyInfo = selectedKeys.get(0);
-                        if (rawTxInfo.getP2sh().getFids().contains(chosenKeyInfo.getId())) {
+                        if (rawTxInfo.getMultisign().getFids().contains(chosenKeyInfo.getId())) {
                             byte[] priKeyBytes = chosenKeyInfo.decryptPrikey(ConfigureManager.getInstance().getSymkey());
                             if (priKeyBytes != null) {
                                 TxCreator.signSchnorrMultiSignTx(rawTxInfo, priKeyBytes);
@@ -207,9 +207,9 @@ public class SignMultisignTxActivity extends BaseCryptoActivity {
             return;
         }
         MultisignKeyCardManager keyCardManager = new MultisignKeyCardManager(this, fragmentContainer, false);
-        P2SH p2sh = new P2SH();
-        p2sh.setId(multisignTxDetail.getSender());
-        keyCardManager.addSenderKeyCard(p2sh);
+        Multisign multisign = new Multisign();
+        multisign.setId(multisignTxDetail.getSender());
+        keyCardManager.addSenderKeyCard(multisign);
     }
 
     private void setupCash() {

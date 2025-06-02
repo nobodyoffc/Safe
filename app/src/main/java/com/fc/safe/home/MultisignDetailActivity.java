@@ -10,7 +10,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.fc.fc_ajdk.data.fchData.P2SH;
+import com.fc.fc_ajdk.data.fchData.Multisign;
 import com.fc.fc_ajdk.data.fcData.KeyInfo;
 import com.fc.safe.SafeApplication;
 import com.fc.safe.R;
@@ -23,7 +23,7 @@ import java.util.List;
 
 public class MultisignDetailActivity extends BaseCryptoActivity {
     private static final String TAG = "MultisignDetailActivity";
-    private P2SH p2sh;
+    private Multisign multisign;
     private LinearLayout memberCardsContainer;
     private LinearLayout detailContainer;
     private Button createTxButton;
@@ -34,9 +34,9 @@ public class MultisignDetailActivity extends BaseCryptoActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Get P2SH from intent
-        p2sh = (P2SH) getIntent().getSerializableExtra("p2sh");
-        if (p2sh == null) {
+        // Get Multisign from intent
+        multisign = (Multisign) getIntent().getSerializableExtra("multisign");
+        if (multisign == null) {
             finish();
             return;
         }
@@ -77,9 +77,9 @@ public class MultisignDetailActivity extends BaseCryptoActivity {
 
         // Setup copy button
         copyButton.setOnClickListener(v -> {
-            String jsonString = p2sh.toNiceJson();
+            String jsonString = multisign.toNiceJson();
             ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-            ClipData clip = ClipData.newPlainText("P2SH JSON", jsonString);
+            ClipData clip = ClipData.newPlainText("Multisign JSON", jsonString);
             clipboard.setPrimaryClip(clip);
             Toast.makeText(this, getString(R.string.copied), SafeApplication.TOAST_LASTING).show();
         });
@@ -87,7 +87,7 @@ public class MultisignDetailActivity extends BaseCryptoActivity {
         // Setup delete button
         Button deleteButton = findViewById(R.id.deleteButton);
         deleteButton.setOnClickListener(v -> {
-            MultisignManager.getInstance(this.getApplicationContext()).removeMultisign(p2sh);
+            MultisignManager.getInstance(this.getApplicationContext()).removeMultisign(multisign);
             MultisignManager.getInstance(this.getApplicationContext()).commit();
             MultisignActivity.setNeedsRefresh(true);
             finish();
@@ -111,7 +111,7 @@ public class MultisignDetailActivity extends BaseCryptoActivity {
         keyCardManager = new KeyCardManager(this, keyCardList, null);
 
         // Create KeyInfo objects from pubKeys and add them to the card manager
-        List<String> pubKeys = p2sh.getPubKeys();
+        List<String> pubKeys = multisign.getPubKeys();
         if(pubKeys!=null && !pubKeys.isEmpty())
             for (String pubKey : pubKeys) {
                 KeyInfo keyInfo = new KeyInfo(null, pubKey);
@@ -121,7 +121,7 @@ public class MultisignDetailActivity extends BaseCryptoActivity {
 
     private void setupDetailFragment() {
         // Create and add detail fragment
-        DetailFragment detailFragment = DetailFragment.newInstance(p2sh, P2SH.class);
+        DetailFragment detailFragment = DetailFragment.newInstance(multisign, Multisign.class);
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.detailContainer, detailFragment)
                 .commit();
@@ -130,7 +130,7 @@ public class MultisignDetailActivity extends BaseCryptoActivity {
     private void setupCreateTxButton() {
         createTxButton.setOnClickListener(v -> {
             Intent intent = new Intent(this, CreateMultisignTxActivity.class);
-            intent.putExtra("p2sh", p2sh);
+            intent.putExtra("multisign", multisign);
             startActivity(intent);
         });
     }
@@ -142,7 +142,7 @@ public class MultisignDetailActivity extends BaseCryptoActivity {
 
         // Set click listeners
         deleteButton.setOnClickListener(v -> {
-            MultisignManager.getInstance(this.getApplicationContext()).removeMultisign(p2sh);
+            MultisignManager.getInstance(this.getApplicationContext()).removeMultisign(multisign);
             MultisignManager.getInstance(this.getApplicationContext()).commit();
             MultisignActivity.setNeedsRefresh(true);
             finish();
@@ -150,7 +150,7 @@ public class MultisignDetailActivity extends BaseCryptoActivity {
 
         createTxButton.setOnClickListener(v -> {
             Intent intent = new Intent(this, CreateMultisignTxActivity.class);
-            intent.putExtra("p2sh", p2sh);
+            intent.putExtra("multisign", multisign);
             startActivity(intent);
         });
     }

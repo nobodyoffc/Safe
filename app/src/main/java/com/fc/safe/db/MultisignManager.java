@@ -5,7 +5,7 @@ import static com.fc.fc_ajdk.constants.FieldNames.SAVE_TIME;
 import android.content.Context;
 import android.widget.Toast;
 
-import com.fc.fc_ajdk.data.fchData.P2SH;
+import com.fc.fc_ajdk.data.fchData.Multisign;
 import com.fc.fc_ajdk.db.LocalDB;
 import com.fc.fc_ajdk.utils.DateUtils;
 import com.fc.fc_ajdk.utils.TimberLogger;
@@ -16,14 +16,14 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * A singleton class to manage and share the P2SH database across activities.
- * This provides a centralized way to access the P2SH database from any activity.
+ * A singleton class to manage and share the Multisign database across activities.
+ * This provides a centralized way to access the Multisign database from any activity.
  */
 public class MultisignManager {
     private static final String TAG = "MultisignManager";
 
     private static MultisignManager instance;
-    private LocalDB<P2SH> multisignDB;
+    private LocalDB<Multisign> multisignDB;
 
     private MultisignManager() {
         // Private constructor to prevent direct instantiation
@@ -58,78 +58,78 @@ public class MultisignManager {
                 TimberLogger.e(TAG, "Error closing existing database: " + e.getMessage());
             }
         }
-        multisignDB = dbManager.getEntityDatabase(P2SH.class, LocalDB.SortType.BIRTH_ORDER, SAVE_TIME);
+        multisignDB = dbManager.getEntityDatabase(Multisign.class, LocalDB.SortType.BIRTH_ORDER, SAVE_TIME);
     }
 
     /**
-     * Gets the P2SH database.
+     * Gets the Multisign database.
      * 
-     * @return The P2SH database
+     * @return The Multisign database
      */
-    public LocalDB<P2SH> getMultisignDB() {
+    public LocalDB<Multisign> getMultisignDB() {
         return multisignDB;
     }
 
     /**
-     * Gets all P2SH objects from the database.
+     * Gets all Multisign objects from the database.
      * 
-     * @return A map of P2SH objects with their IDs as keys
+     * @return A map of Multisign objects with their IDs as keys
      */
-    public Map<String, P2SH> getAllMultisigns() {
+    public Map<String, Multisign> getAllMultisigns() {
         return multisignDB.getAll();
     }
 
     /**
-     * Gets a list of all P2SH objects from the database.
+     * Gets a list of all Multisign objects from the database.
      * 
-     * @return A list of all P2SH objects
+     * @return A list of all Multisign objects
      */
-    public List<P2SH> getAllMultisignList() {
+    public List<Multisign> getAllMultisignList() {
         return new ArrayList<>(multisignDB.getAll().values());
     }
 
     /**
-     * Gets a P2SH object by its ID.
+     * Gets a Multisign object by its ID.
      * 
-     * @param id The ID of the P2SH object to get
-     * @return The P2SH object, or null if not found
+     * @param id The ID of the Multisign object to get
+     * @return The Multisign object, or null if not found
      */
-    public P2SH getMultisignById(String id) {
+    public Multisign getMultisignById(String id) {
         return multisignDB.get(id);
     }
 
     /**
-     * Adds a P2SH object to the database.
+     * Adds a Multisign object to the database.
      * 
-     * @param script The redeem script to create and add P2SH
+     * @param script The redeem script to create and add Multisign
      */
     public void addMultisign(String script,Context context) {
-        P2SH p2sh = P2SH.parseP2shRedeemScript(script);
-        if(p2sh==null){
+        Multisign multisign = Multisign.parseMultisignRedeemScript(script);
+        if(multisign ==null){
             Toast.makeText(context,"Failed to parse script to multisign.",Toast.LENGTH_LONG).show();
             return;
         }
-        p2sh.setSaveTime(DateUtils.longToTime(System.currentTimeMillis(), DateUtils.TO_MINUTE));
-        multisignDB.put(p2sh.getId(), p2sh);
-        TimberLogger.i(TAG, "Added P2SH with ID: %s", p2sh.getId());
+        multisign.setSaveTime(DateUtils.longToTime(System.currentTimeMillis(), DateUtils.TO_MINUTE));
+        multisignDB.put(multisign.getId(), multisign);
+        TimberLogger.i(TAG, "Added Multisign with ID: %s", multisign.getId());
     }
 
     /**
-     * Removes a P2SH object from the database.
+     * Removes a Multisign object from the database.
      * 
-     * @param p2sh The P2SH object to remove
+     * @param multisign The Multisign object to remove
      */
-    public void removeMultisign(P2SH p2sh) {
-        multisignDB.remove(p2sh.getId());
+    public void removeMultisign(Multisign multisign) {
+        multisignDB.remove(multisign.getId());
     }
 
     /**
-     * Removes multiple P2SH objects from the database.
+     * Removes multiple Multisign objects from the database.
      * 
-     * @param p2shs The list of P2SH objects to remove
+     * @param multisigns The list of Multisign objects to remove
      */
-    public void removeMultisigns(List<P2SH> p2shs) {
-        multisignDB.remove(p2shs);
+    public void removeMultisigns(List<Multisign> multisigns) {
+        multisignDB.remove(multisigns);
     }
 
     /**
@@ -140,14 +140,14 @@ public class MultisignManager {
     }
 
     /**
-     * Gets a paginated list of P2SH objects.
+     * Gets a paginated list of Multisign objects.
      * 
      * @param pageSize The number of items per page
      * @param lastIndex The index of the last item from the previous page, or null for the first page
      * @param descending Whether to sort in descending order
-     * @return A list of P2SH objects for the requested page
+     * @return A list of Multisign objects for the requested page
      */
-    public List<P2SH> getPaginatedMultisigns(int pageSize, Long lastIndex, boolean descending) {
+    public List<Multisign> getPaginatedMultisigns(int pageSize, Long lastIndex, boolean descending) {
         if(multisignDB.getSortType().equals(LocalDB.SortType.NO_SORT)){
             TimberLogger.e(TAG, "getPaginatedMultisigns: The DB should been sorted.", SafeApplication.TOAST_LASTING);
             return null;
@@ -157,13 +157,13 @@ public class MultisignManager {
             pageSize, lastIndex, descending);
 
         // If we have items but pagination returns none, try without sorting
-        List<P2SH> result = multisignDB.getList(pageSize, null, lastIndex, true, null, null, false, descending);
+        List<Multisign> result = multisignDB.getList(pageSize, null, lastIndex, true, null, null, false, descending);
 
         TimberLogger.d(TAG, "getPaginatedMultisigns: Retrieved %d items", result != null ? result.size() : 0);
         if (result != null && !result.isEmpty()) {
-            for (P2SH p2sh : result) {
+            for (Multisign multisign : result) {
                 TimberLogger.d(TAG, "getPaginatedMultisigns: Retrieved Item ID: %s, SaveTime: %s", 
-                    p2sh.getId(), p2sh.getSaveTime());
+                    multisign.getId(), multisign.getSaveTime());
             }
         } else {
             TimberLogger.d(TAG, "getPaginatedMultisigns: No items retrieved");
@@ -172,17 +172,17 @@ public class MultisignManager {
     }
 
     /**
-     * Gets the index of a P2SH object by its ID.
+     * Gets the index of a Multisign object by its ID.
      * 
-     * @param id The ID of the P2SH object
-     * @return The index of the P2SH object
+     * @param id The ID of the Multisign object
+     * @return The index of the Multisign object
      */
     public Long getIndexById(String id) {
         return multisignDB.getIndexById(id);
     }
 
     /**
-     * Checks if a P2SH with the given ID already exists in the database.
+     * Checks if a Multisign with the given ID already exists in the database.
      * 
      * @param id The ID to check
      * @return true if the key exists, false otherwise

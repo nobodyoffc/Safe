@@ -8,6 +8,7 @@ import com.fc.fc_ajdk.core.crypto.Decryptor;
 import com.fc.fc_ajdk.core.fch.RawTxInfo;
 import com.fc.fc_ajdk.data.apipData.Fcdsl;
 import com.fc.fc_ajdk.data.apipData.Sort;
+import com.fc.fc_ajdk.data.fchData.Multisign;
 import com.fc.fc_ajdk.ui.Inputer;
 import com.fc.fc_ajdk.ui.Menu;
 import com.fc.fc_ajdk.config.Settings;
@@ -22,7 +23,6 @@ import com.fc.fc_ajdk.core.fch.FchMainNetwork;
 import com.fc.fc_ajdk.data.fchData.Cash;
 import com.fc.fc_ajdk.data.fchData.Cid;
 import com.fc.fc_ajdk.data.fchData.Nobody;
-import com.fc.fc_ajdk.data.fchData.P2SH;
 import com.fc.fc_ajdk.data.fchData.RawTxForCsV1;
 import com.fc.fc_ajdk.data.fchData.SendTo;
 import com.fc.fc_ajdk.data.fchData.TxHasInfo;
@@ -157,8 +157,8 @@ public class CashHandler extends Handler<Cash> {
     }
 
     public static void myMultiFids(String fid, ApipClient apipClient, BufferedReader br) {
-        List<P2SH> p2shList = apipClient.myP2SHs(fid);
-        if (p2shList == null || p2shList.isEmpty()) {
+        List<Multisign> multisignList = apipClient.myMultisigns(fid);
+        if (multisignList == null || multisignList.isEmpty()) {
             System.out.println("No multiSign address yet.");
             Menu.anyKeyToContinue(br);
             return;
@@ -166,17 +166,17 @@ public class CashHandler extends Handler<Cash> {
         System.out.println("\nMultisig addresses associated with your FID:");
         System.out.println("----------------------------------------------");
 
-        for (int i = 0; i < p2shList.size(); i++) {
-            P2SH p2sh = p2shList.get(i);
-            System.out.printf("%d. ID: %s\n", (i + 1), p2sh.getId());
+        for (int i = 0; i < multisignList.size(); i++) {
+            Multisign multisign = multisignList.get(i);
+            System.out.printf("%d. ID: %s\n", (i + 1), multisign.getId());
 
             // Display additional information if available
-            if (p2sh.getM() != null && p2sh.getN() != null) {
-                System.out.printf("   M of N: %d of %d\n", p2sh.getM(), p2sh.getN());
+            if (multisign.getM() != null && multisign.getN() != null) {
+                System.out.printf("   M of N: %d of %d\n", multisign.getM(), multisign.getN());
             }
 
-            if (p2sh.getFids() != null && !p2sh.getFids().isEmpty()) {
-                System.out.println("   Members: " + String.join(", ", p2sh.getFids()));
+            if (multisign.getFids() != null && !multisign.getFids().isEmpty()) {
+                System.out.println("   Members: " + String.join(", ", multisign.getFids()));
             }
 
             System.out.println();
@@ -302,25 +302,25 @@ public class CashHandler extends Handler<Cash> {
     public static void createTx(ApipClient apipClient, BufferedReader br) {
 
         String fid = inputGoodFid(br, "Input the multisig fid:");
-        P2SH p2sh;
-        Map<String, P2SH> p2shMap = apipClient.p2shByIds(RequestMethod.POST, AuthType.FC_SIGN_BODY, fid);
-        if (p2shMap == null || p2shMap.get(fid)==null) {
+        Multisign multisign;
+        Map<String, Multisign> multisignMap = apipClient.multisignByIds(RequestMethod.POST, AuthType.FC_SIGN_BODY, fid);
+        if (multisignMap == null || multisignMap.get(fid)==null) {
             System.out.println(fid + " is not found.");
-            if(Inputer.askIfYes(br,"Input the P2SH or the redeem script?")){
+            if(Inputer.askIfYes(br,"Input the Multisign or the redeem script?")){
                 String redeem = Inputer.inputStringMultiLine(br);
                 try {
                     if (Hex.isHexString(redeem)) {
-                        p2sh = P2SH.parseP2shRedeemScript(redeem);
-                    } else p2sh = P2SH.fromJson(redeem, P2SH.class);
+                        multisign = Multisign.parseMultisignRedeemScript(redeem);
+                    } else multisign = Multisign.fromJson(redeem, Multisign.class);
                 }catch (Exception e){
                     System.out.println("Failed to import multisig FID information:"+e.getMessage());
                     Menu.anyKeyToContinue(br);
                     return;
                 }
             }else return;
-        }else p2sh = p2shMap.get(fid);
+        }else multisign = multisignMap.get(fid);
 
-        System.out.println(JsonUtils.toNiceJson(p2sh));
+        System.out.println(JsonUtils.toNiceJson(multisign));
 
         List<SendTo> sendToList = SendTo.inputSendToList(br);
         String msg = Inputer.inputString(br, "Input the message for OpReturn. Enter to ignore:");
@@ -343,15 +343,15 @@ public class CashHandler extends Handler<Cash> {
             Menu.anyKeyToContinue(br);
             return;
         }
-        Transaction transaction = TxCreator.createUnsignedTx(cashList, sendToList, msg, p2sh, DEFAULT_FEE_RATE, null, org.bitcoinj.fch.FchMainNetwork.MAINNETWORK);
+        Transaction transaction = TxCreator.createUnsignedTx(cashList, sendToList, msg, multisign, DEFAULT_FEE_RATE, null, org.bitcoinj.fch.FchMainNetwork.MAINNETWORK);
         if(transaction==null){
             System.out.println("Failed to create unsigned TX.");
             Menu.anyKeyToContinue(br);
             return;
         }
-        RawTxInfo multiSignData = new RawTxInfo(transaction.bitcoinSerialize(), p2sh, cashList);
+        RawTxInfo multiSignData = new RawTxInfo(transaction.bitcoinSerialize(), multisign, cashList);
 
-        CryptoSign.showMultiUnsignedResult(br, p2sh, multiSignData);
+        CryptoSign.showMultiUnsignedResult(br, multisign, multiSignData);
     }
 
     public static void createFid(ApipClient apipClient, BufferedReader br) {
@@ -379,14 +379,14 @@ public class CashHandler extends Handler<Cash> {
             pubkeyList.add(Hex.fromHex(pubkey));
         }
 
-        P2SH p2SH = TxCreator.createP2sh(pubkeyList, m);
+        Multisign multisign = TxCreator.createMultisign(pubkeyList, m);
 
         Shower.printUnderline(10);
-        System.out.println("The multisign information is: \n" + JsonUtils.toNiceJson(p2SH));
+        System.out.println("The multisign information is: \n" + JsonUtils.toNiceJson(multisign));
 
         Shower.printUnderline(10);
-        if (p2SH == null) return;
-        String fid = p2SH.getId();
+        if (multisign == null) return;
+        String fid = multisign.getId();
         System.out.println("Your multisign FID: \n" + fid);
         Shower.printUnderline(10);
         Menu.anyKeyToContinue(br);
@@ -400,24 +400,24 @@ public class CashHandler extends Handler<Cash> {
             return;
         }
         System.out.println("Requesting APIP from " + apipClient.getUrlHead());
-        Map<String, P2SH> p2shMap = apipClient.p2shByIds(RequestMethod.POST, AuthType.FC_SIGN_BODY, fid);
-        if(p2shMap==null || p2shMap.isEmpty()){
+        Map<String, Multisign> multisignMap = apipClient.multisignByIds(RequestMethod.POST, AuthType.FC_SIGN_BODY, fid);
+        if(multisignMap==null || multisignMap.isEmpty()){
             System.out.println("The redeem script of this multisig FID hasn't been shown on chain.");
             return;
         }
-        P2SH p2sh = p2shMap.get(fid);
+        Multisign multisign = multisignMap.get(fid);
 
-        if (p2sh == null) {
+        if (multisign == null) {
             System.out.println(fid + " is not found.");
             return;
         }
         Shower.printUnderline(10);
-        System.out.println("Multisig:");
-        System.out.println(JsonUtils.toNiceJson(p2sh));
+        System.out.println("Multisign:");
+        System.out.println(JsonUtils.toNiceJson(multisign));
         Shower.printUnderline(10);
         System.out.println("The members:");
 
-        Map<String, Cid> cidInfoMap = apipClient.cidByIds(RequestMethod.POST, AuthType.FC_SIGN_BODY, p2sh.getFids().toArray(new String[0]));
+        Map<String, Cid> cidInfoMap = apipClient.cidByIds(RequestMethod.POST, AuthType.FC_SIGN_BODY, multisign.getFids().toArray(new String[0]));
         if (cidInfoMap == null) {
             return;
         }
@@ -426,11 +426,11 @@ public class CashHandler extends Handler<Cash> {
         Menu.anyKeyToContinue(br);
     }
 
-    public static String makeOffLineTx(String sender, List<Cash> cashList, List<SendTo> sendToList, Long cd, String msg, Double feeRate, P2SH p2sh, String ver, @org.jetbrains.annotations.Nullable BufferedReader br) {
+    public static String makeOffLineTx(String sender, List<Cash> cashList, List<SendTo> sendToList, Long cd, String msg, Double feeRate, Multisign multisign, String ver, @org.jetbrains.annotations.Nullable BufferedReader br) {
         String signedTx;
         if(cashList!=null) cashList = Cash.makeCashListForPay(cashList);
 
-        RawTxInfo txInfo = new RawTxInfo(sender, cashList, sendToList,msg,cd, feeRate,p2sh ,ver);
+        RawTxInfo txInfo = new RawTxInfo(sender, cashList, sendToList,msg,cd, feeRate, multisign,ver);
         String txJson = txInfo.toNiceJson();
         System.out.println("Unsigned TX: \n--------\n" + txJson + "\n--------");
         QRCodeUtils.generateQRCode(txJson);
@@ -1014,10 +1014,10 @@ public class CashHandler extends Handler<Cash> {
      * @param sendToList if null, input sendToList.
      * @param opReturn   if null, input opReturn.
      * @param br         if null, no input and prompt.
-     * @param p2SH
+     * @param multisign
      * @return the sent txid, unsigned rawTx or null if failed.
      */
-    public String send(@Nullable List<Cash> cashList, @Nullable Double amount, @Nullable Long cd, @Nullable List<SendTo> sendToList, @Nullable String opReturn, Double feeRate, String changeTo, MainNetParams mainNetParams, @Nullable BufferedReader br, P2SH p2SH){
+    public String send(@Nullable List<Cash> cashList, @Nullable Double amount, @Nullable Long cd, @Nullable List<SendTo> sendToList, @Nullable String opReturn, Double feeRate, String changeTo, MainNetParams mainNetParams, @Nullable BufferedReader br, Multisign multisign){
         TxResultType resultType = TxResultType.NULL;
         if(feeRate==null)feeRate=DEFAULT_FEE_RATE;
         List<Cash> meetList;
@@ -1028,7 +1028,7 @@ public class CashHandler extends Handler<Cash> {
             meetList = getCashesForSend(amount, cd, sendToList==null ? 0 : sendToList.size(), opReturnSize);
             if(meetList==null || meetList.isEmpty()){
                 System.out.println("Can't get the valid cash list to make the TX");
-                RawTxInfo rawTxInfo = new RawTxInfo(mainFid, null, sendToList, opReturn, cd, feeRate, p2SH, "2");
+                RawTxInfo rawTxInfo = new RawTxInfo(mainFid, null, sendToList, opReturn, cd, feeRate, multisign, "2");
                 String result = rawTxInfo.toNiceJson();
                 resultType= TxResultType.TX_WITHOUT_INPUTS;
                 return resultType.addTypeAheadResult(result);
@@ -1063,11 +1063,11 @@ public class CashHandler extends Handler<Cash> {
         String result;
         
         if(prikey ==null){
-            RawTxInfo rawTxInfo = new RawTxInfo(mainFid, meetList, sendToList,opReturn,cd,feeRate,p2SH,"2");
+            RawTxInfo rawTxInfo = new RawTxInfo(mainFid, meetList, sendToList,opReturn,cd,feeRate, multisign,"2");
             resultType = TxResultType.UNSIGNED_JSON;
             result = rawTxInfo.toNiceJson();
         }else {
-            String signedTx = signTx(meetList, sendToList, opReturn, p2SH, feeRate, changeTo, mainNetParams);
+            String signedTx = signTx(meetList, sendToList, opReturn, multisign, feeRate, changeTo, mainNetParams);
 
             if (nasaClient != null) {
                 result = nasaClient.sendRawTransaction(signedTx);
@@ -1139,13 +1139,13 @@ public class CashHandler extends Handler<Cash> {
         cid.setCash(cashCount-meetList.size());
     }
 
-    public String signTx(@org.jetbrains.annotations.Nullable List<Cash> cashList, @org.jetbrains.annotations.Nullable List<SendTo> sendToList, @org.jetbrains.annotations.Nullable String opReturn, P2SH p2SH, Double feeRate, String changeToFid, MainNetParams mainNetParams) {
-        Transaction transaction = TxCreator.createUnsignedTx(cashList, sendToList, opReturn, p2SH, feeRate, changeToFid, mainNetParams);
+    public String signTx(@org.jetbrains.annotations.Nullable List<Cash> cashList, @org.jetbrains.annotations.Nullable List<SendTo> sendToList, @org.jetbrains.annotations.Nullable String opReturn, Multisign multisign, Double feeRate, String changeToFid, MainNetParams mainNetParams) {
+        Transaction transaction = TxCreator.createUnsignedTx(cashList, sendToList, opReturn, multisign, feeRate, changeToFid, mainNetParams);
         if(transaction == null)return null;
         return TxCreator.signTx(prikey, transaction);
     }
 
-    public double calcRestAmount(List<Cash> cashList, List<SendTo> sendToList, int opReturnSize, Double feeRate, boolean isMultiSign, P2SH p2sh){
+    public double calcRestAmount(List<Cash> cashList, List<SendTo> sendToList, int opReturnSize, Double feeRate, boolean isMultiSign, Multisign multisign){
         if(feeRate==null)feeRate = DEFAULT_FEE_RATE;
         int sendSize=0;
         if(sendToList!=null)sendSize = sendToList.size();
@@ -1158,16 +1158,16 @@ public class CashHandler extends Handler<Cash> {
             }
         }
 
-        return calcRestAmount(cashList.size(), cashAmountSum, sendToAmountSum, sendSize, opReturnSize, feeRate, isMultiSign, p2sh);
+        return calcRestAmount(cashList.size(), cashAmountSum, sendToAmountSum, sendSize, opReturnSize, feeRate, isMultiSign, multisign);
     }
 
-    public double calcRestAmount(int cashListSize, double cashAmountSum, double outPutSum, int sendToListSize, int opReturnSize, Double feeRate, boolean isMultiSign, P2SH p2sh) {
-        this.lastFee = TxCreator.calcFee(cashListSize, sendToListSize, opReturnSize, feeRate, isMultiSign, p2sh);
+    public double calcRestAmount(int cashListSize, double cashAmountSum, double outPutSum, int sendToListSize, int opReturnSize, Double feeRate, boolean isMultiSign, Multisign multisign) {
+        this.lastFee = TxCreator.calcFee(cashListSize, sendToListSize, opReturnSize, feeRate, isMultiSign, multisign);
         double feeCoin = FchUtils.satoshiToCoin(lastFee);
         return NumberUtils.roundDouble8(cashAmountSum-feeCoin-outPutSum);
     }
 
-//    public static double calcRestAmount(List<Cash> cashList, List<SendTo> sendToList, int opReturnSize, Double feeRate, boolean isMultiSign, P2SH p2sh) {
+//    public static double calcRestAmount(List<Cash> cashList, List<SendTo> sendToList, int opReturnSize, Double feeRate, boolean isMultiSign, Multisign p2sh) {
 //        double cashAmountSum = Cash.sumCashAmount(cashList);
 //
 //        double sendToAmountSum = 0;
@@ -1187,12 +1187,12 @@ public class CashHandler extends Handler<Cash> {
 //        return NumberUtils.roundDouble8(cashAmountSum-feeCoin-sendToAmountSum);
 //    }
 
-    public long calcFee(List<Cash> cashList, List<SendTo> sendToList, int opReturnSize, Double feeRate, boolean isMultiSign, P2SH p2sh){
+    public long calcFee(List<Cash> cashList, List<SendTo> sendToList, int opReturnSize, Double feeRate, boolean isMultiSign, Multisign multisign){
         if(feeRate==null)feeRate = DEFAULT_FEE_RATE;
         int sendSize=0;
         if(sendToList!=null)sendSize = sendToList.size();
 
-        this.lastFee = TxCreator.calcFee(cashList.size(), sendSize, opReturnSize, feeRate, isMultiSign, p2sh);
+        this.lastFee = TxCreator.calcFee(cashList.size(), sendSize, opReturnSize, feeRate, isMultiSign, multisign);
         return this.lastFee;
     }
 

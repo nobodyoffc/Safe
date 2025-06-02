@@ -3,6 +3,7 @@ package com.fc.fc_ajdk.core.fch;
 import com.fc.fc_ajdk.clients.ApipClient;
 import com.fc.fc_ajdk.config.ApiAccount;
 import com.fc.fc_ajdk.data.fcData.AlgorithmId;
+import com.fc.fc_ajdk.data.fchData.Multisign;
 import com.fc.fc_ajdk.data.fchData.SendTo;
 import org.bitcoinj.fch.FchMainNetwork;
 import com.fc.fc_ajdk.utils.http.AuthType;
@@ -14,7 +15,6 @@ import com.fc.fc_ajdk.core.crypto.KeyTools;
 import com.fc.fc_ajdk.utils.Hex;
 import com.fc.fc_ajdk.core.crypto.Hash;
 import com.fc.fc_ajdk.data.fchData.Cash;
-import com.fc.fc_ajdk.data.fchData.P2SH;
 import com.fc.fc_ajdk.data.fcData.Signature;
 import com.fc.fc_ajdk.utils.BytesUtils;
 import com.fc.fc_ajdk.utils.JsonUtils;
@@ -77,9 +77,9 @@ public class TxTest {
         pubkeyList.add(Hex.fromHex(pubkeyB));
         pubkeyList.add(Hex.fromHex(pubkeyC));
 
-        P2SH p2SH = createP2sh(pubkeyList, 2);
-        if(p2SH==null)return;
-        String mFid = p2SH.getId();
+        Multisign multisign = createMultisign(pubkeyList, 2);
+        if(multisign ==null)return;
+        String mFid = multisign.getId();
 
         System.out.println("Multisig address:" + mFid);
         //Get multisig address information
@@ -89,10 +89,10 @@ public class TxTest {
         apipClient.setUrlHead(urlHead);
         apipClient.setSessionKey(sessionKey);
         String id = mFid;
-        Map<String, P2SH> p2SHMap = apipClient.p2shByIds(RequestMethod.POST,AuthType.FC_SIGN_BODY,mFid);
-        if(p2SHMap==null)return;
-        P2SH p2sh = p2SHMap.get(mFid);
-        JsonUtils.printJson(p2sh);
+        Map<String, Multisign> multisignMap = apipClient.multisignByIds(RequestMethod.POST,AuthType.FC_SIGN_BODY,mFid);
+        if(multisignMap==null)return;
+        multisign = multisignMap.get(mFid);
+        JsonUtils.printJson(multisign);
 
         //Get cashes of the multisig address
 
@@ -115,13 +115,13 @@ public class TxTest {
         JsonUtils.printJson(cashList);
 
         //Make raw tx
-        Transaction transaction = createUnsignedTx(cashList, sendToList, msg, p2sh, DEFAULT_FEE_RATE, null, FchMainNetwork.MAINNETWORK);
+        Transaction transaction = createUnsignedTx(cashList, sendToList, msg, multisign, DEFAULT_FEE_RATE, null, FchMainNetwork.MAINNETWORK);
         byte[] txBytes = transaction.bitcoinSerialize();
         System.out.println(Hex.toHex(txBytes));
         Shower.printUnderline(10);
         //Sign raw tx
-        byte[] redeemScript = Hex.fromHex(p2sh.getRedeemScript());
-        RawTxInfo multiSignData = new RawTxInfo(txBytes, p2sh, cashList);
+        byte[] redeemScript = Hex.fromHex(multisign.getRedeemScript());
+        RawTxInfo multiSignData = new RawTxInfo(txBytes, multisign, cashList);
 
         RawTxInfo multiSignDataA = signSchnorrMultiSignTx(multiSignData, prikeyBytesA, FchMainNetwork.MAINNETWORK);
         RawTxInfo multiSignDataB = signSchnorrMultiSignTx(multiSignData, prikeyBytesB, FchMainNetwork.MAINNETWORK);
@@ -146,7 +146,7 @@ public class TxTest {
         }
         Shower.printUnderline(10);
         //build signed tx
-        String signedTx = buildSchnorrMultiSignTx(txBytes, sigAll, p2sh, FchMainNetwork.MAINNETWORK);
+        String signedTx = buildSchnorrMultiSignTx(txBytes, sigAll, multisign, FchMainNetwork.MAINNETWORK);
 
         System.out.println(signedTx);
 

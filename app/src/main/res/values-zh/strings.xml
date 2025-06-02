@@ -151,7 +151,7 @@
     <string name="import_tx">导入</string>
     <string name="add">添加</string>
     <string name="input_the_text_carved_on_chain">输入要刻在链上的文本</string>
-    <string name="sender_from_script_or_p2sh">多签地址的Script或P2SH</string>
+    <string name="sender_from_script_or_multisign">多签地址的Script或P2SH</string>
     <string name="add_cash_to_spend">添加现钞</string>
     <string name="please_input_required_signer_number">请输入必需的签名数量</string>
     <string name="invalid_signer_number">输入签名者总人数</string>

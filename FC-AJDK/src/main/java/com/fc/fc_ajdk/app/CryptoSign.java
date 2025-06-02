@@ -7,6 +7,7 @@ import com.fc.fc_ajdk.config.Starter;
 import com.fc.fc_ajdk.core.crypto.EncryptType;
 import com.fc.fc_ajdk.data.fcData.KeyInfo;
 
+import com.fc.fc_ajdk.data.fchData.Multisign;
 import com.fc.fc_ajdk.ui.AndroidMenu;
 import com.fc.fc_ajdk.config.Configure;
 import com.fc.fc_ajdk.config.Settings;
@@ -25,7 +26,6 @@ import com.fc.fc_ajdk.data.fcData.AlgorithmId;
 import com.fc.fc_ajdk.data.fcData.FcEntity;
 import com.fc.fc_ajdk.data.fcData.SecretDetail;
 import com.fc.fc_ajdk.data.fcData.Signature;
-import com.fc.fc_ajdk.data.fchData.P2SH;
 import com.fc.fc_ajdk.data.fchData.RawTxForCsV1;
 import com.fc.fc_ajdk.ui.Inputer;
 import com.fc.fc_ajdk.ui.Menu;
@@ -1637,14 +1637,14 @@ public class CryptoSign extends FcApp {
         if("".equals(offLineTx))
             rawTxInfo = RawTxInfo.fromUserInput(br,null);
         else rawTxInfo = RawTxInfo.fromString(offLineTx);
-        P2SH p2sh;
+        Multisign multisign;
 
         while(true) {
             String redeemScriptStr = Inputer.inputString(br, "Input the redeem script. Enter to exit:");
             if("".equals(redeemScriptStr))return;
             try {
-                p2sh = P2SH.parseP2shRedeemScript(redeemScriptStr);
-                if(p2sh==null){
+                multisign = Multisign.parseMultisignRedeemScript(redeemScriptStr);
+                if(multisign ==null){
                     System.out.println("Failed to parse redeemScript. Try again.");
                     continue;
                 }
@@ -1652,13 +1652,13 @@ public class CryptoSign extends FcApp {
                 System.out.println("Invalid redeem script.");
                 continue;
             }
-            System.out.println("MultiSign Info:\n"+ JsonUtils.toNiceJson(p2sh));
+            System.out.println("MultiSign Info:\n"+ JsonUtils.toNiceJson(multisign));
             break;
         }
         if(rawTxInfo ==null)return;
-        rawTxInfo.setP2sh(p2sh);
+        rawTxInfo.setMultisign(multisign);
 
-        Transaction transaction = RawTxInfo.createMultisignTx(rawTxInfo, p2sh, mainnetwork);
+        Transaction transaction = RawTxInfo.createMultisignTx(rawTxInfo, multisign, mainnetwork);
         if(transaction==null){
             System.out.println("Create unsigned tx failed.");
             return;
@@ -1667,7 +1667,7 @@ public class CryptoSign extends FcApp {
 
 //        RawTxInfo multiSignData = new RawTxInfo(rawTx, rawTxInfo);
 
-        showMultiUnsignedResult(br, p2sh, rawTxInfo);
+        showMultiUnsignedResult(br, multisign, rawTxInfo);
 
         if(askIfYes(br,"Would you sign it?")){
             do {
@@ -1688,7 +1688,7 @@ public class CryptoSign extends FcApp {
         Shower.printUnderline(10);
     }
 
-    public static void showMultiUnsignedResult(BufferedReader br, P2SH p2sh, RawTxInfo multiSignData) {
+    public static void showMultiUnsignedResult(BufferedReader br, Multisign multisign, RawTxInfo multiSignData) {
         System.out.println("Multisign data unsigned:");
         Shower.printUnderline(10);
         String unsignedJson = multiSignData.toNiceJson();
@@ -1699,7 +1699,7 @@ public class CryptoSign extends FcApp {
 
         System.out.println("Next step: sign it separately with the prikeys of: ");
         Shower.printUnderline(10);
-        for (String fid1 : p2sh.getFids()) System.out.println(fid1);
+        for (String fid1 : multisign.getFids()) System.out.println(fid1);
         Shower.printUnderline(10);
         Menu.anyKeyToContinue(br);
     }
@@ -1725,17 +1725,17 @@ public class CryptoSign extends FcApp {
             pubkeyList.add(Hex.fromHex(pubkeyString));
         }
 
-        P2SH p2SH = TxCreator.createP2sh(pubkeyList, m);
+        Multisign multisign = TxCreator.createMultisign(pubkeyList, m);
 
         Shower.printUnderline(10);
-        System.out.println("The multisig information is: \n" + JsonUtils.toNiceJson(p2SH));
+        System.out.println("The multisig information is: \n" + JsonUtils.toNiceJson(multisign));
         System.out.println("It's generated from :");
         for (String pubkeyString : pubkeyStringList) {
             System.out.println(KeyTools.pubkeyToFchAddr(pubkeyString));
         }
         Shower.printUnderline(10);
-        if(p2SH==null)return;
-        String fid = p2SH.getId();
+        if(multisign ==null)return;
+        String fid = multisign.getId();
         System.out.println("Your multisig FID: \n" + fid);
         Shower.printUnderline(10);
         Menu.anyKeyToContinue(br);
@@ -1765,21 +1765,21 @@ public class CryptoSign extends FcApp {
     }
 
     public static void showFid(BufferedReader br) {
-        P2SH p2sh = inputP2SH(br);
+        Multisign multisign = inputMultisign(br);
         Shower.printUnderline(10);
         System.out.println("Multisig:");
-        System.out.println(JsonUtils.toNiceJson(p2sh));
+        System.out.println(JsonUtils.toNiceJson(multisign));
         Shower.printUnderline(10);
         Menu.anyKeyToContinue(br);
     }
 
     @Nullable
-    private static P2SH inputP2SH(BufferedReader br) {
+    private static Multisign inputMultisign(BufferedReader br) {
         String redeemScript = Inputer.inputString(br, "Input the redeem script of the multisig FID:");
         if(redeemScript==null) return null;
-        P2SH p2sh;
-        p2sh = P2SH.parseP2shRedeemScript(redeemScript);
-        return p2sh;
+        Multisign multisign;
+        multisign = Multisign.parseMultisignRedeemScript(redeemScript);
+        return multisign;
     }
 
     public void pubkeyConvert(BufferedReader br) {

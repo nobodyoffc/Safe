@@ -13,7 +13,7 @@ import androidx.fragment.app.Fragment;
 
 import com.fc.fc_ajdk.core.fch.RawTxInfo;
 import com.fc.fc_ajdk.data.fchData.MultisignTxDetail;
-import com.fc.fc_ajdk.data.fchData.P2SH;
+import com.fc.fc_ajdk.data.fchData.Multisign;
 import com.fc.fc_ajdk.data.fchData.SendTo;
 import com.fc.fc_ajdk.data.fcData.KeyInfo;
 import com.fc.safe.R;
@@ -70,9 +70,9 @@ public class MultisignTxDetailFragment extends Fragment {
             return;
         }
         MultisignKeyCardManager keyCardManager = new MultisignKeyCardManager(getContext(), senderContainer, false);
-        P2SH p2sh = new P2SH();
-        p2sh.setId(multisignTxDetail.getSender());
-        keyCardManager.addSenderKeyCard(p2sh);
+        Multisign multisign = new Multisign();
+        multisign.setId(multisignTxDetail.getSender());
+        keyCardManager.addSenderKeyCard(multisign);
     }
 
     private void setupCash() {

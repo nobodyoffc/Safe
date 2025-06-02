@@ -27,22 +27,22 @@ public class MultisignTxDetail extends FcObject {
     public static MultisignTxDetail fromMultiSigData(RawTxInfo rawTxInfo, Context context){
         MultisignTxDetail multisignTxDetail = new MultisignTxDetail();
 
-        P2SH p2Sh = rawTxInfo.getP2sh();
-        if(p2Sh==null){
-            Toast.makeText(context,"P2SH can't be null.",Toast.LENGTH_LONG).show();
+        Multisign multisign = rawTxInfo.getMultisign();
+        if(multisign ==null){
+            Toast.makeText(context,"Multisign can't be null.",Toast.LENGTH_LONG).show();
             return null;
         }
-        if(p2Sh.getId()==null){
-            Toast.makeText(context,"The FID of P2SH can't be null.",Toast.LENGTH_LONG).show();
+        if(multisign.getId()==null){
+            Toast.makeText(context,"The FID of Multisign can't be null.",Toast.LENGTH_LONG).show();
             return null;
         }
-        multisignTxDetail.setSender(p2Sh.getId());
+        multisignTxDetail.setSender(multisign.getId());
         multisignTxDetail.setCashIdAmountMap(new HashMap<>());
 
         multisignTxDetail.setSendToList(rawTxInfo.getOutputs());
         multisignTxDetail.setOpReturn(rawTxInfo.getOpReturn());
-        multisignTxDetail.setmOfN(p2Sh.getM() + "/"+ p2Sh.getN());
-        multisignTxDetail.setUnSignedFidList(new ArrayList<>(rawTxInfo.getP2sh().getFids()));
+        multisignTxDetail.setmOfN(multisign.getM() + "/"+ multisign.getN());
+        multisignTxDetail.setUnSignedFidList(new ArrayList<>(rawTxInfo.getMultisign().getFids()));
 
         Map<String, List<String>> fidSigMap = rawTxInfo.getFidSigMap();
         if(fidSigMap != null && !fidSigMap.isEmpty()) {
@@ -51,9 +51,9 @@ public class MultisignTxDetail extends FcObject {
             multisignTxDetail.getUnSignedFidList().removeAll(multisignTxDetail.getSignedFidList());
         }
 
-        int restSignNum = p2Sh.getM();
+        int restSignNum = multisign.getM();
         if(fidSigMap!=null && !fidSigMap.isEmpty())
-            for(String fid:p2Sh.getFids()){
+            for(String fid: multisign.getFids()){
                 if(fidSigMap.get(fid)!=null)restSignNum--;
                 if(restSignNum==0)break;
             }

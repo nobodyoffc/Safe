@@ -23,7 +23,7 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import com.fc.fc_ajdk.core.crypto.KeyTools;
 import com.fc.fc_ajdk.core.fch.TxCreator;
 import com.fc.fc_ajdk.data.fcData.KeyInfo;
-import com.fc.fc_ajdk.data.fchData.P2SH;
+import com.fc.fc_ajdk.data.fchData.Multisign;
 import com.fc.fc_ajdk.utils.DateUtils;
 import com.fc.fc_ajdk.utils.Hex;
 import com.fc.fc_ajdk.utils.StringUtils;
@@ -333,7 +333,7 @@ public class CreateMultisignIdActivity extends BaseCryptoActivity {
         }
         
         try {
-            // Create P2SH
+            // Create Multisign
             List<byte[]> pubkeyList = new ArrayList<>();
             for (KeyInfo keyInfo : memberList) {
                 if(keyInfo.getPubkey()==null){
@@ -343,16 +343,16 @@ public class CreateMultisignIdActivity extends BaseCryptoActivity {
                 pubkeyList.add(Hex.fromHex(keyInfo.getPubkey()));
             }
             
-            P2SH p2sh = TxCreator.createP2sh(pubkeyList, signerNumber);
-            if(p2sh==null){
+            Multisign multisign = TxCreator.createMultisign(pubkeyList, signerNumber);
+            if(multisign ==null){
                 showToast("Failed to create multisign ID.");
                 return;
             }
             // Set save time before adding to database
-            p2sh.setSaveTime(DateUtils.longToTime(System.currentTimeMillis(), DateUtils.TO_MINUTE));
+            multisign.setSaveTime(DateUtils.longToTime(System.currentTimeMillis(), DateUtils.TO_MINUTE));
             
             // Show label dialog
-            showLabelDialog(p2sh);
+            showLabelDialog(multisign);
         } catch (Exception e) {
             String errorMessage = "Failed to create multisign ID: " + e.getMessage();
             showToast(errorMessage);
@@ -360,7 +360,7 @@ public class CreateMultisignIdActivity extends BaseCryptoActivity {
         }
     }
 
-    private void showLabelDialog(P2SH p2sh) {
+    private void showLabelDialog(Multisign multisign) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Enter Label for Multisign ID");
         
@@ -371,17 +371,17 @@ public class CreateMultisignIdActivity extends BaseCryptoActivity {
         EditText labelInput = dialogView.findViewById(R.id.label_input);
         ProgressBar progressBar = dialogView.findViewById(R.id.progress_bar);
         
-        idTextView.setText(p2sh.getId());
+        idTextView.setText(multisign.getId());
         
         builder.setPositiveButton("OK", (dialog, which) -> {
             String label = labelInput.getText().toString().trim();
             if (!label.isEmpty()) {
-                p2sh.setLabel(label);
+                multisign.setLabel(label);
             }
             
             try {
                 // Add to database
-                multisignManager.getMultisignDB().put(p2sh.getId(), p2sh);
+                multisignManager.getMultisignDB().put(multisign.getId(), multisign);
                 multisignManager.commit();
                 
                 dialog.dismiss();

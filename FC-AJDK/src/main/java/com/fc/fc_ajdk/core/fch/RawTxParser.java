@@ -213,7 +213,7 @@ public class RawTxParser {
                     newCash.setValid(false);
                 }
                 case OP_HASH160 -> {
-                    newCash.setType("P2SH");
+                    newCash.setType("Multisign");
                     newCash.setLockScript(BytesUtils.bytesToHexStringBE(bScript));
                     byte[] hash160Bytes1 = Arrays.copyOfRange(bScript, 2, 22);
                     newCash.setOwner(KeyTools.hash160ToMultiAddr(hash160Bytes1));
@@ -408,7 +408,7 @@ public class RawTxParser {
                     newCash.setValid(false);
                 }
                 case OP_HASH160 -> {
-                    newCash.setType("P2SH");
+                    newCash.setType("Multisign");
                     newCash.setLockScript(BytesUtils.bytesToHexStringBE(bScript));
                     byte[] hash160Bytes1 = Arrays.copyOfRange(bScript, 2, 22);
                     newCash.setOwner(KeyTools.hash160ToMultiAddr(hash160Bytes1));

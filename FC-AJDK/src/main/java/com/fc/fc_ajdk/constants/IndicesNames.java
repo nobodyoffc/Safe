@@ -11,7 +11,7 @@ public class IndicesNames {
     public static final String CASH = "cash";
     public static final String OPRETURN = "opreturn";
     public static final String ADDRESS = "address";
-    public static final String P2SH = "p2sh";
+    public static final String MULTISIGN = "multisign";
     public static final String BLOCK_MARK = "block_mark";
     public static final String CID = "cid";
     public static final String CID_HISTORY = "cid_history";
@@ -69,7 +69,7 @@ public class IndicesNames {
         CASH(IndicesNames.CASH,5),
         OPRETURN(IndicesNames.OPRETURN,6),
         ADDRESS(IndicesNames.CID,7),
-        P2SH(IndicesNames.P2SH,8),
+        Multisign(IndicesNames.MULTISIGN,8),
         BLOCK_MARK(IndicesNames.BLOCK_MARK,9),
 
         CID(IndicesNames.CID,10),

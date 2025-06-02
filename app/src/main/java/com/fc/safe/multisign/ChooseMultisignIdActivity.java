@@ -9,7 +9,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.fc.fc_ajdk.data.fchData.P2SH;
+import com.fc.fc_ajdk.data.fchData.Multisign;
 import com.fc.fc_ajdk.utils.JsonUtils;
 import com.fc.fc_ajdk.utils.TimberLogger;
 import com.fc.safe.R;
@@ -41,16 +41,16 @@ public class ChooseMultisignIdActivity extends BaseCryptoActivity {
         return intent;
     }
 
-    public static Map<String, P2SH> getSelectedP2SHMap(Intent data) {
-        Map<String, P2SH> resultMap = new HashMap<>();
+    public static Map<String, Multisign> getSelectedMultisignMap(Intent data) {
+        Map<String, Multisign> resultMap = new HashMap<>();
         TimberLogger.i(TAG, "resultMap siz = " + resultMap.size());
 
         if (data != null && data.hasExtra(EXTRA_SELECTED_P2SH)) {
             String p2shJson = data.getStringExtra(EXTRA_SELECTED_P2SH);
             if (p2shJson != null) {
-                P2SH p2sh = P2SH.fromJson(p2shJson, P2SH.class);
-                if (p2sh != null) {
-                    resultMap.put(p2sh.getId(), p2sh);
+                Multisign multisign = Multisign.fromJson(p2shJson, Multisign.class);
+                if (multisign != null) {
+                    resultMap.put(multisign.getId(), multisign);
                 }
             }
         }
@@ -83,15 +83,15 @@ public class ChooseMultisignIdActivity extends BaseCryptoActivity {
         
         confirmButton.setOnClickListener(v -> {
             if (keyCardManager != null) {
-                List<P2SH> selectedP2SHs = keyCardManager.getSelectedKeys();
+                List<Multisign> selectedMultisigns = keyCardManager.getSelectedKeys();
 
-                if (selectedP2SHs != null)TimberLogger.i(TAG, "selectedP2SH size = " + selectedP2SHs.size());
-                else TimberLogger.i(TAG, "selectedP2SH is null");
+                if (selectedMultisigns != null)TimberLogger.i(TAG, "selectedMultisign size = " + selectedMultisigns.size());
+                else TimberLogger.i(TAG, "selectedMultisign is null");
 
-                if (selectedP2SHs != null && !selectedP2SHs.isEmpty()) {
+                if (selectedMultisigns != null && !selectedMultisigns.isEmpty()) {
                     Intent resultIntent = new Intent();
-                    String p2shJson = JsonUtils.toJson(selectedP2SHs.get(0));
-                    resultIntent.putExtra(EXTRA_SELECTED_P2SH, p2shJson);
+                    String multisignJson = JsonUtils.toJson(selectedMultisigns.get(0));
+                    resultIntent.putExtra(EXTRA_SELECTED_P2SH, multisignJson);
                     setResult(RESULT_OK, resultIntent);
                     finish();
                 } else {
@@ -111,10 +111,10 @@ public class ChooseMultisignIdActivity extends BaseCryptoActivity {
 
     private void loadMultisigns() {
         isLoading = true;
-        List<P2SH> p2shs = MultisignManager.getInstance(this).getPaginatedMultisigns(PAGE_SIZE, null, true);
-        if (p2shs != null && !p2shs.isEmpty()) {
-            keyCardManager.addMultisignCards(keyListContainer, p2shs);
-            lastIndex = MultisignManager.getInstance(this.getApplicationContext()).getIndexById(p2shs.get(p2shs.size() - 1).getId());
+        List<Multisign> multisigns = MultisignManager.getInstance(this).getPaginatedMultisigns(PAGE_SIZE, null, true);
+        if (multisigns != null && !multisigns.isEmpty()) {
+            keyCardManager.addMultisignCards(keyListContainer, multisigns);
+            lastIndex = MultisignManager.getInstance(this.getApplicationContext()).getIndexById(multisigns.get(multisigns.size() - 1).getId());
             emptyView.setVisibility(View.GONE);
         } else {
             emptyView.setVisibility(View.VISIBLE);
@@ -126,10 +126,10 @@ public class ChooseMultisignIdActivity extends BaseCryptoActivity {
         if (lastIndex == null) return;
         
         isLoading = true;
-        List<P2SH> moreP2shs = MultisignManager.getInstance(this.getApplicationContext()).getPaginatedMultisigns(PAGE_SIZE, lastIndex, true);
-        if (moreP2shs != null && !moreP2shs.isEmpty()) {
-            keyCardManager.addMultisignCards(keyListContainer, moreP2shs);
-            lastIndex = MultisignManager.getInstance(this.getApplicationContext()).getIndexById(moreP2shs.get(moreP2shs.size() - 1).getId());
+        List<Multisign> moreMultisigns = MultisignManager.getInstance(this.getApplicationContext()).getPaginatedMultisigns(PAGE_SIZE, lastIndex, true);
+        if (moreMultisigns != null && !moreMultisigns.isEmpty()) {
+            keyCardManager.addMultisignCards(keyListContainer, moreMultisigns);
+            lastIndex = MultisignManager.getInstance(this.getApplicationContext()).getIndexById(moreMultisigns.get(moreMultisigns.size() - 1).getId());
         }
         isLoading = false;
     }

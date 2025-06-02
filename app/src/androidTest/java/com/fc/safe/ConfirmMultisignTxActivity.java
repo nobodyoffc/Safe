@@ -8,8 +8,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.fc.fc_ajdk.core.fch.RawTxInfo;
+import com.fc.fc_ajdk.data.fchData.Multisign;
 import com.fc.fc_ajdk.data.fchData.MultisignTxDetail;
-import com.fc.fc_ajdk.data.fchData.P2SH;
 import com.fc.fc_ajdk.data.fchData.SendTo;
 import com.fc.fc_ajdk.data.fcData.KeyInfo;
 import com.fc.safe.home.BaseCryptoActivity;
@@ -92,9 +92,9 @@ public class ConfirmMultisignTxActivity extends BaseCryptoActivity {
             return;
         }
         MultisignKeyCardManager keyCardManager = new MultisignKeyCardManager(this, fragmentContainer, false);
-        P2SH p2sh = new P2SH();
-        p2sh.setId(multisignTxDetail.getSender());
-        keyCardManager.addSenderKeyCard(p2sh);
+        Multisign multisign = new Multisign();
+        multisign.setId(multisignTxDetail.getSender());
+        keyCardManager.addSenderKeyCard(multisign);
     }
 
     private void setupCash() {

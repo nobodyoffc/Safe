@@ -12,7 +12,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.fc.fc_ajdk.core.fch.RawTxInfo;
-import com.fc.fc_ajdk.data.fchData.P2SH;
+import com.fc.fc_ajdk.data.fchData.Multisign;
 import com.fc.fc_ajdk.feature.avatar.AvatarMaker;
 import com.fc.fc_ajdk.utils.TimberLogger;
 import com.fc.safe.R;
@@ -29,7 +29,7 @@ public class MultisignKeyCardManager {
     private static final String TAG = "MultisignKeyCardManager";
     private final Context context;
     private final ViewGroup keyListContainer;
-    private final List<P2SH> p2shList;
+    private final List<Multisign> multisignList;
     private final List<RadioButton> radioButtons;
     private final boolean withCheckBox;
     private final boolean isSingleChoice;
@@ -45,14 +45,14 @@ public class MultisignKeyCardManager {
     public MultisignKeyCardManager(Context context, LinearLayout keyListContainer, boolean withCheckBox, boolean isSingleChoice) {
         this.context = context;
         this.keyListContainer = keyListContainer;
-        this.p2shList = new ArrayList<>();
+        this.multisignList = new ArrayList<>();
         this.radioButtons = new ArrayList<>();
         this.withCheckBox = withCheckBox;
         this.isSingleChoice = isSingleChoice;
     }
 
-    public void addKeyCard(P2SH p2sh) {
-        TimberLogger.d(TAG, "addKeyCard: Starting to add card for P2SH with ID: " + p2sh.getId());
+    public void addKeyCard(Multisign multisign) {
+        TimberLogger.d(TAG, "addKeyCard: Starting to add card for Multisign with ID: " + multisign.getId());
         
         int layoutResId;
         if (!withCheckBox) {
@@ -90,25 +90,25 @@ public class MultisignKeyCardManager {
         TextView keyId = cardView.findViewById(R.id.key_id);
 
         try {
-            byte[] avatarBytes = AvatarMaker.createAvatar(p2sh.getId(), context);
+            byte[] avatarBytes = AvatarMaker.createAvatar(multisign.getId(), context);
             if (avatarBytes != null) {
                 android.graphics.Bitmap bitmap = android.graphics.BitmapFactory.decodeByteArray(avatarBytes, 0, avatarBytes.length);
                 avatar.setImageBitmap(bitmap);
-                TimberLogger.d(TAG, "addKeyCard: Successfully created avatar for ID: " + p2sh.getId());
+                TimberLogger.d(TAG, "addKeyCard: Successfully created avatar for ID: " + multisign.getId());
             } else {
-                TimberLogger.e(TAG, "addKeyCard: Failed to create avatar bytes for ID: " + p2sh.getId());
+                TimberLogger.e(TAG, "addKeyCard: Failed to create avatar bytes for ID: " + multisign.getId());
             }
         } catch (Exception e) {
-            TimberLogger.e(TAG, "Failed to create avatar for key ID %s: %s", p2sh.getId(), e.getMessage());
+            TimberLogger.e(TAG, "Failed to create avatar for key ID %s: %s", multisign.getId(), e.getMessage());
             Toast.makeText(context, "Failed to create avatar", Toast.LENGTH_SHORT).show();
         }
-        keyLabel.setText(p2sh.getLabel());
+        keyLabel.setText(multisign.getLabel());
         keyLabel.setTextColor(context.getResources().getColor(R.color.field_name, context.getTheme()));
         keyLabel.setTypeface(keyLabel.getTypeface(), android.graphics.Typeface.BOLD);
-        keyId.setText(p2sh.getId());
-        TimberLogger.d(TAG, "addKeyCard: Set label: " + p2sh.getLabel() + ", ID: " + p2sh.getId());
+        keyId.setText(multisign.getId());
+        TimberLogger.d(TAG, "addKeyCard: Set label: " + multisign.getLabel() + ", ID: " + multisign.getId());
 
-        avatar.setOnClickListener(v -> IdUtils.showAvatarDialog(context, p2sh.getId()));
+        avatar.setOnClickListener(v -> IdUtils.showAvatarDialog(context, multisign.getId()));
         
         // Create a common long press listener
         View.OnLongClickListener longPressListener = v -> {
@@ -117,22 +117,22 @@ public class MultisignKeyCardManager {
             builder.setItems(options, (dialog, which) -> {
                 switch (which) {
                     case 0: // Delete
-                        MultisignManager.getInstance(context.getApplicationContext()).removeMultisign(p2sh);
+                        MultisignManager.getInstance(context.getApplicationContext()).removeMultisign(multisign);
                         MultisignManager.getInstance(context.getApplicationContext()).commit();
                         keyListContainer.removeView(cardView);
-                        p2shList.remove(p2sh);
+                        multisignList.remove(multisign);
                         MultisignActivity.setNeedsRefresh(true);
                         break;
                     case 1: // Create TX
                         Intent createTxIntent = new Intent(context, CreateMultisignTxActivity.class);
-                        createTxIntent.putExtra("p2sh", p2sh);
+                        createTxIntent.putExtra("multisign", multisign);
                         RawTxInfo rawTxInfo = new RawTxInfo();
-                        rawTxInfo.setP2sh(p2sh);
+                        rawTxInfo.setMultisign(multisign);
                         createTxIntent.putExtra("rawTxInfo", rawTxInfo);
                         context.startActivity(createTxIntent);
                         break;
                     case 2: // Add to FID list
-                        SafeApplication.addFid(p2sh.getId());
+                        SafeApplication.addFid(multisign.getId());
                         Toast.makeText(context, "Added to FID list", Toast.LENGTH_SHORT).show();
                         break;
                     case 3: // Clear FID list
@@ -154,18 +154,18 @@ public class MultisignKeyCardManager {
             if (withCheckBox && v.getId() != R.id.key_checkbox) {
                 radioButton.setChecked(!radioButton.isChecked());
             } else {
-                showKeyDetail(p2sh);
+                showKeyDetail(multisign);
             }
         });
-        keyId.setOnClickListener(v -> showKeyDetail(p2sh));
+        keyId.setOnClickListener(v -> showKeyDetail(multisign));
 
         keyListContainer.addView(cardView);
-        p2shList.add(p2sh);
-        TimberLogger.d(TAG, "addKeyCard: Successfully added card to container. Total cards: " + p2shList.size());
+        multisignList.add(multisign);
+        TimberLogger.d(TAG, "addKeyCard: Successfully added card to container. Total cards: " + multisignList.size());
     }
 
-    public void addSenderKeyCard(P2SH p2sh) {
-        TimberLogger.d(TAG, "addSenderKeyCard: Starting to add card for P2SH with ID: " + p2sh.getId());
+    public void addSenderKeyCard(Multisign multisign) {
+        TimberLogger.d(TAG, "addSenderKeyCard: Starting to add card for Multisign with ID: " + multisign.getId());
         View cardView = LayoutInflater.from(context).inflate(R.layout.item_sender_key_card, keyListContainer, false);
         
         ImageView avatar = cardView.findViewById(R.id.key_avatar);
@@ -173,25 +173,25 @@ public class MultisignKeyCardManager {
         TextView keyId = cardView.findViewById(R.id.key_id);
 
         try {
-            byte[] avatarBytes = AvatarMaker.createAvatar(p2sh.getId(), context);
+            byte[] avatarBytes = AvatarMaker.createAvatar(multisign.getId(), context);
             if (avatarBytes != null) {
                 android.graphics.Bitmap bitmap = android.graphics.BitmapFactory.decodeByteArray(avatarBytes, 0, avatarBytes.length);
                 avatar.setImageBitmap(bitmap);
-                TimberLogger.d(TAG, "addSenderKeyCard: Successfully created avatar for ID: " + p2sh.getId());
+                TimberLogger.d(TAG, "addSenderKeyCard: Successfully created avatar for ID: " + multisign.getId());
             } else {
-                TimberLogger.e(TAG, "addSenderKeyCard: Failed to create avatar bytes for ID: " + p2sh.getId());
+                TimberLogger.e(TAG, "addSenderKeyCard: Failed to create avatar bytes for ID: " + multisign.getId());
             }
         } catch (Exception e) {
             Toast.makeText(context, "Failed to create avatar", Toast.LENGTH_SHORT).show();
         }
-        keyLabel.setText(p2sh.getLabel());
+        keyLabel.setText(multisign.getLabel());
         keyLabel.setTextColor(context.getResources().getColor(R.color.field_name, context.getTheme()));
         keyLabel.setTypeface(keyLabel.getTypeface(), android.graphics.Typeface.BOLD);
-        keyId.setText(p2sh.getId());
+        keyId.setText(multisign.getId());
         keyId.setTypeface(keyId.getTypeface(), android.graphics.Typeface.BOLD);
-        TimberLogger.d(TAG, "addSenderKeyCard: Set label: " + p2sh.getLabel() + ", ID: " + p2sh.getId());
+        TimberLogger.d(TAG, "addSenderKeyCard: Set label: " + multisign.getLabel() + ", ID: " + multisign.getId());
 
-        avatar.setOnClickListener(v -> IdUtils.showAvatarDialog(context, p2sh.getId()));
+        avatar.setOnClickListener(v -> IdUtils.showAvatarDialog(context, multisign.getId()));
         
         // Create a common long press listener
         View.OnLongClickListener longPressListener = v -> {
@@ -200,22 +200,22 @@ public class MultisignKeyCardManager {
             builder.setItems(options, (dialog, which) -> {
                 switch (which) {
                     case 0: // Delete
-                        MultisignManager.getInstance(context.getApplicationContext()).removeMultisign(p2sh);
+                        MultisignManager.getInstance(context.getApplicationContext()).removeMultisign(multisign);
                         MultisignManager.getInstance(context.getApplicationContext()).commit();
                         keyListContainer.removeView(cardView);
-                        p2shList.remove(p2sh);
+                        multisignList.remove(multisign);
                         MultisignActivity.setNeedsRefresh(true);
                         break;
                     case 1: // Create TX
                         Intent createTxIntent = new Intent(context, CreateMultisignTxActivity.class);
-                        createTxIntent.putExtra("p2sh", p2sh);
+                        createTxIntent.putExtra("multisign", multisign);
                         RawTxInfo rawTxInfo = new RawTxInfo();
-                        rawTxInfo.setP2sh(p2sh);
+                        rawTxInfo.setMultisign(multisign);
                         createTxIntent.putExtra("rawTxInfo", rawTxInfo);
                         context.startActivity(createTxIntent);
                         break;
                     case 2: // Add to FID list
-                        SafeApplication.addFid(p2sh.getId());
+                        SafeApplication.addFid(multisign.getId());
                         Toast.makeText(context, "Added to FID list", Toast.LENGTH_SHORT).show();
                         break;
                     case 3: // Clear FID list
@@ -233,12 +233,12 @@ public class MultisignKeyCardManager {
         keyId.setOnLongClickListener(longPressListener);
         
         // Set click listeners for showing details
-        cardView.setOnClickListener(v -> showKeyDetail(p2sh));
-        keyId.setOnClickListener(v -> showKeyDetail(p2sh));
+        cardView.setOnClickListener(v -> showKeyDetail(multisign));
+        keyId.setOnClickListener(v -> showKeyDetail(multisign));
 
         keyListContainer.addView(cardView);
-        p2shList.add(p2sh);
-        TimberLogger.d(TAG, "addSenderKeyCard: Successfully added card to container. Total cards: " + p2shList.size());
+        multisignList.add(multisign);
+        TimberLogger.d(TAG, "addSenderKeyCard: Successfully added card to container. Total cards: " + multisignList.size());
     }
 
     private void copyKeyId(String keyId) {
@@ -248,44 +248,44 @@ public class MultisignKeyCardManager {
         Toast.makeText(context, R.string.copied, Toast.LENGTH_SHORT).show();
     }
 
-    private void showKeyDetail(P2SH p2sh) {
+    private void showKeyDetail(Multisign multisign) {
         Intent intent = new Intent(context, MultisignDetailActivity.class);
-        intent.putExtra("p2sh", p2sh);
+        intent.putExtra("multisign", multisign);
         context.startActivity(intent);
     }
 
-    public List<P2SH> getSelectedKeys() {
-        List<P2SH> selectedKeys = new ArrayList<>();
+    public List<Multisign> getSelectedKeys() {
+        List<Multisign> selectedKeys = new ArrayList<>();
         for (int i = 0; i < radioButtons.size(); i++) {
             if (radioButtons.get(i).isChecked()) {
-                selectedKeys.add(p2shList.get(i));
-                TimberLogger.d(TAG, "getSelectedKeys: Selected key: " + p2shList.get(i).getId());
+                selectedKeys.add(multisignList.get(i));
+                TimberLogger.d(TAG, "getSelectedKeys: Selected key: " + multisignList.get(i).getId());
             }
         }
         return selectedKeys;
     }
 
     public void clearAll() {
-        TimberLogger.d(TAG, "clearAll: Starting to clear all cards. Current count: " + p2shList.size());
-        p2shList.clear();
+        TimberLogger.d(TAG, "clearAll: Starting to clear all cards. Current count: " + multisignList.size());
+        multisignList.clear();
         keyListContainer.removeAllViews();
         radioButtons.clear();
         TimberLogger.d(TAG, "clearAll: Successfully cleared all cards and radio buttons");
     }
 
-    public List<P2SH> getP2SHList() {
-        return p2shList;
+    public List<Multisign> getMultisignList() {
+        return multisignList;
     }
 
-    public void addMultisignCards(LinearLayout container, List<P2SH> p2shs) {
-        TimberLogger.d(TAG, "addMultisignCards: Starting to add " + (p2shs != null ? p2shs.size() : 0) + " cards");
-        if (p2shs == null || p2shs.isEmpty()) {
-            TimberLogger.w(TAG, "addMultisignCards: No cards to add - p2shs is null or empty");
+    public void addMultisignCards(LinearLayout container, List<Multisign> multisigns) {
+        TimberLogger.d(TAG, "addMultisignCards: Starting to add " + (multisigns != null ? multisigns.size() : 0) + " cards");
+        if (multisigns == null || multisigns.isEmpty()) {
+            TimberLogger.w(TAG, "addMultisignCards: No cards to add - multisigns is null or empty");
             return;
         }
-        for (P2SH p2sh : p2shs) {
-            addKeyCard(p2sh);
+        for (Multisign multisign : multisigns) {
+            addKeyCard(multisign);
         }
-        TimberLogger.d(TAG, "addMultisignCards: Finished adding all cards. Total cards in list: " + p2shList.size());
+        TimberLogger.d(TAG, "addMultisignCards: Finished adding all cards. Total cards in list: " + multisignList.size());
     }
 } 
