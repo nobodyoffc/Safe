@@ -62,7 +62,7 @@ public class CheckPasswordActivity extends AppCompatActivity {
                             finish();
                         } else {
                             TimberLogger.e(TAG, "Configure object not found in ConfigureManager");
-                            Toast.makeText(this, "Error: Configuration not found", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(this, getString(R.string.error_configuration_not_found), Toast.LENGTH_SHORT).show();
                         }
                     }
                 }

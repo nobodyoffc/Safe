@@ -27,7 +27,7 @@
             android:id="@+id/promoteTextView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Promote"
+            android:text="@string/promote"
             android:textAppearance="@style/TextAppearance.AppCompat.Medium"
             android:layout_marginBottom="8dp" />
 

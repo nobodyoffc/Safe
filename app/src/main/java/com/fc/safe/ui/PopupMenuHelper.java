@@ -21,7 +21,6 @@ import com.fc.safe.myKeys.CreateKeyByPrikeyCipherActivity;
 import com.fc.safe.myKeys.CreateKeyByPubkeyActivity;
 import com.fc.safe.myKeys.RandomNewKeysActivity;
 import com.fc.safe.myKeys.FindNiceKeysActivity;
-import com.fc.safe.tools.RandomBytesGeneratorActivity;
 import com.fc.safe.tools.PrikeyConverterActivity;
 import com.fc.safe.tools.PubkeyConverterActivity;
 import com.fc.safe.tools.AddressConverterActivity;
@@ -252,7 +251,7 @@ public class PopupMenuHelper {
                     ConfigureManager.getInstance().removeConfigure(context, currentPasswordName);
                     
                     // Show success message
-                    Toast.makeText(context, "All data cleared successfully", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(context, R.string.all_data_cleared_successfully, Toast.LENGTH_SHORT).show();
                     
                     // Close the app
                     if (context instanceof android.app.Activity) {

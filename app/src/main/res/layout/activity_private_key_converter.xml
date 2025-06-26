@@ -60,21 +60,21 @@
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 
-                android:text="To Hex" />
+                android:text="@string/to_hex" />
 
             <RadioButton
                 android:id="@+id/optionBase58"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:text="Base58" />
+                android:text="@string/base58" />
 
             <RadioButton
                 android:id="@+id/optionBase58Compressed"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:text="Base58 New" />
+                android:text="@string/base58_new" />
 
         </RadioGroup>
     </LinearLayout>

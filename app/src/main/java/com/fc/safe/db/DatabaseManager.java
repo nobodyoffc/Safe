@@ -32,15 +32,14 @@ public class DatabaseManager {
     }
 
     public void setCurrentPasswordName(String passwordName) {
-        // Close current databases before switching
         if (currentPasswordName != null && !currentPasswordName.equals(passwordName)) {
+            TimberLogger.d("DatabaseManager", "Switching password from " + currentPasswordName + " to " + passwordName);
             closeCurrentDatabases();
         }
         currentPasswordName = passwordName;
     }
 
     private void closeCurrentDatabases() {
-        // Close and clear all current databases
         for (LocalDB<? extends FcEntity> db : databases.values()) {
             if (db != null) {
                 try {
@@ -55,130 +54,117 @@ public class DatabaseManager {
     }
 
     public void changePassword(String passwordName) {
-        if (!passwordName.equals(this.currentPasswordName)) {
-            try {
-                // Rename database keys from old password to new password
-                Map<String, LocalDB<? extends FcEntity>> newDatabases = new HashMap<>();
-                Map<String, Class<? extends FcEntity>> newDatabaseClasses = new HashMap<>();
+        if (passwordName.equals(this.currentPasswordName)) {
+            return;
+        }
 
-                for (Map.Entry<String, LocalDB<? extends FcEntity>> entry : databases.entrySet()) {
-                    String oldDbKey = entry.getKey();
-                    if (oldDbKey.startsWith(this.currentPasswordName)) {
-                        // Create new key with new password name
-                        String dbName = oldDbKey.substring(this.currentPasswordName.length() + 1); // +1 for the underscore
-                        String newDbKey = makeDatabaseKey(dbName, passwordName);
+        try {
+            TimberLogger.d("DatabaseManager", "Changing password from " + this.currentPasswordName + " to " + passwordName);
+            Map<String, LocalDB<? extends FcEntity>> newDatabases = new HashMap<>();
+            Map<String, Class<? extends FcEntity>> newDatabaseClasses = new HashMap<>();
 
-                        // Get the database and save its data with new namespace
-                        LocalDB<? extends FcEntity> oldDb = entry.getValue();
-                        if (oldDb instanceof HawkDB) {
-                            HawkDB<?> oldHawkDB = (HawkDB<?>) oldDb;
-                            
-                            // Create new database instance
-                            HawkDB<?> newHawkDB = new HawkDB<>(oldHawkDB.getSortType(), oldHawkDB.getSortField());
-                            newHawkDB.initialize(null, null, null, newDbKey);
-                            
-                            // Process main data first
-                            Map<String, ?> allData = oldHawkDB.getAll();
-                            if (allData != null) {
-                                @SuppressWarnings("unchecked")
-                                Map<String, FcEntity> typedData = (Map<String, FcEntity>) allData;
-                                ((HawkDB<FcEntity>) newHawkDB).putAll(typedData);
-                                allData = null; // Release the data
-                            }
+            for (Map.Entry<String, LocalDB<? extends FcEntity>> entry : databases.entrySet()) {
+                String oldDbKey = entry.getKey();
+                if (oldDbKey.startsWith(this.currentPasswordName)) {
+                    String dbName = oldDbKey.substring(this.currentPasswordName.length() + 1);
+                    String newDbKey = makeDatabaseKey(dbName, passwordName);
+                    LocalDB<? extends FcEntity> oldDb = entry.getValue();
 
-                            // Process ID maps
-                            Map<String, Long> idIndexMap = oldHawkDB.getIdIndexMap();
-                            if(idIndexMap != null) {
-                                newHawkDB.saveIdIndexMap(idIndexMap);
-                                idIndexMap = null; // Release the map
-                            }
+                    if (oldDb instanceof HawkDB) {
+                        HawkDB<?> oldHawkDB = (HawkDB<?>) oldDb;
+                        HawkDB<?> newHawkDB = new HawkDB<>(oldHawkDB.getSortType(), oldHawkDB.getSortField());
+                        newHawkDB.initialize(null, null, null, newDbKey);
 
-                            Map<Long,String> indexIdMap = oldHawkDB.getIndexIdMap();
-                            if(indexIdMap != null) {
-                                newHawkDB.saveIndexIdMap(indexIdMap);
-                                indexIdMap = null; // Release the map
-                            }
-                            
-                            // Process settings
-                            Map<String, String> allSettings = oldHawkDB.getAllSettings();
-                            if(allSettings != null) {
-                                for (Map.Entry<String, String> setting : allSettings.entrySet()) {
-                                    newHawkDB.putSetting(setting.getKey(), setting.getValue());
-                                }
-                                allSettings = null; // Release the settings
-                            }
-
-                            // Process state
-                            Map<String, Object> allState = oldHawkDB.getStateMap();
-                            if(allState != null) {
-                                for (Map.Entry<String, Object> state : allState.entrySet()) {
-                                    newHawkDB.putState(state.getKey(), state.getValue());
-                                }
-                                allState = null; // Release the state
-                            }
-
-                            // Process meta
-                            Map<String, Object> allMeta = oldHawkDB.getMetaMap();
-                            if(allMeta != null) {
-                                for (Map.Entry<String, Object> meta : allMeta.entrySet()) {
-                                    newHawkDB.putMeta(meta.getKey(), meta.getValue());
-                                }
-                                allMeta = null; // Release the meta
-                            }
-                            
-                            // Process maps one by one
-                            for (String mapName : oldHawkDB.getMapNames()) {
-                                Class<?> mapType = oldHawkDB.getMapType(mapName);
-                                if (mapType != null) {
-                                    newHawkDB.registerMapType(mapName, mapType);
-                                    
-                                    Map<String, ?> mapData = oldHawkDB.getAllFromMap(mapName);
-                                    if (mapData != null && !mapData.isEmpty()) {
-                                        String mapTypeName = mapType.getName();
-                                        
-                                        // Handle byte[] type specially
-                                        if (Objects.equals(mapTypeName, byte[].class.getName())) {
-                                            for (Map.Entry<String, ?> mapEntry : mapData.entrySet()) {
-                                                if (mapEntry.getValue() instanceof byte[]) {
-                                                    newHawkDB.putInMap(mapName, mapEntry.getKey(), mapEntry.getValue());
-                                                }
-                                            }
-                                        } else {
-                                            newHawkDB.putAllInMap(mapName, mapData);
-                                        }
-                                    }
-                                    mapData = null; // Release the map data
-                                }
-                            }
-
-                            // Only clear old database after successful data transfer
-                            oldHawkDB.clearDB();
-                            
-                            // Use the new database instance
-                            newDatabases.put(newDbKey, newHawkDB);
-                            newDatabaseClasses.put(newDbKey, databaseClasses.get(oldDbKey));
-                        }
+                        // Transfer all data
+                        transferHawkDBData(oldHawkDB, newHawkDB);
+                        
+                        oldHawkDB.clearDB();
+                        newDatabases.put(newDbKey, newHawkDB);
+                        newDatabaseClasses.put(newDbKey, databaseClasses.get(oldDbKey));
                     }
                 }
+            }
 
-                // Update the maps with renamed databases
-                databases.clear();
-                databases.putAll(newDatabases);
-                databaseClasses.clear();
-                databaseClasses.putAll(newDatabaseClasses);
+            databases.clear();
+            databases.putAll(newDatabases);
+            databaseClasses.clear();
+            databaseClasses.putAll(newDatabaseClasses);
+            this.currentPasswordName = passwordName;
+            
+            TimberLogger.d("DatabaseManager", "Password change completed successfully");
+        } catch (Exception e) {
+            TimberLogger.e("DatabaseManager", "Failed to change password: " + e.getMessage());
+            throw new RuntimeException("Failed to change password: " + e.getMessage());
+        }
+    }
 
-                // Set the new password name only after successful migration
-                this.currentPasswordName = passwordName;
-            } catch (Exception e) {
-                // If any error occurs during password change, revert the changes
-                TimberLogger.e("DatabaseManager", "Error changing password: " + e.getMessage());
-                throw new RuntimeException("Failed to change password: " + e.getMessage());
+    private void transferHawkDBData(HawkDB<?> oldHawkDB, HawkDB<?> newHawkDB) {
+        // Transfer main data
+        Map<String, ?> allData = oldHawkDB.getAll();
+        if (allData != null) {
+            @SuppressWarnings("unchecked")
+            Map<String, FcEntity> typedData = (Map<String, FcEntity>) allData;
+            ((HawkDB<FcEntity>) newHawkDB).putAll(typedData);
+        }
+
+        // Transfer ID maps
+        Map<String, Long> idIndexMap = oldHawkDB.getIdIndexMap();
+        if (idIndexMap != null) {
+            newHawkDB.saveIdIndexMap(idIndexMap);
+        }
+
+        Map<Long, String> indexIdMap = oldHawkDB.getIndexIdMap();
+        if (indexIdMap != null) {
+            newHawkDB.saveIndexIdMap(indexIdMap);
+        }
+
+        // Transfer settings
+        Map<String, String> allSettings = oldHawkDB.getAllSettings();
+        if (allSettings != null) {
+            for (Map.Entry<String, String> setting : allSettings.entrySet()) {
+                newHawkDB.putSetting(setting.getKey(), setting.getValue());
+            }
+        }
+
+        // Transfer state
+        Map<String, Object> allState = oldHawkDB.getStateMap();
+        if (allState != null) {
+            for (Map.Entry<String, Object> state : allState.entrySet()) {
+                newHawkDB.putState(state.getKey(), state.getValue());
+            }
+        }
+
+        // Transfer meta
+        Map<String, Object> allMeta = oldHawkDB.getMetaMap();
+        if (allMeta != null) {
+            for (Map.Entry<String, Object> meta : allMeta.entrySet()) {
+                newHawkDB.putMeta(meta.getKey(), meta.getValue());
+            }
+        }
+
+        // Transfer maps
+        for (String mapName : oldHawkDB.getMapNames()) {
+            Class<?> mapType = oldHawkDB.getMapType(mapName);
+            if (mapType != null) {
+                newHawkDB.registerMapType(mapName, mapType);
+                Map<String, ?> mapData = oldHawkDB.getAllFromMap(mapName);
+                if (mapData != null && !mapData.isEmpty()) {
+                    if (Objects.equals(mapType.getName(), byte[].class.getName())) {
+                        for (Map.Entry<String, ?> mapEntry : mapData.entrySet()) {
+                            if (mapEntry.getValue() instanceof byte[]) {
+                                newHawkDB.putInMap(mapName, mapEntry.getKey(), mapEntry.getValue());
+                            }
+                        }
+                    } else {
+                        newHawkDB.putAllInMap(mapName, mapData);
+                    }
+                }
             }
         }
     }
 
-    public  <T extends FcEntity> LocalDB<T> createEntityDatabase(String dbName, String passwordName, Class<T> entityClass, LocalDB.SortType sortType, String sortField) {
-        // No need to initialize Hawk here, it's already initialized at the application level
+    public <T extends FcEntity> LocalDB<T> createEntityDatabase(String dbName, String passwordName, Class<T> entityClass, LocalDB.SortType sortType, String sortField) {
+        TimberLogger.d("DatabaseManager", "Creating new database for " + dbName + " with password " + passwordName);
         LocalDB<T> db = new HawkDB<>(sortType, sortField);
         String dbKey = makeDatabaseKey(dbName, passwordName);
         db.initialize(null, null, null, dbKey);
@@ -219,13 +205,14 @@ public class DatabaseManager {
         String dbKey = makeDatabaseKey(dbName, currentPasswordName);
         LocalDB<?> db = databases.get(dbKey);
         if (db != null) {
+            TimberLogger.d("DatabaseManager", "Clearing database: " + dbName);
             db.clearDB();
             databases.remove(dbKey);
         }
     }
 
     public void clearAllDatabases() {
-        // Clear all password-specific databases
+        TimberLogger.d("DatabaseManager", "Clearing all databases for password: " + currentPasswordName);
         for (String dbKey : databases.keySet()) {
             if (dbKey.startsWith(currentPasswordName)) {
                 LocalDB<?> db = databases.get(dbKey);
@@ -248,11 +235,10 @@ public class DatabaseManager {
      */
     public static void shutdown() {
         if (instance != null) {
-            // Close all databases without deleting data
+            TimberLogger.d("DatabaseManager", "Shutting down DatabaseManager");
             for (LocalDB<?> db : instance.databases.values()) {
                 db.close();
             }
-            // Reset the instance
             instance = null;
         }
     }

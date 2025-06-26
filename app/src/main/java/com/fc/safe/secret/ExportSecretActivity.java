@@ -70,13 +70,13 @@ public class ExportSecretActivity extends BaseCryptoActivity {
         // Get and parse the secret list from intent
         String secretListJson = getIntent().getStringExtra("secretList");
         if(secretListJson == null){
-            Toast.makeText(this,"Secret list is null", Toast.LENGTH_LONG).show();
+            Toast.makeText(this,R.string.secret_list_is_null, Toast.LENGTH_LONG).show();
             finish(); // Finish activity if secret list is null
             return;
         }
         secretList = JsonUtils.listFromJson(secretListJson,SecretDetail.class);
-        if (secretList == null || secretList.isEmpty()) {
-            Toast.makeText(this, "Secret list is empty", Toast.LENGTH_LONG).show();
+        if (secretList.isEmpty()) {
+            Toast.makeText(this, R.string.secret_list_is_empty, Toast.LENGTH_LONG).show();
             finish(); // Finish activity if secret list is empty
             return;
         }
@@ -88,7 +88,7 @@ public class ExportSecretActivity extends BaseCryptoActivity {
                     CryptoDataByte cryptoDataByte = CryptoDataByte.fromJson(secret.getContentCipher());
                     byte[] symKey = ConfigureManager.getInstance().getSymkey();
                     if(symKey==null){
-                        Toast.makeText(this,"SymKey is null", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(this,R.string.symkey_is_null, Toast.LENGTH_SHORT).show();
                         return;
                     }
                     Decryptor.decryptBySymkey(cryptoDataByte, com.fc.fc_ajdk.utils.Hex.toHex(symKey));
@@ -158,7 +158,7 @@ public class ExportSecretActivity extends BaseCryptoActivity {
             // Show QR codes in a dialog using QRCodeGenerator
             QRCodeGenerator.showQRDialog(this, flattenedBitmaps);
         } else {
-            Toast.makeText(this, "No data to make QR code.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.no_data_to_make_qr_code), Toast.LENGTH_SHORT).show();
         }
     }
 

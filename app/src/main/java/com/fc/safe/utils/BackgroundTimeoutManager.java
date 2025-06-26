@@ -2,7 +2,6 @@ package com.fc.safe.utils;
 
 import android.app.Activity;
 import android.content.Intent;
-import com.fc.fc_ajdk.utils.TimberLogger;
 import com.fc.safe.initiate.CheckPasswordActivity;
 
 public class BackgroundTimeoutManager {
@@ -16,7 +15,6 @@ public class BackgroundTimeoutManager {
         if (!isInBackground) {
             lastBackgroundTime = System.currentTimeMillis();
             isInBackground = true;
-            TimberLogger.d(TAG, "App entered background at: " + lastBackgroundTime);
         }
     }
     
@@ -25,10 +23,7 @@ public class BackgroundTimeoutManager {
             long currentTime = System.currentTimeMillis();
             long timeInBackground = currentTime - lastBackgroundTime;
             
-            TimberLogger.d(TAG, "App returned to foreground. Time in background: " + timeInBackground + "ms");
-            
             if (timeInBackground >= BACKGROUND_TIMEOUT) {
-                TimberLogger.d(TAG, "Background timeout exceeded, launching password check");
                 launchPasswordCheck(activity);
             }
             

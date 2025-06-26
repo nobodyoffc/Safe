@@ -7,8 +7,8 @@ import android.text.InputType;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.fc.fc_ajdk.R;
 import com.fc.fc_ajdk.ui.interfaces.IInputer;
-import com.fc.fc_ajdk.ui.interfaces.IInputer.InputCallback;
 import com.fc.fc_ajdk.utils.ObjectUtils;
 
 import java.io.File;
@@ -89,7 +89,7 @@ public class AndroidInputer implements IInputer {
         try {
             return Long.parseLong(input);
         } catch (NumberFormatException e) {
-            Toast.makeText(context, "Invalid number format", Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, R.string.invalid_number_format, Toast.LENGTH_SHORT).show();
             return 0;
         }
     }
@@ -194,7 +194,7 @@ public class AndroidInputer implements IInputer {
         try {
             return Long.parseLong(input);
         } catch (NumberFormatException e) {
-            Toast.makeText(context, "Invalid number format", Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, R.string.invalid_number_format, Toast.LENGTH_SHORT).show();
             return defaultValue;
         }
     }
@@ -204,7 +204,7 @@ public class AndroidInputer implements IInputer {
         try {
             return Double.parseDouble(input);
         } catch (NumberFormatException e) {
-            Toast.makeText(context, "Invalid number format", Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, R.string.invalid_number_format, Toast.LENGTH_SHORT).show();
             return 0.0;
         }
     }
@@ -219,7 +219,7 @@ public class AndroidInputer implements IInputer {
         try {
             return Double.parseDouble(input);
         } catch (NumberFormatException e) {
-            Toast.makeText(context, "Invalid number format", Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, R.string.invalid_number_format, Toast.LENGTH_SHORT).show();
             return defaultValue;
         }
     }
@@ -401,7 +401,7 @@ public class AndroidInputer implements IInputer {
         try {
             return convertDateToTimestamp(input, pattern);
         } catch (ParseException e) {
-            Toast.makeText(context, "Invalid date format", Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, context.getString(R.string.invalid_date_format), Toast.LENGTH_SHORT).show();
             return null;
         }
     }

@@ -17,7 +17,7 @@
         android:id="@+id/label_input"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Enter label"
+        android:hint="@string/enter_label"
         android:inputType="text"
         android:maxLines="1" />
 

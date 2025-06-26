@@ -60,7 +60,7 @@ public class ImportMultisignTxActivity extends BaseCryptoActivity {
             
             if (jsonText.isEmpty()) {
                 TimberLogger.e(TAG, "JSON text is empty");
-                showToast("Please input JSON text");
+                showToast(getString(R.string.please_input_json_text));
                 return;
             }
 
@@ -71,7 +71,7 @@ public class ImportMultisignTxActivity extends BaseCryptoActivity {
                 finish();
             } catch (Exception e) {
                 TimberLogger.e(TAG, "Error parsing JSON: " + e.getMessage());
-                showToast("Invalid JSON format");
+                showToast(getString(R.string.invalid_json_format));
             }
         });
     }

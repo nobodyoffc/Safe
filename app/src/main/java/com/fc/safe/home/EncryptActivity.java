@@ -69,7 +69,7 @@ public class EncryptActivity extends BaseCryptoActivity {
                             // Automatically set the PubKey option when a public key is selected
                             optionContainer.check(R.id.pubKeyOption);
                         } else {
-                            showToast("Selected key has no public key");
+                            showToast(getString(R.string.selected_key_has_no_public_key));
                         }
                     }
                 }
@@ -140,7 +140,7 @@ public class EncryptActivity extends BaseCryptoActivity {
         String key = keyInput.getText() != null ? keyInput.getText().toString() : "";
 
         if (text.isEmpty() || key.isEmpty()) {
-            showToast("Please input both text and key");
+            showToast(getString(R.string.please_input_both_text_and_key));
             return;
         }
         encrypt(text, key);

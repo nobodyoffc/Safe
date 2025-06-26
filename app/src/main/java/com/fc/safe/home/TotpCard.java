@@ -126,7 +126,7 @@ public class TotpCard extends LinearLayout {
                 ((LinearLayout) getParent()).removeView(this);
                 SecretManager.getInstance(context.getApplicationContext()).removeSecretDetail(secretDetail);
                 SecretManager.getInstance(context.getApplicationContext()).commit();
-                Toast.makeText(context, "Deleted", Toast.LENGTH_SHORT).show();
+                Toast.makeText(context, R.string.deleted, Toast.LENGTH_SHORT).show();
                 return true;
             } else if (item.getItemId() == 2) {
                 // Show Detail: launch DetailActivity with secretDetail

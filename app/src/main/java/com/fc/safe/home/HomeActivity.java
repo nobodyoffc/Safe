@@ -84,7 +84,7 @@ public class HomeActivity extends AppCompatActivity {
         } catch (Exception ex) {
             // Log any exceptions that occur during initialization
             TimberLogger.e(TAG, "Error in HomeActivity onCreate: " + ex.getMessage(), ex);
-            Toast.makeText(this, "Error initializing HomeActivity: " + ex.getMessage(), SafeApplication.TOAST_LASTING).show();
+            Toast.makeText(this, getString(R.string.error_initializing_home, ex.getMessage()), SafeApplication.TOAST_LASTING).show();
         }
     }
 
@@ -338,7 +338,7 @@ public class HomeActivity extends AppCompatActivity {
             }
         } catch (Exception ex) {
             TimberLogger.e(TAG, "Error in setupMenuClickListeners: " + ex.getMessage(), ex);
-            Toast.makeText(this, "Error setting up menu: " + ex.getMessage(), SafeApplication.TOAST_LASTING).show();
+            Toast.makeText(this, getString(R.string.error_setting_up_menu, ex.getMessage()), SafeApplication.TOAST_LASTING).show();
         }
     }
 } 

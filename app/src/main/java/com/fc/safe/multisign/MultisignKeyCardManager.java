@@ -100,7 +100,7 @@ public class MultisignKeyCardManager {
             }
         } catch (Exception e) {
             TimberLogger.e(TAG, "Failed to create avatar for key ID %s: %s", multisign.getId(), e.getMessage());
-            Toast.makeText(context, "Failed to create avatar", Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, R.string.failed_to_create_avatar, Toast.LENGTH_SHORT).show();
         }
         keyLabel.setText(multisign.getLabel());
         keyLabel.setTextColor(context.getResources().getColor(R.color.field_name, context.getTheme()));
@@ -133,11 +133,11 @@ public class MultisignKeyCardManager {
                         break;
                     case 2: // Add to FID list
                         SafeApplication.addFid(multisign.getId());
-                        Toast.makeText(context, "Added to FID list", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(context, R.string.added_to_fid_list, Toast.LENGTH_SHORT).show();
                         break;
                     case 3: // Clear FID list
                         SafeApplication.clearFidList();
-                        Toast.makeText(context, "FID list cleared", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(context, R.string.fid_list_cleared, Toast.LENGTH_SHORT).show();
                         break;
                 }
             });
@@ -182,7 +182,7 @@ public class MultisignKeyCardManager {
                 TimberLogger.e(TAG, "addSenderKeyCard: Failed to create avatar bytes for ID: " + multisign.getId());
             }
         } catch (Exception e) {
-            Toast.makeText(context, "Failed to create avatar", Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, R.string.failed_to_create_avatar, Toast.LENGTH_SHORT).show();
         }
         keyLabel.setText(multisign.getLabel());
         keyLabel.setTextColor(context.getResources().getColor(R.color.field_name, context.getTheme()));
@@ -216,11 +216,11 @@ public class MultisignKeyCardManager {
                         break;
                     case 2: // Add to FID list
                         SafeApplication.addFid(multisign.getId());
-                        Toast.makeText(context, "Added to FID list", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(context, R.string.added_to_fid_list, Toast.LENGTH_SHORT).show();
                         break;
                     case 3: // Clear FID list
                         SafeApplication.clearFidList();
-                        Toast.makeText(context, "FID list cleared", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(context, R.string.fid_list_cleared, Toast.LENGTH_SHORT).show();
                         break;
                 }
             });

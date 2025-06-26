@@ -53,17 +53,17 @@
                 android:id="@+id/ecdsaOption"
                 style="@style/EncryptOptionRadioButton"
                 android:checked="true"
-                android:text="ECDSA" />
+                android:text="@string/ecdsa" />
 
             <RadioButton
                 android:id="@+id/schnorrOption"
                 style="@style/EncryptOptionRadioButton"
-                android:text="Schnorr" />
+                android:text="@string/schnorr" />
 
             <RadioButton
                 android:id="@+id/symKeyOption"
                 style="@style/EncryptOptionRadioButton"
-                android:text="SHA256" />
+                android:text="@string/sha256" />
         </RadioGroup>
 
         <!-- Button Container (1/8) -->

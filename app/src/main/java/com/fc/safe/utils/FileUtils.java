@@ -2,7 +2,6 @@ package com.fc.safe.utils;
 
 import android.content.Context;
 import android.net.Uri;
-import android.util.Log;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -52,7 +51,6 @@ public class FileUtils {
 
             return tempFile.getAbsolutePath();
         } catch (IOException e) {
-            Log.e(TAG, "Error getting path from URI: " + e.getMessage(), e);
             return null;
         }
     }
@@ -78,7 +76,7 @@ public class FileUtils {
                     }
                 }
             } catch (Exception e) {
-                Log.e(TAG, "Error getting file name from URI: " + e.getMessage(), e);
+                // Silent fail
             }
         }
         

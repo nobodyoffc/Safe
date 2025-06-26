@@ -80,7 +80,7 @@ public class ResultDialog {
             com.fc.fc_ajdk.core.crypto.CryptoDataByte cryptoDataByte = null;
             byte[] symkey = com.fc.safe.initiate.ConfigureManager.getInstance().getSymkey();
             if (symkey == null) {
-                Toast.makeText(context, "No symmetric key found", Toast.LENGTH_SHORT).show();
+                Toast.makeText(context, context.getString(R.string.no_symmetric_key_found), Toast.LENGTH_SHORT).show();
                 return;
             }
             if (com.fc.fc_ajdk.utils.JsonUtils.isJson(cipherText)) {
@@ -89,17 +89,17 @@ public class ResultDialog {
                 byte[] bundle = android.util.Base64.decode(cipherText, android.util.Base64.DEFAULT);
                 cryptoDataByte = com.fc.fc_ajdk.core.crypto.CryptoDataByte.fromBundle(bundle);
             } else {
-                Toast.makeText(context, "Not a valid cipher format", Toast.LENGTH_SHORT).show();
+                Toast.makeText(context, context.getString(R.string.not_valid_cipher_format), Toast.LENGTH_SHORT).show();
                 return;
             }
             com.fc.fc_ajdk.core.crypto.Decryptor.decryptBySymkey(cryptoDataByte, com.fc.fc_ajdk.utils.Hex.toHex(symkey));
             if (cryptoDataByte.getCode() != null && cryptoDataByte.getCode() != 0) {
-                Toast.makeText(context, "Decrypt failed: " + cryptoDataByte.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(context, context.getString(R.string.decrypt_failed, cryptoDataByte.getMessage()), Toast.LENGTH_SHORT).show();
                 return;
             }
             show(context, context.getString(R.string.result), cryptoDataByte.getData(), listener);
         } catch (Exception e) {
-            Toast.makeText(context, "Decrypt error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, context.getString(R.string.decrypt_error, e.getMessage()), Toast.LENGTH_SHORT).show();
         }
     }
 } 

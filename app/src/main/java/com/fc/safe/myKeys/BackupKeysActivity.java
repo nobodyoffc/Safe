@@ -345,7 +345,7 @@ public class BackupKeysActivity extends BaseCryptoActivity {
             finalJson = keyInfo.toNiceJson();
 
         } catch (Exception e) {
-            Toast.makeText(context, "Error encrypting key: " + keyInfo.getId(), Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, context.getString(R.string.error_encrypting_key, keyInfo.getId()), Toast.LENGTH_SHORT).show();
             return null;
         }
 

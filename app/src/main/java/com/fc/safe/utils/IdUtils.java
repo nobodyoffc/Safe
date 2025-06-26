@@ -317,7 +317,7 @@ public class IdUtils {
             avatarBytes = AvatarMaker.createAvatar(id, context);
         } catch (Exception e) {
             TimberLogger.e(TAG, "Failed to create avatar: %s", e.getMessage());
-            Toast.makeText(context, "Failed to create avatar", Toast.LENGTH_LONG).show();
+            Toast.makeText(context, R.string.failed_to_create_avatar, Toast.LENGTH_LONG).show();
         }
         setAvatarImage(avatarView, avatarBytes);
 
@@ -333,7 +333,7 @@ public class IdUtils {
 
     private static void saveAvatarToGallery(Context context, String id, byte[] avatarBytes) {
         if (avatarBytes == null) {
-            Toast.makeText(context, "No avatar to save", Toast.LENGTH_LONG).show();
+            Toast.makeText(context, context.getString(R.string.no_avatar_to_save), Toast.LENGTH_LONG).show();
             return;
         }
 
@@ -355,10 +355,10 @@ public class IdUtils {
             mediaScanIntent.setData(contentUri);
             context.sendBroadcast(mediaScanIntent);
 
-            Toast.makeText(context, "Avatar saved to gallery", Toast.LENGTH_LONG).show();
+            Toast.makeText(context, context.getString(R.string.avatar_saved_to_gallery), Toast.LENGTH_LONG).show();
         } catch (Exception e) {
             TimberLogger.e(TAG, "Failed to save avatar: %s", e.getMessage());
-            Toast.makeText(context, "Failed to save avatar", Toast.LENGTH_LONG).show();
+            Toast.makeText(context, context.getString(R.string.failed_to_save_avatar), Toast.LENGTH_LONG).show();
         }
     }
 }

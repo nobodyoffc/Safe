@@ -197,7 +197,6 @@ public class CreateMultisignTxActivity extends BaseCryptoActivity {
     }
 
     private void setupListeners() {
-        TimberLogger.i(TAG, "setupListeners started");
 
         // Add click listener to root layout to hide keyboard
         View rootView = findViewById(android.R.id.content);
@@ -210,7 +209,6 @@ public class CreateMultisignTxActivity extends BaseCryptoActivity {
         });
 
         copyButton.setOnClickListener(v -> {
-            TimberLogger.i(TAG, "copyButton clicked");
             // Hide keyboard
             View currentFocus = getCurrentFocus();
             if (currentFocus != null) {
@@ -219,12 +217,12 @@ public class CreateMultisignTxActivity extends BaseCryptoActivity {
             }
 
             if (!makeRawTxInfo()) {
-                Toast.makeText(this, "Failed to create transaction info", SafeApplication.TOAST_LASTING).show();
+                Toast.makeText(this, getString( R.string.failed_to_create_transaction_info), SafeApplication.TOAST_LASTING).show();
                 return;
             }
 
             if (rawTxInfo == null) {
-                Toast.makeText(this, "No transaction to copy", SafeApplication.TOAST_LASTING).show();
+                Toast.makeText(this, getString( R.string.no_transaction_to_copy), SafeApplication.TOAST_LASTING).show();
                 return;
             }
 
@@ -236,7 +234,6 @@ public class CreateMultisignTxActivity extends BaseCryptoActivity {
         });
 
         plusInputButton.setOnClickListener(v -> {
-            TimberLogger.i(TAG, "plusInputButton clicked");
             // Hide keyboard before showing dialog
             View currentFocus = getCurrentFocus();
             if (currentFocus != null) {
@@ -248,7 +245,6 @@ public class CreateMultisignTxActivity extends BaseCryptoActivity {
             currentDialog = dialog;
             dialog.setOnDoneListener(cash -> {
                 if(cash==null)return;
-                TimberLogger.i(TAG, "AddTxInputDialog done, cash: " + cash);
                 TxInputCard card = new TxInputCard(this);
                 card.setCash(cash);
                 card.setOnDeleteListener(this::removeInputCard);
@@ -263,7 +259,6 @@ public class CreateMultisignTxActivity extends BaseCryptoActivity {
         });
 
         plusOutputButton.setOnClickListener(v -> {
-            TimberLogger.i(TAG, "plusOutputButton clicked");
             AddTxOutputDialog dialog = new AddTxOutputDialog(this, rawTxInfo, rest);
             currentDialog = dialog;  // Set the current dialog
             dialog.setOnDoneListener(sendTo -> {
@@ -282,7 +277,6 @@ public class CreateMultisignTxActivity extends BaseCryptoActivity {
 
         // Add long press listener for plus output button
         plusOutputButton.setOnLongClickListener(v -> {
-            TimberLogger.i(TAG, "plusOutputButton long pressed");
             // Hide keyboard
             View currentFocus = getCurrentFocus();
             if (currentFocus != null) {
@@ -310,7 +304,6 @@ public class CreateMultisignTxActivity extends BaseCryptoActivity {
         });
 
         clearButton.setOnClickListener(v -> {
-            TimberLogger.i(TAG, "clearButton clicked");
             // Hide keyboard
             View currentFocus = getCurrentFocus();
             if (currentFocus != null) {
@@ -344,7 +337,6 @@ public class CreateMultisignTxActivity extends BaseCryptoActivity {
         });
 
         importTxButton.setOnClickListener(v -> {
-            TimberLogger.i(TAG, "importTxButton clicked");
             // Hide keyboard
             View currentFocus = getCurrentFocus();
             if (currentFocus != null) {
@@ -355,13 +347,12 @@ public class CreateMultisignTxActivity extends BaseCryptoActivity {
         });
 
         createButton.setOnClickListener(v -> {
-            TimberLogger.i(TAG, "createButton clicked");
 
             if (!makeRawTxInfo()) return;
 
             if (rawTxInfo == null) {
                 TimberLogger.e(TAG, "Failed to create multisign TX");
-                Toast.makeText(this,"Failed to create multisign TX.", SafeApplication.TOAST_LASTING).show();
+                Toast.makeText(this, getString(R.string.failed_to_create_multisign_tx), SafeApplication.TOAST_LASTING).show();
                 return;
             }
 
@@ -370,7 +361,6 @@ public class CreateMultisignTxActivity extends BaseCryptoActivity {
             intent.putExtra(SignTxActivity.EXTRA_TX_INFO_JSON, rawTxInfo.toJsonWithSenderInfo());
             signMultisignTxLauncher.launch(intent);  // Use launcher instead of startActivity
         });
-        TimberLogger.i(TAG, "setupListeners completed");
     }
 
     private boolean makeRawTxInfo() {
@@ -378,7 +368,7 @@ public class CreateMultisignTxActivity extends BaseCryptoActivity {
             rawTxInfo.setOpReturn(opreturnInput.getText().toString());
 
         if (multisignInput.getText() == null || multisignInput.getText().toString().isEmpty()) {
-            Toast.makeText(this,"Input the script or Multisign. Or select a multisign FID.", SafeApplication.TOAST_LASTING).show();
+            Toast.makeText(this, getString(R.string.input_the_script_or_multisign_or_select_a_multisign_fid),SafeApplication.TOAST_LASTING).show();
             return false;
         }
 
@@ -394,7 +384,7 @@ public class CreateMultisignTxActivity extends BaseCryptoActivity {
             multisign = Multisign.fromJson(multisignText, Multisign.class);
             rawTxInfo.setMultisign(multisign);
         }else{
-            Toast.makeText(this,"Failed to parse Multisign.", SafeApplication.TOAST_LASTING).show();
+            Toast.makeText(this, R.string.failed_to_parse_multisign, SafeApplication.TOAST_LASTING).show();
             return false;
         }
 
@@ -410,14 +400,16 @@ public class CreateMultisignTxActivity extends BaseCryptoActivity {
         df.setDecimalSeparatorAlwaysShown(false);
 
         // Create SpannableString for output text
-        String outputText = String.format(Locale.US, "Paying %s F    Fee %s c",
-            df.format(FchUtils.satoshiToCoin(totalOutput)),
-            df.format(FchUtils.satoshiToCash(fee)));
+        String outputText = String.format(Locale.US, "%s %s F    %s %s c",
+                getString(R.string.paying),
+                df.format(FchUtils.satoshiToCoin(totalOutput)),
+                getString(R.string.fee),
+                df.format(FchUtils.satoshiToCash(fee)));
         SpannableString spannableOutput = new SpannableString(outputText);
         
         // Make "Paying" and "Fee" bold and colored
-        int payingIndex = outputText.indexOf("Paying");
-        int feeIndex = outputText.indexOf("Fee");
+        int payingIndex = outputText.indexOf(getString(R.string.paying));
+        int feeIndex = outputText.indexOf(getString(R.string.fee));
         int fieldNameColor = getResources().getColor(R.color.field_name);
         
         spannableOutput.setSpan(new StyleSpan(Typeface.BOLD), payingIndex, payingIndex + 6, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
@@ -429,15 +421,16 @@ public class CreateMultisignTxActivity extends BaseCryptoActivity {
         totalAndFeeText.setText(spannableOutput);
 
         // Create SpannableString for input text
-        String inputText = String.format(Locale.US, "Spending %s F",
+        String inputText = String.format(Locale.US, "%s %s F",
+                getString(R.string.spending),
                 df.format(FchUtils.satoshiToCoin(totalInput)));
         SpannableString spannableInput = new SpannableString(inputText);
         
         // Make "Spending" bold and colored
-        int spendingIndex = inputText.indexOf("Spending");
-        spannableInput.setSpan(new StyleSpan(Typeface.BOLD), spendingIndex, spendingIndex + 8, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-        spannableInput.setSpan(new ForegroundColorSpan(fieldNameColor), spendingIndex, spendingIndex + 8, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-        
+        int spendingIndex = inputText.indexOf(getString(R.string.spending));
+        spannableInput.setSpan(new StyleSpan(Typeface.BOLD), spendingIndex, spendingIndex + getString(R.string.spending).length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        spannableInput.setSpan(new ForegroundColorSpan(fieldNameColor), spendingIndex, spendingIndex + getString(R.string.spending).length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+
         totalInputText.setText(spannableInput);
     }
 
@@ -446,26 +439,26 @@ public class CreateMultisignTxActivity extends BaseCryptoActivity {
         List<Cash> inputs = rawTxInfo.getInputs();
         for(Cash cash : inputs){
             if(cash.getValue()<=0){
-                Toast.makeText(this,"Input value must be greater than 0.", SafeApplication.TOAST_LASTING).show();
+                Toast.makeText(this, getString(R.string.input_value_must_be_greater_than_0), SafeApplication.TOAST_LASTING).show();
                 return false;
             }
             if(!Hex.isHex32(cash.getBirthTxId())){
-                Toast.makeText(this,"Invalid txid.", SafeApplication.TOAST_LASTING).show();
+                Toast.makeText(this, getString(R.string.invalid_txid), SafeApplication.TOAST_LASTING).show();
                 return false;
             }
             if(cash.getBirthIndex()<0){
-                Toast.makeText(this,"Invalid index.", SafeApplication.TOAST_LASTING).show();
+                Toast.makeText(this, getString(R.string.invalid_index), SafeApplication.TOAST_LASTING).show();
                 return false;
             }
         }
 
         if(rawTxInfo.getMultisign()==null){
-            Toast.makeText(this,"Failed to parse Multisign.", SafeApplication.TOAST_LASTING).show();
+            Toast.makeText(this, getString(R.string.failed_to_parse_multisign), SafeApplication.TOAST_LASTING).show();
             return false;
         }
 
         if(rawTxInfo.getInputs()==null || rawTxInfo.getInputs().isEmpty()){
-            Toast.makeText(this,"Inputs cannot be empty.", SafeApplication.TOAST_LASTING).show();
+            Toast.makeText(this, getString(R.string.inputs_cannot_be_empty), SafeApplication.TOAST_LASTING).show();
             return false;
         }
 
@@ -474,7 +467,7 @@ public class CreateMultisignTxActivity extends BaseCryptoActivity {
 
 
         if(totalInput<fee+totalOutput){
-            Toast.makeText(this,"Inputs are not enough to cover the fee.", SafeApplication.TOAST_LASTING).show();
+            Toast.makeText(this, getString(R.string.inputs_are_not_enough_to_cover_the_fee), SafeApplication.TOAST_LASTING).show();
             return false;
         }
 
@@ -668,7 +661,7 @@ public class CreateMultisignTxActivity extends BaseCryptoActivity {
         TimberLogger.i(TAG, "handleQrScanResult called with requestCode: " + requestCode + ", qrContent: " + qrContent);
         if (qrContent == null || qrContent.isEmpty()) {
             TimberLogger.e(TAG, "Invalid QR code content");
-            showToast("Invalid QR code content");
+            showToast(getString(R.string.invalid_qr_code_content));
             return;
         }
 

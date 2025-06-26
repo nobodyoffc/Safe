@@ -42,7 +42,6 @@ public class MainActivity extends AppCompatActivity {
     private void setupEdgeToEdge() {
         try {
             EdgeToEdge.enable(this);
-            TimberLogger.d(TAG, "EdgeToEdge enabled successfully");
         } catch (Exception ex) {
             TimberLogger.e(TAG, "Failed to enable EdgeToEdge: " + ex.getMessage(), ex);
         }
@@ -88,7 +87,6 @@ public class MainActivity extends AppCompatActivity {
     private void handlePasswordResult(androidx.activity.result.ActivityResult result) {
         String activityName = result.getData() != null ? 
             Objects.requireNonNull(result.getData().getComponent()).getClassName() : "Unknown";
-        TimberLogger.d(TAG, activityName + " result received: " + result.getResultCode());
         
         if (result.getResultCode() == RESULT_OK) {
             Configure configure = ConfigureManager.getInstance().getConfigure();
@@ -105,23 +103,17 @@ public class MainActivity extends AppCompatActivity {
 
     private void handleError(String message) {
         TimberLogger.e(TAG, message);
-        Toast.makeText(this, "Failed to initiate.", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, getString(R.string.failed_to_initiate), Toast.LENGTH_SHORT).show();
     }
 
     private void launchHomeActivity() {
         try {
-            TimberLogger.d(TAG, "Launching HomeActivity");
             Intent intent = new Intent(this, HomeActivity.class);
-            
-            // No need to pass the Configure object as an extra since we're using ConfigureManager
-            TimberLogger.d(TAG, "Using ConfigureManager to share Configure object with HomeActivity");
-            
             startActivity(intent);
-            TimberLogger.d(TAG, "HomeActivity started successfully");
             finish(); // Close MainActivity
         } catch (Exception ex) {
             TimberLogger.e(TAG, "Error launching HomeActivity: " + ex.getMessage(), ex);
-            Toast.makeText(this, "Error launching HomeActivity: " + ex.getMessage(), Toast.LENGTH_LONG).show();
+            Toast.makeText(this, getString(R.string.error_launching_homeactivity) + ex.getMessage(), Toast.LENGTH_LONG).show();
         }
     }
 
@@ -132,7 +124,6 @@ public class MainActivity extends AppCompatActivity {
         if (dbManager != null) {
             dbManager.clearAllDatabases();
             ConfigureManager.getInstance().clearConfig(this);
-            TimberLogger.d(TAG,"Databases and configuration cleared successfully");
         }
     }
 }

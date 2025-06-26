@@ -116,10 +116,10 @@ public class MultisignActivity extends BaseCryptoActivity {
             TimberLogger.d(TAG, "loadMultisigns: Adding " + multisigns.size() + " multisigns to container");
             multisignCardManager.addMultisignCards(multisignListContainer, multisigns);
             TimberLogger.d(TAG, "loadMultisigns: Container child count: " + multisignListContainer.getChildCount());
-            showToast("Loaded " + multisigns.size() + " multisigns");
+            showToast(getString(R.string.loaded_multisigns, multisigns.size()));
         } else {
             TimberLogger.d(TAG, "loadMultisigns: No more multisigns to load");
-            showToast("No more multisigns to load");
+            showToast(getString(R.string.no_more_multisigns_to_load));
         }
         
         isLoading = false;

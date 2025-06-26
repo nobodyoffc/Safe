@@ -15,7 +15,7 @@
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:scaleType="fitCenter"
-            android:contentDescription="Small Avatar Image"
+            android:contentDescription="@string/small_avatar_image"
             android:layout_alignParentStart="true"
             android:layout_alignParentTop="true"/>
 
@@ -47,24 +47,27 @@
         android:layout_marginBottom="16dp"/>
 
     <LinearLayout
+        style="?android:attr/buttonBarStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal">
 
         <Button
             android:id="@+id/stopButton"
+            style="?android:attr/buttonBarButtonStyle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Stop"
-            android:layout_marginEnd="8dp"/>
+            android:text="@string/stop"
+            android:layout_marginEnd="8dp" />
 
         <Button
             android:id="@+id/nextButton"
+            style="?android:attr/buttonBarButtonStyle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Next"/>
+            android:text="@string/next"/>
 
     </LinearLayout>
 

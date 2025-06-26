@@ -57,7 +57,7 @@ public class ImportTotpActivity extends BaseCryptoActivity {
 
             @Override
             public void onImportError(String error) {
-                showToast(error);
+                showToast(getString(R.string.operation_failed_with_message, error));
             }
 
             @Override
@@ -112,7 +112,7 @@ public class ImportTotpActivity extends BaseCryptoActivity {
         String fileName = FileUtils.getFileNameFromUri(this, uri);
 
         if (filePath == null || fileName == null) {
-            showToast("Failed to load file");
+            showToast(getString(R.string.failed_to_load_file));
             return;
         }
 
@@ -144,7 +144,7 @@ public class ImportTotpActivity extends BaseCryptoActivity {
                 if (isFileMode && currentFilePath != null) {
                     File file = new File(currentFilePath);
                     if (!file.exists()) {
-                        showToast("File not found");
+                        showToast(getString(R.string.file_not_found));
                         return;
                     }
                     try (FileInputStream fis = new FileInputStream(file)) {

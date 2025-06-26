@@ -343,7 +343,7 @@ public class FindNiceKeysActivity extends AppCompatActivity {
             @Override
             public void onVerificationCancelled() {
                 // Keep the activity open if verification is cancelled
-                Toast.makeText(FindNiceKeysActivity.this, R.string.password_verification_cancelled , Toast.LENGTH_SHORT).show();
+                Toast.makeText(FindNiceKeysActivity.this, R.string.password_verification_cancelled, Toast.LENGTH_SHORT).show();
             }
         });
         dialog.show();

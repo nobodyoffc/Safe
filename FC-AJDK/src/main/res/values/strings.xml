@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">FC-AJDK</string>
+    <string name="invalid_number_format">Invalid number format</string>
+    <string name="welcome_to_the_freeverse_with">"Welcome to the Freeverse with "</string>
+    <string name="builder_shares_didn_t_sum_up_to_100_reset_it">Builder shares didn\'t sum up to 100%. Reset it.</string>
+    <string name="invalid_date_format">Invalid date format</string>
 </resources> 

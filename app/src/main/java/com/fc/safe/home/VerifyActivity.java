@@ -59,7 +59,7 @@ public class VerifyActivity extends BaseCryptoActivity {
                         // Store the actual key ID for verification
                         keyInput.setTag(keyInfo.getId());
                     } else {
-                        showToast("Selected key has no ID");
+                        showToast(getString(R.string.selected_key_has_no_id));
                     }
                 }
             }
@@ -130,7 +130,7 @@ public class VerifyActivity extends BaseCryptoActivity {
     private void verifyMessage() {
         Editable text = textInput.getText();
         if(text==null){
-            showToast("Please input signature");
+            showToast(getString(R.string.please_input_signature));
             return;
         }
         String signatureJson = text.toString();
@@ -149,14 +149,14 @@ public class VerifyActivity extends BaseCryptoActivity {
 
             if(signature.getAlg().equals(AlgorithmId.FC_Sha256SymSignMsg_No1_NrC7)){
                 if(key==null || key.isEmpty()){
-                    showToast("The symKey is required for SHA256 signature");
+                    showToast(getString(R.string.symkey_required_for_sha256_signature));
                     return;
                 }else{
                     signature.setKey(Hex.fromHex(key));
                 }
             }else if(key != null && !key.isEmpty()){
                 if(signature.getFid()==null && KeyTools.isGoodFid(key))signature.setFid(key);
-                else showToast("The key is not required.");
+                else showToast(getString(R.string.key_is_not_required));
             }
             
             // Verify the signature

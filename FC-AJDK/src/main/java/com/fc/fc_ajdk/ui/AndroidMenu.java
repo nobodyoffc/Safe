@@ -10,6 +10,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.fc.fc_ajdk.R;
 import com.fc.fc_ajdk.utils.NumberUtils;
 
 import java.util.ArrayList;
@@ -175,7 +176,7 @@ public class AndroidMenu {
      * Show a welcome message
      */
     public static void welcome(Context context, String name) {
-        Toast.makeText(context, "Welcome to the Freeverse with " + name, Toast.LENGTH_LONG).show();
+        Toast.makeText(context, R.string.welcome_to_the_freeverse_with + name, Toast.LENGTH_LONG).show();
     }
 
     /**
@@ -203,7 +204,7 @@ public class AndroidMenu {
         }
 
         if (sum != 10000) {
-            Toast.makeText(context, "Builder shares didn't sum up to 100%. Reset it.", 
+            Toast.makeText(context, context.getString(R.string.builder_shares_didn_t_sum_up_to_100_reset_it),
                 Toast.LENGTH_LONG).show();
             return false;
         }

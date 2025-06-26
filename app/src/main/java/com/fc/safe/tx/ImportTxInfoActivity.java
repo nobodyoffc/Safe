@@ -66,7 +66,7 @@ public class ImportTxInfoActivity extends BaseCryptoActivity {
             
             if (jsonText.isEmpty()) {
                 TimberLogger.e(TAG, "JSON text is empty");
-                showToast("Please input JSON text");
+                showToast(getString(R.string.please_input_json_text));
                 return;
             }
 
@@ -81,7 +81,7 @@ public class ImportTxInfoActivity extends BaseCryptoActivity {
 
                     if (rawTxInfo == null) {
                         TimberLogger.e(TAG, "Failed to parse TX");
-                        showToast("Failed to parse JSON");
+                        showToast(getString(R.string.failed_to_parse_json));
                         return;
                     }
                 }catch (Exception e){
@@ -89,12 +89,12 @@ public class ImportTxInfoActivity extends BaseCryptoActivity {
                         rawTxInfo = RawTxInfo.fromRawTxForCs(jsonText);
                     }catch (Exception e1){
                         TimberLogger.e(TAG, "Failed to parse TX");
-                        showToast("Failed to parse JSON");
+                        showToast(getString(R.string.failed_to_parse_json));
                         return;
                     }
                     if (rawTxInfo == null) {
                         TimberLogger.e(TAG, "Failed to parse TX");
-                        showToast("Failed to parse JSON");
+                        showToast(getString(R.string.failed_to_parse_json));
                         return;
                     }
                 }
@@ -106,7 +106,7 @@ public class ImportTxInfoActivity extends BaseCryptoActivity {
                 finish();
             } catch (Exception e) {
                 TimberLogger.e(TAG, "Error parsing JSON: " + e.getMessage());
-                showToast("Invalid JSON format");
+                showToast(getString(R.string.invalid_json_format));
             }
         });
     }

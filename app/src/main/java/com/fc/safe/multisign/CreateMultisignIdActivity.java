@@ -86,7 +86,7 @@ public class CreateMultisignIdActivity extends BaseCryptoActivity {
                             keyInput.setEnabled(false);
                             keyInput.setTag(qrContent);
                         } else {
-                            showToast("Invalid public key");
+                            showToast(getString(R.string.invalid_public_key));
                         }
                     }
                 }
@@ -130,7 +130,7 @@ public class CreateMultisignIdActivity extends BaseCryptoActivity {
         signerNumberRadioGroup = findViewById(R.id.signerNumberRadioGroup);
         View keyView = findViewById(R.id.keyView);
         keyInput = keyView.findViewById(R.id.keyInputWithPeopleAndScanLayout).findViewById(R.id.keyInput);
-        keyInput.setHint(R.string.input_the_pubkey);
+        keyInput.setHint(R.string.input_the_pubkey_or_redeem_script);
         buttonContainer = findViewById(R.id.buttonContainer);
         
         // Initialize radio buttons array
@@ -212,7 +212,7 @@ public class CreateMultisignIdActivity extends BaseCryptoActivity {
                 keyInput.setEnabled(false);
                 keyInput.setTag(qrContent);
             } else {
-                showToast("Invalid public key");
+                showToast(getString(R.string.invalid_public_key));
             }
         }
     }
@@ -259,7 +259,7 @@ public class CreateMultisignIdActivity extends BaseCryptoActivity {
             updateRadioButtonsState();
 
             if (memberList.isEmpty()) {
-                showToast("Selected keys have no public keys");
+                showToast(getString(R.string.selected_keys_have_no_public_keys));
             }
         }
     }
@@ -284,18 +284,37 @@ public class CreateMultisignIdActivity extends BaseCryptoActivity {
             showToast(getString(R.string.the_members_can_t_more_than_16));
             return;
         }
-        String pubkey = selectedKeyInfo == null ? keyInput.getText().toString() : selectedKeyInfo.getPubkey();
-
-        if (!KeyTools.isPubkey(pubkey)) {
-            showToast(getString(R.string.invalid_public_key));
-            return;
+        String str = selectedKeyInfo == null ? keyInput.getText().toString() : selectedKeyInfo.getPubkey();
+        if (!KeyTools.isPubkey(str)) {
+            try {
+                Multisign multisign = Multisign.parseMultisignRedeemScript(str);
+                if(multisign==null || multisign.getPubKeys()==null || multisign.getPubKeys().isEmpty()){
+                    showToast(getString(R.string.invalid_public_key_or_redeem_script));
+                    return;
+                }
+                for(String key: multisign.getPubKeys()){
+                    KeyInfo newKeyInfo = new KeyInfo(null, key);
+                    memberList.add(newKeyInfo);
+                    keyCardManager.addKeyCard(newKeyInfo);
+                }
+                
+                // Set the radio button corresponding to multisign.getM() as selected
+                int m = multisign.getM();
+                if (m > 0 && m <= radioButtons.length) {
+                    signerNumberRadioGroup.check(radioButtons[m - 1].getId());
+                }
+                
+            }catch (Exception e){
+                showToast(getString(R.string.invalid_public_key_or_redeem_script));
+                return;
+            }
+        }else {
+            // Add the KeyInfo to member list
+            KeyInfo newKeyInfo = new KeyInfo(null, str);
+            memberList.add(newKeyInfo);
+            keyCardManager.addKeyCard(newKeyInfo);
         }
 
-        // Add the KeyInfo to member list
-        KeyInfo newKeyInfo = new KeyInfo(null, pubkey);
-        memberList.add(newKeyInfo);
-        keyCardManager.addKeyCard(newKeyInfo);
-        
         // Clear key input
         keyInput.setText("");
         keyInput.setEnabled(true);
@@ -337,7 +356,7 @@ public class CreateMultisignIdActivity extends BaseCryptoActivity {
             List<byte[]> pubkeyList = new ArrayList<>();
             for (KeyInfo keyInfo : memberList) {
                 if(keyInfo.getPubkey()==null){
-                    showToast("Failed to get the pubkey of "+keyInfo.getId());
+                    showToast(getString(R.string.failed_to_get_pubkey_of, keyInfo.getId()));
                     return;
                 }
                 pubkeyList.add(Hex.fromHex(keyInfo.getPubkey()));
@@ -345,7 +364,7 @@ public class CreateMultisignIdActivity extends BaseCryptoActivity {
             
             Multisign multisign = TxCreator.createMultisign(pubkeyList, signerNumber);
             if(multisign ==null){
-                showToast("Failed to create multisign ID.");
+                showToast(getString(R.string.failed_to_create_multisign_id));
                 return;
             }
             // Set save time before adding to database
@@ -355,7 +374,7 @@ public class CreateMultisignIdActivity extends BaseCryptoActivity {
             showLabelDialog(multisign);
         } catch (Exception e) {
             String errorMessage = "Failed to create multisign ID: " + e.getMessage();
-            showToast(errorMessage);
+            showToast(getString(R.string.operation_failed_with_message, e.getMessage()));
             TimberLogger.e(TAG, errorMessage);
         }
     }
@@ -385,13 +404,13 @@ public class CreateMultisignIdActivity extends BaseCryptoActivity {
                 multisignManager.commit();
                 
                 dialog.dismiss();
-                showToast("Multisign ID created successfully");
+                showToast(getString(R.string.multisign_id_created_successfully));
                 MultisignActivity.setNeedsRefresh(true);
                 finish();
             } catch (Exception e) {
                 String errorMessage = "Failed to save multisign ID: " + e.getMessage();
                 TimberLogger.e(TAG, errorMessage);
-                showToast(errorMessage);
+                showToast(getString(R.string.operation_failed_with_message, e.getMessage()));
             }
         });
 

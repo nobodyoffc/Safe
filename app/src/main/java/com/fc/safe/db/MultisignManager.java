@@ -55,7 +55,7 @@ public class MultisignManager {
             try {
                 multisignDB.close();
             } catch (Exception e) {
-                TimberLogger.e(TAG, "Error closing existing database: " + e.getMessage());
+                TimberLogger.e(TAG, "Error closing database: " + e.getMessage());
             }
         }
         multisignDB = dbManager.getEntityDatabase(Multisign.class, LocalDB.SortType.BIRTH_ORDER, SAVE_TIME);
@@ -153,21 +153,7 @@ public class MultisignManager {
             return null;
         }
 
-        TimberLogger.d(TAG, "getPaginatedMultisigns: pageSize=%d, lastIndex=%d, descending=%b",
-            pageSize, lastIndex, descending);
-
-        // If we have items but pagination returns none, try without sorting
         List<Multisign> result = multisignDB.getList(pageSize, null, lastIndex, true, null, null, false, descending);
-
-        TimberLogger.d(TAG, "getPaginatedMultisigns: Retrieved %d items", result != null ? result.size() : 0);
-        if (result != null && !result.isEmpty()) {
-            for (Multisign multisign : result) {
-                TimberLogger.d(TAG, "getPaginatedMultisigns: Retrieved Item ID: %s, SaveTime: %s", 
-                    multisign.getId(), multisign.getSaveTime());
-            }
-        } else {
-            TimberLogger.d(TAG, "getPaginatedMultisigns: No items retrieved");
-        }
         return result;
     }
 

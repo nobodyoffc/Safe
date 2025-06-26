@@ -110,7 +110,7 @@ public class ChangePasswordActivity extends AppCompatActivity {
                         } catch (Exception e) {
                             runOnUiThread(() -> {
                                 dismissWaitingDialog();
-                                Toast.makeText(this, "Error during password change: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                                Toast.makeText(this, getString(R.string.error_during_password_change) + e.getMessage(), Toast.LENGTH_LONG).show();
                                 setResult(RESULT_CANCELED);
                                 finish();
                             });

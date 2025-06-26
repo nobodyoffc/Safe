@@ -189,7 +189,7 @@ public class SignMultisignTxActivity extends BaseCryptoActivity {
             
             List<KeyInfo> keyInfoList = keyInfoManager.getAllKeyInfoList();
             if (keyInfoList.isEmpty()) {
-                showToast("No keys available");
+                showToast(getString(R.string.no_keys_available));
                 return;
             }
             Intent intent = ChooseKeyInfoActivity.newIntent(this, keyInfoList, true);

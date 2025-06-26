@@ -115,6 +115,16 @@ public class KeyInfoManager {
         return keyInfoDB.get(id);
     }
 
+    private void encryptAndSetPrikeyCipher(KeyInfo keyInfo) {
+        if (keyInfo.getPrikeyCipher() == null && (keyInfo.getPrikey() != null || keyInfo.getPrikeyBytes() != null)) {
+            if (keyInfo.getPrikeyBytes() == null) {
+                keyInfo.setPrikeyBytes(KeyTools.getPrikey32(keyInfo.getPrikey()));
+            }
+            String prikeyCipher = Encryptor.encryptBySymkeyToJson(keyInfo.getPrikeyBytes(), ConfigureManager.getInstance().getSymkey());
+            keyInfo.setPrikeyCipher(prikeyCipher);
+        }
+    }
+
     /**
      * Adds a KeyInfo object to the database.
      * 
@@ -122,45 +132,34 @@ public class KeyInfoManager {
      */
     public void addKeyInfo(KeyInfo keyInfo) {
         keyInfo.setSaveTime(DateUtils.longToTime(System.currentTimeMillis(), DateUtils.TO_MINUTE));
-        if(keyInfo.getPrikeyCipher()==null){
-            if( keyInfo.getPrikey()!=null || keyInfo.getPrikeyBytes()!=null) {
-                if (keyInfo.getPrikeyBytes() == null)
-                    keyInfo.setPrikeyBytes(KeyTools.getPrikey32(keyInfo.getPrikey()));
-                String prikeyCipher = Encryptor.encryptBySymkeyToJson(keyInfo.getPrikeyBytes(), ConfigureManager.getInstance().getSymkey());
-                keyInfo.setPrikeyCipher(prikeyCipher);
-            }
-        }
-
+        encryptAndSetPrikeyCipher(keyInfo);
         keyInfoDB.put(keyInfo.getId(), keyInfo);
         TimberLogger.i(TAG, "Added KeyInfo with ID: %s", keyInfo.getId());
     }
 
     public void addAllKeyInfo(List<KeyInfo> keyInfoList) {
-        Map<String,KeyInfo> keyInfoMap = new HashMap();
+        Map<String,KeyInfo> keyInfoMap = new HashMap<>();
         int count = 0;
         for(KeyInfo keyInfo: keyInfoList) {
-            if(keyInfo.getSaveTime()==null)
+            if(keyInfo.getSaveTime() == null) {
                 keyInfo.setSaveTime(DateUtils.longToTime(System.currentTimeMillis(), DateUtils.TO_MINUTE));
-            if (keyInfo.getPrikeyCipher() == null) {
-                if (keyInfo.getPrikey() != null || keyInfo.getPrikeyBytes() != null) {
-                    if (keyInfo.getPrikeyBytes() == null)
-                        keyInfo.setPrikeyBytes(KeyTools.getPrikey32(keyInfo.getPrikey()));
-                    String prikeyCipher = Encryptor.encryptBySymkeyToJson(keyInfo.getPrikeyBytes(), ConfigureManager.getInstance().getSymkey());
-                    keyInfo.setPrikeyCipher(prikeyCipher);
-                }
             }
-            if(keyInfo.getId()==null){
+            encryptAndSetPrikeyCipher(keyInfo);
+            
+            if(keyInfo.getId() == null) {
                 try {
-                    if (keyInfo.getPrikey() != null)
+                    if (keyInfo.getPrikey() != null) {
                         keyInfo.setId(KeyTools.prikeyToFid(KeyTools.getPrikey32(keyInfo.getPrikey())));
-                    else if (keyInfo.getPubkey() != null)
+                    } else if (keyInfo.getPubkey() != null) {
                         keyInfo.setId(KeyTools.pubkeyToFchAddr(keyInfo.getPubkey()));
-                    else continue;
-                }catch (Exception e){
+                    } else {
+                        continue;
+                    }
+                } catch (Exception e) {
                     continue;
                 }
             }
-            keyInfoMap.put(keyInfo.getId(),keyInfo);
+            keyInfoMap.put(keyInfo.getId(), keyInfo);
             count++;
         }
         keyInfoDB.putAll(keyInfoMap);
@@ -218,13 +217,10 @@ public class KeyInfoManager {
         return keyInfoDB.getFromMap(AVATAR_MAP, id);
     }
 
-    public void makeAvatarByFid(String fid,Context context) throws IOException {
+    public void makeAvatarByFid(String fid, Context context) throws IOException {
         byte[] avatarBytes = AvatarMaker.createAvatar(fid, context);
-
-        // Save avatar to database
         if (avatarBytes != null) {
             keyInfoDB.putInMap(AVATAR_MAP, fid, avatarBytes);
-            TimberLogger.i(TAG, "Created and saved avatar for %s", fid);
         }
     }
 
@@ -245,7 +241,7 @@ public class KeyInfoManager {
         processKeyInfoSequentially(activity, keyInfoManager, keyInfoList, symkey, 0,0);
     }
 
-    private static void processKeyInfoSequentially(Activity activity, KeyInfoManager keyInfoManager, List<KeyInfo> keyInfoList, byte[] symkey, int index,int savedCount) {
+    private static void processKeyInfoSequentially(Activity activity, KeyInfoManager keyInfoManager, List<KeyInfo> keyInfoList, byte[] symkey, int index, int savedCount) {
         if (index >= keyInfoList.size()) {
             keyInfoManager.commit();
             Toast.makeText(activity, activity.getString(R.string.secrets_saved_successfully, savedCount), Toast.LENGTH_SHORT).show();
@@ -253,27 +249,28 @@ public class KeyInfoManager {
             activity.finish();
             return;
         }
+
         KeyInfo keyInfo = keyInfoList.get(index);
         if (keyInfo.getPrikey() != null) {
-            if (keyInfo.getId() == null)
+            if (keyInfo.getId() == null) {
                 keyInfo.setId(KeyTools.prikeyToFid(KeyTools.getPrikey32(keyInfo.getPrikey())));
+            }
             String cipher = Encryptor.encryptBySymkeyToJson(KeyTools.getPrikey32(keyInfo.getPrikey()), symkey);
             keyInfo.setPrikeyCipher(cipher);
             keyInfo.setPrikey(null);
         } else if (keyInfo.getPrikeyCipher() == null) {
-            // skip this key if no cipher or prikey
-            processKeyInfoSequentially(activity, keyInfoManager, keyInfoList, symkey, index + 1,savedCount);
+            processKeyInfoSequentially(activity, keyInfoManager, keyInfoList, symkey, index + 1, savedCount);
             return;
         }
+
         if (keyInfoManager.checkIfExisted(keyInfo.getId())) {
-            String prompt = keyInfo.getId() + " existed. Replace it?";
-            UserConfirmDialog dialog = new UserConfirmDialog(activity, prompt, choice -> {
+            UserConfirmDialog dialog = new UserConfirmDialog(activity, keyInfo.getId() + " existed. Replace it?", choice -> {
                 if (choice == UserConfirmDialog.Choice.YES) {
                     keyInfoManager.addKeyInfo(keyInfo);
                     keyInfoManager.commit();
-                    processKeyInfoSequentially(activity, keyInfoManager, keyInfoList, symkey, index + 1,savedCount+1);
+                    processKeyInfoSequentially(activity, keyInfoManager, keyInfoList, symkey, index + 1, savedCount + 1);
                 } else if (choice == UserConfirmDialog.Choice.NO) {
-                    processKeyInfoSequentially(activity, keyInfoManager, keyInfoList, symkey, index +1,savedCount);
+                    processKeyInfoSequentially(activity, keyInfoManager, keyInfoList, symkey, index + 1, savedCount);
                 } else if (choice == UserConfirmDialog.Choice.STOP) {
                     keyInfoManager.commit();
                     Toast.makeText(activity, activity.getString(R.string.secrets_saved_successfully, savedCount), Toast.LENGTH_SHORT).show();
@@ -284,7 +281,7 @@ public class KeyInfoManager {
             dialog.show();
         } else {
             keyInfoManager.addKeyInfo(keyInfo);
-            processKeyInfoSequentially(activity, keyInfoManager, keyInfoList, symkey, index + 1,savedCount+1);
+            processKeyInfoSequentially(activity, keyInfoManager, keyInfoList, symkey, index + 1, savedCount + 1);
         }
     }
 } 

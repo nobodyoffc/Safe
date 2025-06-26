@@ -87,7 +87,7 @@ public class ImportKeyInfoActivity extends BaseCryptoActivity {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 // Permission granted
             } else {
-                Toast.makeText(this, "Storage permission is required to read backup files", Toast.LENGTH_LONG).show();
+                Toast.makeText(this, getString(R.string.storage_permission_is_required_to_read_backup_files), Toast.LENGTH_LONG).show();
             }
         }
     }
@@ -101,7 +101,7 @@ public class ImportKeyInfoActivity extends BaseCryptoActivity {
 
             @Override
             public void onImportError(String error) {
-                showToast(error);
+                showToast(getString(R.string.operation_failed_with_message, error));
             }
 
             @Override
@@ -156,7 +156,7 @@ public class ImportKeyInfoActivity extends BaseCryptoActivity {
         String fileName = FileUtils.getFileNameFromUri(this, uri);
 
         if (filePath == null || fileName == null) {
-            showToast("Failed to load file");
+            showToast(getString(R.string.failed_to_load_file));
             return;
         }
 
@@ -191,7 +191,7 @@ public class ImportKeyInfoActivity extends BaseCryptoActivity {
                 if (isFileMode && currentFilePath != null) {
                     java.io.File file = new java.io.File(currentFilePath);
                     if (!file.exists()) {
-                        showToast("File not found");
+                        showToast(getString(R.string.file_not_found));
                         return;
                     }
                     try (java.io.FileInputStream fis = new java.io.FileInputStream(file)) {

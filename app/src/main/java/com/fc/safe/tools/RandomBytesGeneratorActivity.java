@@ -90,14 +90,14 @@ public class RandomBytesGeneratorActivity extends BaseCryptoActivity {
 
     private void handleQrGeneration() {
         if (resultTextView.getText() == null) {
-            showToast("Please generate a random number first");
+            showToast(getString(R.string.please_generate_a_random_number_first));
             return;
         }
         String content = resultTextView.getText().toString();
         if (!TextUtils.isEmpty(content)) {
             IoIconsView.launchQrGenerator(this, content);
         } else {
-            showToast("No content to generate QR code");
+            showToast(getString(R.string.no_content_to_generate_qr_code));
         }
     }
 
@@ -133,11 +133,11 @@ public class RandomBytesGeneratorActivity extends BaseCryptoActivity {
             try {
                 bytesLength = Integer.parseInt(bytesStr);
                 if (bytesLength <= 0) {
-                    showToast("Number of bytesLength must be positive");
+                    showToast(getString(R.string.number_of_bytes_length_must_be_positive));
                     return;
                 }
             } catch (NumberFormatException e) {
-                showToast("Invalid number format");
+                showToast(getString(R.string.invalid_number_format));
                 return;
             }
         }

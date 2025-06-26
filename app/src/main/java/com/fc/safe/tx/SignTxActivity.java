@@ -66,7 +66,7 @@ public class SignTxActivity extends BaseCryptoActivity {
         // Get data from intent
         String offLineTxInfoJson = getIntent().getStringExtra(EXTRA_TX_INFO_JSON);
         if(offLineTxInfoJson == null){
-            Toast.makeText(this, "The TX is empty.", SafeApplication.TOAST_LASTING).show();
+            Toast.makeText(this, getString(R.string.the_tx_is_empty), SafeApplication.TOAST_LASTING).show();
             finish();
             return;
         }
@@ -138,14 +138,14 @@ public class SignTxActivity extends BaseCryptoActivity {
             if (priKey != null) {
                 signedTx = TxCreator.signTx(rawTxInfo, priKey);
                 if (Hex.isHexString(signedTx)) {
-                    Toast.makeText(this, "Signed! You can broadcast it.", SafeApplication.TOAST_LASTING).show();
+                    Toast.makeText(this, getString(R.string.signed_you_can_broadcast_it), SafeApplication.TOAST_LASTING).show();
                     isSigned = true;
                     updateButtonTexts();
                 } else {
-                    Toast.makeText(this, "Failed to sign transaction", SafeApplication.TOAST_LASTING).show();
+                    Toast.makeText(this, getString(R.string.failed_to_sign_transaction), SafeApplication.TOAST_LASTING).show();
                 }
             } else {
-                Toast.makeText(this, "Failed to get private key", SafeApplication.TOAST_LASTING).show();
+                Toast.makeText(this, getString(R.string.failed_to_get_private_key), SafeApplication.TOAST_LASTING).show();
             }
         });
     }
@@ -165,7 +165,7 @@ public class SignTxActivity extends BaseCryptoActivity {
         ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
         ClipData clip = ClipData.newPlainText(label, text);
         clipboard.setPrimaryClip(clip);
-        showToast("Copied to clipboard");
+        showToast(getString(R.string.copied_to_clipboard));
     }
 
     @Override

@@ -75,7 +75,7 @@ public class AddressConverterActivity extends BaseCryptoActivity {
                 if (!TextUtils.isEmpty(content)) {
                     QRCodeGenerator.generateAndShowQRCode(this, content);
                 } else {
-                    showToast("No content to generate QR code");
+                    showToast(getString(R.string.no_content_to_generate_qr_code));
                 }
             }, null, null, null);
     }
@@ -123,7 +123,7 @@ public class AddressConverterActivity extends BaseCryptoActivity {
     private void showChooseKeyInfoDialog() {
         List<KeyInfo> keyInfoList = keyInfoManager.getAllKeyInfoList();
         if (keyInfoList.isEmpty()) {
-            showToast("No keys available");
+            showToast(getString(R.string.no_keys_available));
             return;
         }
 
@@ -141,7 +141,7 @@ public class AddressConverterActivity extends BaseCryptoActivity {
             (String) keyEditText.getTag();
 
         if (TextUtils.isEmpty(inputedKey)) {
-            showToast("Please enter a public key or address");
+            showToast(getString(R.string.please_enter_a_public_key_or_address));
             return;
         }
 
@@ -170,7 +170,7 @@ public class AddressConverterActivity extends BaseCryptoActivity {
             
         } catch (Exception e) {
             TimberLogger.e(TAG, "Error converting: " + e.getMessage());
-            showToast("Error converting: " + e.getMessage());
+            showToast(getString(R.string.error_converting, e.getMessage()));
         }
     }
 
@@ -202,7 +202,7 @@ public class AddressConverterActivity extends BaseCryptoActivity {
             // Store the actual private key cipher for decryption
             keyEditText.setTag(tag);
         } else {
-            showToast("Selected key has no private key cipher");
+            showToast(getString(R.string.selected_key_has_no_private_key_cipher));
         }
     }
 } 

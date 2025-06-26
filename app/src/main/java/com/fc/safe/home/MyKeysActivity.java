@@ -113,7 +113,7 @@ public class MyKeysActivity extends BaseCryptoActivity {
             loadListFragment();
         } catch (Exception e) {
             TimberLogger.e(TAG, "Error loading initial data: %s", e.getMessage());
-            showToast("Error loading keys: " + e.getMessage());
+            showToast(getString(R.string.error_loading_keys, e.getMessage()));
         }
     }
 
@@ -238,15 +238,15 @@ public class MyKeysActivity extends BaseCryptoActivity {
                         entityListFragment.updateList(keyInfoList);
                         updateButtonStates();
 
-                        Toast.makeText(this, moreKeyInfos.size()+" keys loaded.", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(this, moreKeyInfos.size()+R.string.keys_loaded, Toast.LENGTH_SHORT).show();
                         
                         if (!hasMoreData) {
-                            Toast.makeText(this, "No more keys", Toast.LENGTH_LONG).show();
+                            Toast.makeText(this, R.string.no_more_keys, Toast.LENGTH_LONG).show();
                         }
                     } else {
                         // No more data to load
                         hasMoreData = false;
-                        Toast.makeText(this, "No more keys", Toast.LENGTH_LONG).show();
+                        Toast.makeText(this, getString(R.string.no_more_keys), Toast.LENGTH_LONG).show();
                     }
                     
                     isLoadingMore = false;
@@ -257,7 +257,7 @@ public class MyKeysActivity extends BaseCryptoActivity {
                 runOnUiThread(() -> {
                     isLoadingMore = false;
                     dismissWaitingDialog();
-                    Toast.makeText(this, "Error loading more keys: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                    Toast.makeText(this, getString(R.string.error_loading_more_keys) + e.getMessage(), Toast.LENGTH_LONG).show();
                 });
             }
         }).start();

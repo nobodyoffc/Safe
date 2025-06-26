@@ -71,14 +71,14 @@ public class BuildMultisignTxActivity extends BaseCryptoActivity {
     private void handleAddSignature() {
         String jsonStr = jsonInput.getText().toString().trim();
         if (jsonStr.isEmpty()) {
-            showToast("Please input JSON");
+            showToast(getString(R.string.please_input_json));
             return;
         }
 
         try {
             RawTxInfo rawTxInfo = RawTxInfo.fromJson(jsonStr, RawTxInfo.class);
             if (rawTxInfo == null || rawTxInfo.getFidSigMap() == null || rawTxInfo.getFidSigMap().isEmpty()) {
-                showToast("Invalid multisign data");
+                showToast(getString(R.string.invalid_multisign_data));
                 return;
             }
 
@@ -88,7 +88,7 @@ public class BuildMultisignTxActivity extends BaseCryptoActivity {
             updateBuildButtonState();
         } catch (Exception e) {
             TimberLogger.e(TAG, "Failed to parse JSON: " + e.getMessage());
-            showToast("Invalid JSON format");
+            showToast(getString(R.string.invalid_json_format));
         }
     }
 
@@ -131,7 +131,7 @@ public class BuildMultisignTxActivity extends BaseCryptoActivity {
 
     private void handleBuildTx() {
         if (rawTxInfoList.isEmpty()) {
-            showToast("No signatures to build");
+            showToast(getString(R.string.no_signatures_to_build));
             return;
         }
 
@@ -142,13 +142,13 @@ public class BuildMultisignTxActivity extends BaseCryptoActivity {
 
         ReplyBody replyBody = TxCreator.mergeMultisignTxData(jsonStrings);
         if (replyBody == null || replyBody.getCode() != 0) {
-            showToast("Failed to merge signatures: " + (replyBody != null ? replyBody.getMessage() : "Unknown error"));
+            showToast(getString(R.string.failed_to_merge_signatures, (replyBody != null ? replyBody.getMessage() : "Unknown error")));
             return;
         }
 
         RawTxInfo finalRawTxInfo = (RawTxInfo) replyBody.getData();
         if (finalRawTxInfo == null) {
-            showToast("Failed to build transaction");
+            showToast(getString(R.string.failed_to_build_transaction));
             return;
         }
 

@@ -55,7 +55,7 @@
                 android:layout_height="36dp"
                 android:layout_gravity="center_vertical|center_horizontal"
                 android:background="@android:color/transparent"
-                android:contentDescription="Toggle Visibility"
+                android:contentDescription="@string/toggle_visibility"
                 android:src="@drawable/ic_visibility_on" />
 
             <ImageButton
@@ -64,7 +64,7 @@
                 android:layout_height="48dp"
                 android:background="@android:color/transparent"
                 android:src="@drawable/ic_make"
-                android:contentDescription="Make QR" />
+                android:contentDescription="@string/make_qr" />
 
             <TextView
                 android:id="@+id/totpCountdown"

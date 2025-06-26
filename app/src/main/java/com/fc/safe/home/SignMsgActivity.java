@@ -65,7 +65,7 @@ public class SignMsgActivity extends BaseCryptoActivity {
             String priKeyCipher = keyInfo.getPrikeyCipher();
             keyInput.setTag(priKeyCipher);
         } else {
-            showToast("Selected key has no private key cipher");
+            showToast(getString(R.string.selected_key_has_no_private_key_cipher));
         }
     }
 
@@ -193,11 +193,11 @@ public class SignMsgActivity extends BaseCryptoActivity {
             }
             
             if(keyBytes == null) {
-                showToast("Wrong key.");
+                showToast(getString(R.string.wrong_key));
                 return;
             }
         } catch (Exception e) {
-            showToast("Wrong key.");
+            showToast(getString(R.string.wrong_key));
             return;
         }
 
@@ -219,7 +219,7 @@ public class SignMsgActivity extends BaseCryptoActivity {
             resultText.setText(result);
             copyButton.setEnabled(true);
         } catch (Exception e) {
-            showToast("Failed to sign words.");
+            showToast(getString(R.string.failed_to_sign_words));
         }
     }
     

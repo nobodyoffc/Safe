@@ -138,7 +138,7 @@ public class CreateKeyInfoByPrikeyActivity<T extends FcEntity> extends AppCompat
             }
         } catch (Exception e) {
             e.printStackTrace();
-            Toast.makeText(this, "Error setting up input fields: " + e.getMessage(), Toast.LENGTH_LONG).show();
+            Toast.makeText(this, getString(R.string.error_setting_up_input_fields, e.getMessage()), Toast.LENGTH_LONG).show();
         }
     }
 

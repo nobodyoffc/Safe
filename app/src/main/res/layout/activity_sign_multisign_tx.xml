@@ -42,17 +42,17 @@
         <Button
             android:id="@+id/clearButton"
             style="@style/ButtonStyle"
-            android:text="Clear" />
+            android:text="@string/clear" />
 
         <Button
             android:id="@+id/addButton"
             style="@style/ButtonStyle"
-            android:text="Add" />
+            android:text="@string/add" />
 
         <Button
             android:id="@+id/buildButton"
             style="@style/ButtonStyle"
-            android:text="Build" />
+            android:text="@string/build" />
 
     </LinearLayout>
 

@@ -56,7 +56,7 @@ public class JsonConvertActivity extends BaseCryptoActivity {
                 if (!TextUtils.isEmpty(content)) {
                     QRCodeGenerator.generateAndShowQRCode(this, content);
                 } else {
-                    showToast("No content to generate QR code");
+                    showToast(getString(R.string.no_content_to_generate_qr_code));
                 }
             }, null, null, null);
     }
@@ -109,7 +109,7 @@ public class JsonConvertActivity extends BaseCryptoActivity {
         String inputedText = keyEditText.getText().toString();
 
         if (TextUtils.isEmpty(inputedText)) {
-            showToast("Please enter JSON text");
+            showToast(getString(R.string.please_input_json_text));
             return;
         }
 
@@ -128,12 +128,12 @@ public class JsonConvertActivity extends BaseCryptoActivity {
                 updateResultText(result);
                 copyButton.setEnabled(true);
             } else {
-                showToast("Invalid JSON format");
+                showToast(getString(R.string.invalid_json_format));
             }
             
         } catch (Exception e) {
             TimberLogger.e(TAG, "Error converting: " + e.getMessage());
-            showToast("Error converting: " + e.getMessage());
+            showToast(getString(R.string.error_converting, e.getMessage()));
         }
     }
 

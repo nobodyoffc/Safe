@@ -132,7 +132,7 @@ public class DecodeActivity extends BaseCryptoActivity {
         setupButton(decodeButton, v -> {
             String input = inputText.getText() != null ? inputText.getText().toString() : "";
             if (input.isEmpty()) {
-                showToast("Please enter text to decode");
+                showToast(getString(R.string.please_enter_text_to_decode));
                 return;
             }
             decodeInput(input);
@@ -244,7 +244,7 @@ public class DecodeActivity extends BaseCryptoActivity {
             }
         } catch (Exception e) {
             TimberLogger.e(TAG, "Error in decodeInput: " + e.getMessage(), e);
-            showToast("Error: " + e.getMessage());
+            showToast(getString(R.string.error_with_message, e.getMessage()));
             copyButton.setEnabled(false);
         }
     }
@@ -306,6 +306,6 @@ public class DecodeActivity extends BaseCryptoActivity {
         ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
         ClipData clip = ClipData.newPlainText(label, text);
         clipboard.setPrimaryClip(clip);
-        showToast("Copied to clipboard");
+        showToast(getString(R.string.copied_to_clipboard));
     }
 } 

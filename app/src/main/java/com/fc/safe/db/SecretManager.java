@@ -56,13 +56,8 @@ public class SecretManager {
      */
     public void initialize(Context context) {
         DatabaseManager dbManager = DatabaseManager.getInstance(context);
-        // Close existing database if it exists
         if (secretDetailDB != null) {
-            try {
-                secretDetailDB.close();
-            } catch (Exception e) {
-                TimberLogger.e(TAG, "Error closing existing database: " + e.getMessage());
-            }
+            secretDetailDB.close();
         }
         secretDetailDB = dbManager.getEntityDatabase(SecretDetail.class, LocalDB.SortType.BIRTH_ORDER, SAVE_TIME);
     }
@@ -113,17 +108,13 @@ public class SecretManager {
      * 
      * @param secretDetail The SecretDetail object to add
      */
-    public void addSecretDetail(SecretDetail secretDetail) { // Renamed method and updated type
-        // SecretDetail's saveTime is Long
+    public void addSecretDetail(SecretDetail secretDetail) {
         secretDetail.setSaveTime(System.currentTimeMillis());
         secretDetail.checkIdWithCreate(); 
-
         secretDetailDB.put(secretDetail.getId(), secretDetail);
-        TimberLogger.i(TAG, "Added SecretDetail with ID: %s", secretDetail.getId());
     }
 
-    public void addAllSecretDetail(List<SecretDetail> secretDetailList) { // Renamed method and updated type
-        // SecretDetail's saveTime is Long
+    public void addAllSecretDetail(List<SecretDetail> secretDetailList) {
         Map<String,SecretDetail> map = new HashMap<>();
         for(SecretDetail secretDetail: secretDetailList) {
             if(secretDetail.getSaveTime()==null)
@@ -132,8 +123,6 @@ public class SecretManager {
             map.put(secretDetail.getId(),secretDetail);
         }
         secretDetailDB.putAll(map);
-
-        TimberLogger.i(TAG, "%s secrets added", map.size());
     }
 
     /**
@@ -197,31 +186,16 @@ public class SecretManager {
      */
     public byte[] generateAvatarById(String entityId, Context context) throws IOException {
         if (entityId == null || entityId.isEmpty()) {
-            TimberLogger.w(TAG, "Input entityId is null or empty, cannot generate avatar.");
             return null;
         }
         
         SecretDetail secretDetail = getSecretDetailById(entityId); 
-        String idForAvatar;
-
-        if (secretDetail != null) {
-            // We have the SecretDetail object. Use its ID, potentially after checkIdWithCreate.
-            idForAvatar = secretDetail.getId(); 
-            if (idForAvatar == null || idForAvatar.isEmpty()) {
-                 idForAvatar = secretDetail.checkIdWithCreate(); 
-            }
-        } else {
-            // SecretDetail not found, fall back to using the provided entityId directly.
-            TimberLogger.w(TAG, "No SecretDetail found for ID: %s. Attempting to generate avatar with the provided ID string.", entityId);
-            idForAvatar = entityId;
-        }
+        String idForAvatar = secretDetail != null ? secretDetail.getId() : entityId;
 
         if (idForAvatar == null || idForAvatar.isEmpty()) {
-            TimberLogger.w(TAG, "Failed to determine a valid ID for avatar generation (original entityId: %s).", entityId);
             return null;
         }
         
-        TimberLogger.i(TAG, "Generating avatar for ID: %s (derived from original entityId: %s)", idForAvatar, entityId);
         return IdUtils.makeCircleImageFromId(idForAvatar);
     }
     
@@ -237,7 +211,6 @@ public class SecretManager {
      */
     public byte[] generateAvatarForSecret(SecretDetail secretDetail, Context context) throws IOException {
         if (secretDetail == null) {
-            TimberLogger.w(TAG, "SecretDetail object is null, cannot generate avatar.");
             return null;
         }
         String id = secretDetail.getId();
@@ -246,10 +219,8 @@ public class SecretManager {
         }
 
         if (id == null || id.isEmpty()) {
-            TimberLogger.w(TAG, "Cannot generate avatar for SecretDetail, ID is null or empty after checkIdWithCreate.");
             return null; 
         }
-        TimberLogger.i(TAG, "Generating avatar for SecretDetail with ID: %s", id);
         return IdUtils.makeCircleImageFromId(id);
     }
 
@@ -281,19 +252,6 @@ public class SecretManager {
         byte[] symkey = ConfigureManager.getInstance().getSymkey();
 
         processSecretSequentially(activity, secretManager, secretDetails, symkey, 0,0);
-
-//        for(SecretDetail secretDetail : secretDetails) {
-//            if(secretDetail.getContent()!=null){
-//                String cipher = Encryptor.encryptBySymkeyToJson(secretDetail.getContent().getBytes(), symkey);
-//                secretDetail.setContentCipher(cipher);
-//                secretDetail.setContent(null);
-//            }
-//            secretManager.addSecretDetail(secretDetail);
-//            secretManager.commit();
-//        }
-//        Toast.makeText(activity, activity.getString(R.string.secrets_saved_successfully, secretDetails.size()), Toast.LENGTH_SHORT).show();
-//        activity.setResult(Activity.RESULT_OK);
-//        activity.finish();
     }
 
 

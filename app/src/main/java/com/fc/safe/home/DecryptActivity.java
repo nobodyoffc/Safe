@@ -121,7 +121,7 @@ public class DecryptActivity extends BaseCryptoActivity {
             String priKeyCipher = keyInfo.getPrikeyCipher();
             keyEditText.setTag(priKeyCipher);
         } else {
-            showToast("Selected key has no private key cipher");
+            showToast(getString(R.string.selected_key_has_no_private_key_cipher));
         }
     }
 
@@ -138,7 +138,7 @@ public class DecryptActivity extends BaseCryptoActivity {
         resultTextView.setText("");
         copyDataButton.setEnabled(false);
         if( cipherEditText.getText()==null){
-            Toast.makeText(this,"Input the cipher", SafeApplication.TOAST_LASTING).show();
+            Toast.makeText(this, getString(R.string.please_enter_cipher), SafeApplication.TOAST_LASTING).show();
             return;
         }
         String cipher = cipherEditText.getText().toString();
@@ -148,17 +148,17 @@ public class DecryptActivity extends BaseCryptoActivity {
                         : null
                 : (String) keyEditText.getTag();
         if(key==null){
-            Toast.makeText(this,"Input the key", SafeApplication.TOAST_LASTING).show();
+            Toast.makeText(this, getString(R.string.please_enter_key), SafeApplication.TOAST_LASTING).show();
             return;
         }
         // Validate inputs
         if (TextUtils.isEmpty(cipher)) {
-            showToast("Please enter a cipher");
+            showToast(getString(R.string.please_enter_cipher));
             return;
         }
 
         if (TextUtils.isEmpty(key)) {
-            showToast("Please enter a key");
+            showToast(getString(R.string.please_enter_key));
             return;
         }
 
@@ -166,7 +166,7 @@ public class DecryptActivity extends BaseCryptoActivity {
             // Parse and validate cipher data
             CryptoDataByte cryptoDataByteCipher = parseCipherData(cipher);
             if (cryptoDataByteCipher == null) {
-                showToast("It's not a valid cipher");
+                showToast(getString(R.string.not_a_valid_cipher));
                 return;
             }
             
@@ -177,7 +177,7 @@ public class DecryptActivity extends BaseCryptoActivity {
             // Validate key for asymmetric encryption
             if (keyBytes == null && 
                 (cipherType == EncryptType.AsyOneWay || cipherType == EncryptType.AsyTwoWay)) {
-                showToast("It's not a valid key");
+                showToast(getString(R.string.not_a_valid_key));
                 return;
             }
 
@@ -186,14 +186,14 @@ public class DecryptActivity extends BaseCryptoActivity {
 
             // Check decryption result
             if (cryptoDataByteCipher.getCode() != 0) {
-                showToast("Failed to decrypt: " + cryptoDataByteCipher.getMessage());
+                showToast(getString(R.string.failed_to_decrypt_with_message, cryptoDataByteCipher.getMessage()));
                 return;
             }
 
             // Show decrypted data and enable copy button
             byte[] data = cryptoDataByteCipher.getData();
             if(data==null){
-                showToast("Got nothing from the cipher: " + cryptoDataByteCipher.getMessage());
+                showToast(getString(R.string.got_nothing_from_cipher, cryptoDataByteCipher.getMessage()));
                 return;
             }
             updateResultText(new String(data));
@@ -201,7 +201,7 @@ public class DecryptActivity extends BaseCryptoActivity {
             
         } catch (Exception e) {
             TimberLogger.e(TAG, "Error decrypting: " + e.getMessage());
-            showToast("Error decrypting: " + e.getMessage());
+            showToast(getString(R.string.error_decrypting, e.getMessage()));
         }
     }
     

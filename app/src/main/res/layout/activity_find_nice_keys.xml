@@ -36,7 +36,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="24sp"
-            android:text="00:00:00" />
+            android:text="@string/_00_00_00" />
 
     </LinearLayout>
 
@@ -75,6 +75,7 @@
 
     <LinearLayout
         android:id="@+id/buttonContainer"
+        style="?android:attr/buttonBarStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
@@ -83,6 +84,7 @@
 
         <Button
             android:id="@+id/saveButton"
+            style="?android:attr/buttonBarButtonStyle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -91,6 +93,7 @@
 
         <Button
             android:id="@+id/stopButton"
+            style="?android:attr/buttonBarButtonStyle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -100,6 +103,7 @@
 
         <Button
             android:id="@+id/startButton"
+            style="?android:attr/buttonBarButtonStyle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"

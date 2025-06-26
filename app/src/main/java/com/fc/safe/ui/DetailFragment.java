@@ -359,7 +359,7 @@ public class DetailFragment extends Fragment {
                             try {
                                 com.fc.safe.utils.ResultDialog.showDecryptDialogForCipher(requireContext(), displayValue, null);
                             } catch (Exception e) {
-                                Toast.makeText(requireContext(), "Failed to decrypt: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                                Toast.makeText(requireContext(), getString(R.string.failed_to_decrypt) + e.getMessage(), Toast.LENGTH_LONG).show();
                             }
                         });
                         // Add decryptIcon after valueView
@@ -426,7 +426,7 @@ public class DetailFragment extends Fragment {
                 ClipboardManager clipboard = (ClipboardManager) requireContext().getSystemService(Context.CLIPBOARD_SERVICE);
                 ClipData clip = ClipData.newPlainText("Copied text", text);
                 clipboard.setPrimaryClip(clip);
-                Toast.makeText(requireContext(), "Copied to clipboard", SafeApplication.TOAST_LASTING).show();
+                Toast.makeText(requireContext(), getString(R.string.copied_to_clipboard), SafeApplication.TOAST_LASTING).show();
             }
         });
         

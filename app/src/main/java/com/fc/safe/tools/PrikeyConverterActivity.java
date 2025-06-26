@@ -82,7 +82,7 @@ public class PrikeyConverterActivity extends BaseCryptoActivity {
                 if (!TextUtils.isEmpty(content)) {
                     QRCodeGenerator.generateAndShowQRCode(this, content);
                 } else {
-                    showToast("No content to generate QR code");
+                    showToast(getString(R.string.no_content_to_generate_qr_code));
                 }
             }, null, null, null);
     }
@@ -112,7 +112,7 @@ public class PrikeyConverterActivity extends BaseCryptoActivity {
     private void showChooseKeyInfoDialog() {
         List<KeyInfo> keyInfoList = keyInfoManager.getAllKeyInfoList();
         if (keyInfoList.isEmpty()) {
-            showToast("No keys available");
+            showToast(getString(R.string.no_keys_available));
             return;
         }
 
@@ -130,7 +130,7 @@ public class PrikeyConverterActivity extends BaseCryptoActivity {
             (String) keyEditText.getTag();
 
         if (TextUtils.isEmpty(key)) {
-            showToast("Please enter a private key");
+            showToast(getString(R.string.please_enter_a_private_key));
             return;
         }
 
@@ -141,7 +141,7 @@ public class PrikeyConverterActivity extends BaseCryptoActivity {
                 prikeyBytes  = Decryptor.decryptPrikey(key, ConfigureManager.getInstance().getSymkey());
             }else prikeyBytes = KeyTools.getPrikey32(key);
             if (prikeyBytes == null) {
-                showToast("Invalid private key format");
+                showToast(getString(R.string.invalid_private_key_format));
                 return;
             }
 
@@ -155,7 +155,7 @@ public class PrikeyConverterActivity extends BaseCryptoActivity {
             } else if (selectedId == R.id.optionBase58) {
                 result = KeyTools.prikey32To37(Hex.toHex(prikeyBytes));
             } else {
-                showToast("Please select a conversion format");
+                showToast(getString(R.string.please_select_a_conversion_format));
                 return;
             }
 
@@ -164,7 +164,7 @@ public class PrikeyConverterActivity extends BaseCryptoActivity {
             
         } catch (Exception e) {
             TimberLogger.e(TAG, "Error converting: " + e.getMessage());
-            showToast("Error converting: " + e.getMessage());
+            showToast(getString(R.string.error_converting, e.getMessage()));
         }
     }
 
@@ -187,7 +187,7 @@ public class PrikeyConverterActivity extends BaseCryptoActivity {
             String prikeyCipher = keyInfo.getPrikeyCipher();
             keyEditText.setTag(prikeyCipher);
         } else {
-            showToast("Selected key has no private key cipher");
+            showToast(getString(R.string.selected_key_has_no_private_key_cipher));
         }
     }
 } 

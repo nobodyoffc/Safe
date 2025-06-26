@@ -110,7 +110,7 @@ public class HashActivity extends BaseCryptoActivity {
             copyButton.setEnabled(false);
             String text = textInput.getText() != null ? textInput.getText().toString() : "";
             if (text.isEmpty()) {
-                showToast("Please input text");
+                showToast(getString(R.string.please_input_text));
                 return;
             }
             hashInput();
@@ -141,14 +141,14 @@ public class HashActivity extends BaseCryptoActivity {
         setupIoIconsView(R.id.resultView, R.id.makeQrIcon, true, false, false, false,
                 () -> {
                     if(resultText.getText()==null){
-                        showToast("Please input text");
+                        showToast(getString(R.string.please_input_text));
                         return;
                     }
                     String content = resultText.getText().toString();
                     if (!TextUtils.isEmpty(content)) {
                         IoIconsView.launchQrGenerator(this, content);
                     } else {
-                        showToast("No content to generate QR code");
+                        showToast(getString(R.string.no_content_to_generate_qr_code));
                     }
                 }, null, null, null);
     }
@@ -211,7 +211,7 @@ public class HashActivity extends BaseCryptoActivity {
             // Disable non-file compatible hash options
             disableNonFileCompatibleOptions();
         } else {
-            showToast("Failed to load file");
+            showToast(getString(R.string.failed_to_load_file));
         }
     }
 
@@ -288,12 +288,12 @@ public class HashActivity extends BaseCryptoActivity {
 
         Editable text = textInput.getText();
         if(text==null){
-            showToast("Please input text");
+            showToast(getString(R.string.please_input_text));
             return;
         }
         String inputText = text.toString();
         if (inputText.isEmpty()) {
-            showToast("Please enter text to hash");
+            showToast(getString(R.string.please_enter_text_to_hash));
             return;
         }
 

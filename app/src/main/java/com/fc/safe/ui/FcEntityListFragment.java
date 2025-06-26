@@ -1174,7 +1174,7 @@ public class FcEntityListFragment<T extends FcEntity> extends Fragment {
         if (id != null) {
             IdUtils.showAvatarDialog(requireContext(), id);
         } else {
-            Toast.makeText(requireContext(), "No ID found for avatar", Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(), getString(R.string.no_id_found_for_avatar), Toast.LENGTH_SHORT).show();
         }
     }
     

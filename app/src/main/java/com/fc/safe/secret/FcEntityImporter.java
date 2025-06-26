@@ -16,6 +16,7 @@ import com.fc.fc_ajdk.core.crypto.EncryptType;
 import com.fc.fc_ajdk.data.fcData.FcEntity;
 import com.fc.fc_ajdk.data.fcData.KeyInfo;
 import com.fc.fc_ajdk.utils.Hex;
+import com.fc.safe.R;
 import com.fc.safe.ui.SingleInputActivity;
 import com.fc.safe.models.BackupHeader;
 import com.fc.safe.models.BackupKey;
@@ -68,7 +69,7 @@ public class FcEntityImporter<T extends FcEntity> {
         try(InputStream is = new ByteArrayInputStream(jsonBytes)){
             return importEntity(is);
         } catch (Exception e) {
-            Toast.makeText(context, "Failed to parse JSON", Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, R.string.failed_to_parse_json, Toast.LENGTH_SHORT).show();
             return null;
         }
     }
@@ -102,7 +103,7 @@ public class FcEntityImporter<T extends FcEntity> {
 
         if(backupKey!=null && backupHeader!=null){
             if(!backupKey.getKeyName().equals(backupHeader.getKeyName())){
-                Toast.makeText(context, "KeyName is inconsistent！", Toast.LENGTH_SHORT).show();
+                Toast.makeText(context, R.string.keyname_is_inconsistent, Toast.LENGTH_SHORT).show();
                 return null;
             }
         }
