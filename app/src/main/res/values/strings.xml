@@ -45,6 +45,7 @@
     <string name="menu_my_keys">My Keys</string>
     <string name="menu_secrets">Secrets</string>
     <string name="menu_convert">Convert</string>
+    <string name="menu_tools">Tools</string>
     <string name="menu_sign_tx">Sign TX</string>
     <string name="menu_multi_sign">Multi Sign</string>
     <string name="menu_sign_words">Sign Words</string>
@@ -53,6 +54,7 @@
     <string name="menu_decrypt">Decrypt</string>
     <string name="menu_hash">Hash</string>
     <string name="menu_decode">Decode</string>
+    <string name="menu_string_converter">String Converter</string>
     <string name="menu_qr_code">QR Code</string>
     <string name="menu_settings">Settings</string>
     <string name="menu_test">Test</string>
@@ -204,6 +206,9 @@
     <string name="sum">Sum</string>
     <string name="fee">Fee</string>
     <string name="cdd">CDD</string>
+    <string name="cd">CD</string>
+    <string name="owner">Owner</string>
+    <string name="cash">Cash</string>
     <string name="no_tx_to_copy">No TX to copy</string>
     <string name="tx_json_copied_to_clipboard">TX JSON copied to clipboard</string>
     <string name="no_tx_to_sign">No TX to Sign.</string>
@@ -256,6 +261,8 @@
     <string name="stop">Stop</string>
     <string name="no">No</string>
     <string name="yes">Yes</string>
+    <string name="update_cash_database">Update My Cash</string>
+    <string name="update_cash_database_message">Do you want to update My Cash?</string>
     <string name="base32">Base32</string>
     <string name="return_text">Return</string>
     <string name="sha256" translatable="false">SHA256</string>
@@ -347,7 +354,7 @@
     <string name="json_converter">JSON Converter</string>
     <string name="menu_json_converter">JSON Convert</string>
     <string name="input_json">Input JSON string</string>
-    <string name="safe_v_by_no1_nrc7">Safe v0.10 By No1_NrC7</string>
+    <string name="safe_v_by_no1_nrc7">Safe v0.21 By No1_NrC7</string>
     <string name="failed_to_parse_multisign">Failed to parse Multisign.</string>
     <string name="input_the_script_or_multisign_or_select_a_multisign_fid">Input the script or Multisign. Or select a multisign FID.</string>
     <string name="failed_to_create_multisign_tx">Failed to create multisign TX.</string>
@@ -474,4 +481,38 @@
     <string name="operation_failed_with_message">Operation failed: %1$s</string>
     <string name="invalid_public_key_or_redeem_script">Invalid public key or redeem script.</string>
     <string name="input_the_pubkey_or_redeem_script">Input the pubkey or redeem script</string>
+
+    <!-- Cash Activity strings -->
+    <string name="no_cash_found">No cash found</string>
+    <string name="error_loading_cash">Error loading cash: %1$s</string>
+    <string name="cash_loaded"> cash loaded</string>
+    <string name="no_more_cash">No more cash</string>
+    <string name="error_loading_more_cash">Error loading more cash: %1$s</string>
+    <string name="send_functionality_not_implemented">Send functionality not implemented yet</string>
+    <string name="send">Send</string>
+    <string name="cash_creation_guidance">Cash is typically imported from external sources. Use the import functionality to add cash to your wallet.</string>
+    <string name="export_functionality_not_implemented">Export functionality not implemented yet</string>
+    <string name="input_the_cash_json">Input the cash JSON</string>
+    <string name="cash_saved_successfully">Cash saved successfully</string>
+    <string name="cash_saved_successfully_count">%d cash saved successfully</string>
+    <string name="all_cash_must_have_same_owner">All selected cash must have the same owner FID</string>
+    
+    <!-- Create Cash Dialog strings -->
+    <string name="create_cash">Create Cash</string>
+    <string name="birth_time">Birth Time</string>
+    <string name="birth_time_hint">Enter date and time (YYYY-MM-DD HH:MM:SS)</string>
+    <string name="invalid_date_format_please_use_yyyy_mm_dd">Invalid date format. Please use YYYY-MM-DD HH:MM:SS</string>
+    <string name="cash_created_successfully">Cash created successfully</string>
+
+    <string name="my_cash">My cash</string>
+    <string name="please_input_phrase">Please input the phrase</string>
+    
+    <!-- CreateKeyByPhraseActivity strings -->
+    <string name="failed_to_get_keyinfo_from_preview">Failed to get KeyInfo from preview</string>
+    <string name="warning_failed_to_generate_avatar">Warning: Failed to generate avatar, but key will still be saved</string>
+    <string name="error_keyinfo_is_null">Error: KeyInfo is null</string>
+    <string name="key_saved_successfully">Key saved successfully</string>
+    <string name="error_saving_key_with_message">Error saving key: %1$s</string>
+    <string name="key_already_exists_title">Key Already Exists</string>
+    <string name="key_already_exists_message">A key with this ID already exists. Do you want to replace it?</string>
 </resources>

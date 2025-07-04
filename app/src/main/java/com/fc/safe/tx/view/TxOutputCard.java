@@ -74,15 +74,15 @@ public class TxOutputCard extends CardView {
         // Setup copy functionality for FID
         fidText.setOnClickListener(v -> {
             if (sendTo != null) {
-                copyToClipboard(context, "FID", sendTo.getFid());
+                copyToClipboard(context, getContext().getString(R.string.fid), sendTo.getFid());
             }
         });
 
         // Setup copy functionality for Amount
         amountText.setOnClickListener(v -> {
             if (sendTo != null) {
-                String amount = NumberUtils.formatAmount(sendTo.getAmount());
-                copyToClipboard(context, "Amount", amount);
+                String amount = NumberUtils.formatAmount(sendTo.getAmount()) + " F";
+                copyToClipboard(context, getContext().getString(R.string.amount), amount);
             }
         });
 
@@ -247,7 +247,7 @@ public class TxOutputCard extends CardView {
         if(withDelete) width= 21;
         else width = 27;
         fidText.setText(StringUtils.omitMiddle(sendTo.getFid(), width));
-        amountText.setText(NumberUtils.formatAmount(sendTo.getAmount()));
+        amountText.setText(NumberUtils.formatAmount(sendTo.getAmount()) + " F");
         deleteButton.setVisibility(withDelete ? View.VISIBLE : View.GONE);
         
         fidText.setEnabled(editable);

@@ -22,14 +22,14 @@ public abstract class FcEntity implements Serializable {
     public static final String METHOD_GET_SHOW_FIELD_NAME_AS_MAP = "getShowFieldNameAsMap";
     public static final String METHOD_GET_INPUT_FIELD_DEFAULT_VALUE_MAP = "getInputFieldDefaultValueMap";
     public static final String METHOD_GET_REPLACE_WITH_ME_FIELD_LIST = "getReplaceWithMeFieldList";
-    public static int ID_DEFAULT_SHOW_SIZE = 15;
+    public static int ID_DEFAULT_SHOW_SIZE = 19;
     public static int TEXT_DEFAULT_SHOW_SIZE = 33;
     public static int TEXT_MEDIUM_DEFAULT_SHOW_SIZE = 15;
     public static int TEXT_SHORT_DEFAULT_SHOW_SIZE = 9;
-    public static int TIME_DEFAULT_SHOW_SIZE = 18;
-    public static int AMOUNT_DEFAULT_SHOW_SIZE = 10;
-    public static int CD_DEFAULT_SHOW_SIZE = 5;
-    public static int BOOLEAN_DEFAULT_SHOW_SIZE = 5;
+    public static int TIME_DEFAULT_SHOW_SIZE = 20;
+    public static int AMOUNT_DEFAULT_SHOW_SIZE = 18;
+    public static int CD_DEFAULT_SHOW_SIZE = 12;
+    public static int BOOLEAN_DEFAULT_SHOW_SIZE = 8;
 
     protected String id;
     protected String eVer;
@@ -44,6 +44,7 @@ public abstract class FcEntity implements Serializable {
      */
     public <T extends FcEntity> T copy(T source) {
         if (source == null) return null;
+
         try {
             Class<?> clazz = source.getClass();
             while (clazz != null && !clazz.equals(Object.class)) {
@@ -108,6 +109,7 @@ public abstract class FcEntity implements Serializable {
     }
 
     public String getId() {
+        if(id==null)makeId();
         return id;
     }
 

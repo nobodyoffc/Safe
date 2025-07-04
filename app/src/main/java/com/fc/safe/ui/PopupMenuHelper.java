@@ -66,6 +66,15 @@ public class PopupMenuHelper {
         showPopup(anchorView);
     }
 
+    public void showInputOptionsMenu(View anchorView, OnInputOptionSelectedListener listener) {
+        View popupView = LayoutInflater.from(context).inflate(R.layout.popup_menu_input_options, null);
+        popupWindow = new PopupWindow(popupView, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, true);
+        popupWindow.setElevation(10f);
+
+        setupInputOptionsMenuItems(popupView, listener);
+        showPopup(anchorView);
+    }
+
     private void setupCreateKeyMenuItems(View popupView) {
         TextView fromPriKey = popupView.findViewById(R.id.from_pri_key);
         TextView fromPriKeyCipher = popupView.findViewById(R.id.from_pri_key_cipher);
@@ -122,6 +131,7 @@ public class PopupMenuHelper {
         TextView publicKeyConverter = popupView.findViewById(R.id.public_key_converter);
         TextView addressConverter = popupView.findViewById(R.id.address_converter);
         TextView jsonConverter = popupView.findViewById(R.id.json_converter);
+        TextView stringConverter = popupView.findViewById(R.id.string_converter);
 
         privateKeyConverter.setOnClickListener(v -> {
             popupWindow.dismiss();
@@ -141,6 +151,11 @@ public class PopupMenuHelper {
         jsonConverter.setOnClickListener(v -> {
             popupWindow.dismiss();
             context.startActivity(new Intent(context, JsonConvertActivity.class));
+        });
+
+        stringConverter.setOnClickListener(v -> {
+            popupWindow.dismiss();
+            context.startActivity(new Intent(context, com.fc.safe.home.DecodeActivity.class));
         });
     }
 
@@ -198,6 +213,25 @@ public class PopupMenuHelper {
         removeMe.setOnClickListener(v -> {
             popupWindow.dismiss();
             showRemoveMeConfirmation();
+        });
+    }
+
+    private void setupInputOptionsMenuItems(View popupView, OnInputOptionSelectedListener listener) {
+        TextView myCash = popupView.findViewById(R.id.my_cash);
+        TextView input = popupView.findViewById(R.id.input);
+
+        myCash.setOnClickListener(v -> {
+            popupWindow.dismiss();
+            if (listener != null) {
+                listener.onMyCashSelected();
+            }
+        });
+
+        input.setOnClickListener(v -> {
+            popupWindow.dismiss();
+            if (listener != null) {
+                listener.onInputSelected();
+            }
         });
     }
 
@@ -267,5 +301,10 @@ public class PopupMenuHelper {
         anchorView.getLocationOnScreen(location);
         popupWindow.showAtLocation(anchorView, Gravity.NO_GRAVITY, 
             location[0], location[1] - popupWindow.getHeight());
+    }
+
+    public interface OnInputOptionSelectedListener {
+        void onMyCashSelected();
+        void onInputSelected();
     }
 } 

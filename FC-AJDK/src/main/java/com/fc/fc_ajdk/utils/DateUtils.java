@@ -10,6 +10,7 @@ public class DateUtils {
     public static final String LONG_FORMAT = "yyyy-MM-dd HH:mm:ss";
     public static final String SHORT_FORMAT = "dd/MM/yyyy";
     public static final String TO_MINUTE = "yy-MM-dd HH:mm";
+    public static final String TO_SECOND = "yy-MM-dd HH:mm:ss";
 
     public static String longShortToTime(long timestamp,String format) {
         return longToTime(timestamp * 1000,format);

@@ -223,6 +223,25 @@ public class FchUtils {
         return NumberUtils.roundDouble2((double) satoshis / Constants.CASH_TO_SATOSHI);
     }
 
+    /**
+     * Formats a satoshi value to coin with up to 8 decimal places, removing trailing zeros
+     * @param satoshis The satoshi value to format
+     * @return Formatted string representation
+     */
+    public static String formatSatoshiValue(long satoshis) {
+        try {
+            // Use satoshiToCoin for more precision (1 coin = 100000000 satoshis)
+            double coinValue = satoshiToCoin(satoshis);
+            // Format with up to 8 decimal places and remove trailing zeros
+            String formatted = String.format("%.8f", coinValue);
+            // Remove trailing zeros after decimal point
+            formatted = formatted.replaceAll("0*$", "").replaceAll("\\.$", "");
+            return formatted;
+        } catch (Exception e) {
+            return String.valueOf(satoshis);
+        }
+    }
+
     public static String getLast3(double amt) {
         long amtLong = coinToSatoshi(amt);
         return getLast3(amtLong);

@@ -638,5 +638,81 @@ public class JsonUtils {
         }
         return sb.toString();
     }
+
+    /**
+     * 从输入流中读取多个JSON对象并解析为指定类型的列表
+     * 按照用户要求：先读出一个json，解析为对象，然后再读出一个json并解析，直至全部读完或者读不出一个完整json为止
+     * 
+     * @param is 输入流
+     * @param clazz 目标类型
+     * @param <T> 泛型类型
+     * @return 解析后的对象列表
+     * @throws IOException 如果读取过程中发生IO错误
+     */
+    public static <T> List<T> readMultipleJsonObjectsFromInputStream(InputStream is, Class<T> clazz) throws IOException {
+        List<T> objectList = new ArrayList<>();
+        BufferedReader reader = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
+        
+        StringBuilder jsonBuilder = new StringBuilder();
+        int braceCount = 0;
+        boolean inString = false;
+        boolean escaped = false;
+        int c;
+        
+        while ((c = reader.read()) != -1) {
+            char ch = (char) c;
+            
+            // Handle string escaping
+            if (escaped) {
+                jsonBuilder.append(ch);
+                escaped = false;
+                continue;
+            }
+            
+            if (ch == '\\') {
+                escaped = true;
+                jsonBuilder.append(ch);
+                continue;
+            }
+            
+            // Handle string boundaries
+            if (ch == '"' && !escaped) {
+                inString = !inString;
+                jsonBuilder.append(ch);
+                continue;
+            }
+            
+            // Only count braces when not in a string
+            if (!inString) {
+                if (ch == '{') {
+                    braceCount++;
+                } else if (ch == '}') {
+                    braceCount--;
+                }
+            }
+            
+            jsonBuilder.append(ch);
+            
+            // When we have a complete JSON object (braceCount == 0)
+            if (braceCount == 0 && jsonBuilder.length() > 0) {
+                String jsonString = jsonBuilder.toString().trim();
+                if (!jsonString.isEmpty()) {
+                    try {
+                        T obj = fromJson(jsonString, clazz);
+                        if (obj != null) {
+                            objectList.add(obj);
+                        }
+                    } catch (Exception e) {
+                        // Skip invalid JSON and continue
+                        System.err.println("Failed to parse JSON: " + jsonString);
+                        System.err.println("Error: " + e.getMessage());
+                    }
+                }
+                jsonBuilder.setLength(0);
+            }
+        }
+        
+        return objectList;
+    }
 }
 

@@ -10,9 +10,10 @@ public class CashMark extends FcObject {
 	private Long value;
 	private Long cdd;
 
-	public CashMark(String fid, Long value) {
+	public CashMark(String fid, Long value,String id) {
 		super();
 		owner = fid;
+		this.id = id;
 		this.value = value;
 	}
 

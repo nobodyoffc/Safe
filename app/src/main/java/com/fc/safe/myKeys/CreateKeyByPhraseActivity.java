@@ -104,6 +104,7 @@ public class CreateKeyByPhraseActivity extends BaseCryptoActivity {
         String label = labelInput.getText() != null ? labelInput.getText().toString() : "";
 
         if (phrase.isEmpty()) {
+            Toast.makeText(this, getString(R.string.please_input_phrase), Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -112,6 +113,9 @@ public class CreateKeyByPhraseActivity extends BaseCryptoActivity {
 
         // Create a new KeyInfo object
         KeyInfo keyInfo = new KeyInfo(label, priKey32, ConfigureManager.getInstance().getSymkey());
+
+        // Generate and save avatar for the new key
+        generateAndSaveAvatar(keyInfo);
 
         // Show the KeyInfo in the detail fragment
         showDetailFragment(keyInfo);
@@ -129,25 +133,51 @@ public class CreateKeyByPhraseActivity extends BaseCryptoActivity {
     }
 
     private void saveKeyInfo() {
+        KeyInfo keyInfo = null;
+        
         if (detailFragment == null) {
             // If no preview was done, try to create KeyInfo from inputs
-            KeyInfo keyInfo = createKeyInfoFromInputs();
+            keyInfo = createKeyInfoFromInputs();
             if (keyInfo == null) {
                 return;
             }
-            // Generate and save avatar for the new key
-            try {
-                keyInfoManager.makeAvatarByFid(keyInfo.getId(), this);
-            } catch (Exception e) {
-                TimberLogger.e(TAG, "Error generating avatar: %s", e.getMessage());
-            }
-            saveKeyInfoToDatabase(keyInfo);
         } else {
             // Use the previewed KeyInfo
-            KeyInfo keyInfo = (KeyInfo) detailFragment.getCurrentEntity();
-            if (keyInfo != null) {
-                saveKeyInfoToDatabase(keyInfo);
+            keyInfo = (KeyInfo) detailFragment.getCurrentEntity();
+            if (keyInfo == null) {
+                Toast.makeText(this, getString(R.string.failed_to_get_keyinfo_from_preview), Toast.LENGTH_SHORT).show();
+                return;
             }
+        }
+
+        // Always generate and save avatar for the key before saving
+        generateAndSaveAvatar(keyInfo);
+        
+        // Save the KeyInfo to database
+        saveKeyInfoToDatabase(keyInfo);
+    }
+
+    private void generateAndSaveAvatar(KeyInfo keyInfo) {
+        if (keyInfo == null || keyInfo.getId() == null) {
+            TimberLogger.e(TAG, "Cannot generate avatar: KeyInfo or ID is null");
+            return;
+        }
+
+        try {
+            // Check if avatar already exists
+            byte[] existingAvatar = keyInfoManager.getAvatarById(keyInfo.getId());
+            if (existingAvatar != null) {
+                TimberLogger.i(TAG, "Avatar already exists for key: %s", keyInfo.getId());
+                return;
+            }
+
+            // Generate and save avatar for the new key
+            keyInfoManager.makeAvatarByFid(keyInfo.getId(), this);
+            TimberLogger.i(TAG, "Avatar generated and saved for key: %s", keyInfo.getId());
+        } catch (Exception e) {
+            TimberLogger.e(TAG, "Error generating avatar for key %s: %s", keyInfo.getId(), e.getMessage());
+            // Show user-friendly error message
+            Toast.makeText(this, getString(R.string.warning_failed_to_generate_avatar), Toast.LENGTH_LONG).show();
         }
     }
 
@@ -156,7 +186,7 @@ public class CreateKeyByPhraseActivity extends BaseCryptoActivity {
         String label = labelInput.getText() != null ? labelInput.getText().toString() : "";
 
         if (phrase.isEmpty()) {
-            Toast.makeText(this, "Phrase is empty", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.please_input_phrase), Toast.LENGTH_SHORT).show();
             return null;
         }
 
@@ -167,15 +197,20 @@ public class CreateKeyByPhraseActivity extends BaseCryptoActivity {
     }
 
     private void saveKeyInfoToDatabase(KeyInfo keyInfo) {
+        if (keyInfo == null) {
+            Toast.makeText(this, getString(R.string.error_keyinfo_is_null), Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         // Check if the key already exists
         if (keyInfoManager.checkIfExisted(keyInfo.getId())) {
             new AlertDialog.Builder(this)
-                .setTitle("Key Already Exists")
-                .setMessage("A key with this ID already exists. Do you want to replace it?")
-                .setPositiveButton("Replace", (dialog, which) -> {
+                .setTitle(getString(R.string.key_already_exists_title))
+                .setMessage(getString(R.string.key_already_exists_message))
+                .setPositiveButton(getString(R.string.replace), (dialog, which) -> {
                     saveAndFinish(keyInfo);
                 })
-                .setNegativeButton("Cancel", null)
+                .setNegativeButton(getString(R.string.cancel), null)
                 .show();
         } else {
             saveAndFinish(keyInfo);
@@ -183,9 +218,15 @@ public class CreateKeyByPhraseActivity extends BaseCryptoActivity {
     }
 
     private void saveAndFinish(KeyInfo keyInfo) {
-        keyInfoManager.addKeyInfo(keyInfo);
-        keyInfoManager.commit();
-        setResult(RESULT_OK);
-        finish();
+        try {
+            keyInfoManager.addKeyInfo(keyInfo);
+            keyInfoManager.commit();
+            Toast.makeText(this, getString(R.string.key_saved_successfully), Toast.LENGTH_SHORT).show();
+            setResult(RESULT_OK);
+            finish();
+        } catch (Exception e) {
+            TimberLogger.e(TAG, "Error saving KeyInfo: %s", e.getMessage());
+            Toast.makeText(this, getString(R.string.error_saving_key_with_message, e.getMessage()), Toast.LENGTH_LONG).show();
+        }
     }
 } 

@@ -294,6 +294,18 @@
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
 
+
+
+        <activity
+            android:name=".home.CashActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
+            android:name=".home.ImportCashActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
         <activity
             android:name=".tools.JsonConvertActivity"
             android:exported="false" 

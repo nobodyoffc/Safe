@@ -43,6 +43,7 @@
     <string name="menu_my_keys">密钥</string>
     <string name="menu_secrets">秘密</string>
     <string name="menu_convert">转换</string>
+    <string name="menu_tools">工具</string>
     <string name="menu_sign_tx">交易</string>
     <string name="menu_multi_sign">多签</string>
     <string name="menu_sign_words">签名</string>
@@ -51,6 +52,7 @@
     <string name="menu_decrypt">解密</string>
     <string name="menu_hash">哈希</string>
     <string name="menu_decode">解码</string>
+    <string name="menu_string_converter">字符串转换</string>
     <string name="menu_qr_code">二维码</string>
     <string name="menu_settings">设置</string>
     <string name="random_in_base32">Base32随机数</string>
@@ -159,9 +161,9 @@
     <string name="the_members_can_t_more_than_16">成员不能超过16人</string>
     <string name="please_input_a_public_key">请输入公钥</string>
     <string name="invalid_public_key">非法公钥</string>
-    <string name="txid">TxId</string>
-    <string name="index">Index</string>
-    <string name="amount">Amount</string>
+    <string name="txid">交易ID</string>
+    <string name="index">索引</string>
+    <string name="amount">金额</string>
     <string name="fid">FID</string>
     <string name="avatar">头像</string>
     <string name="no_multisign_found">没有发现多签</string>
@@ -194,6 +196,9 @@
     <string name="failed_to_create_avatar">生成头像失败</string>
     <string name="sign_tx">签署交易</string>
     <string name="cdd">币天销毁</string>
+    <string name="cd">币天</string>
+    <string name="cash">钞票</string>
+    <string name="owner">所有者</string>
     <string name="no_tx_to_copy">无交易可用</string>
     <string name="tx_json_copied_to_clipboard">交易已拷贝</string>
     <string name="no_tx_to_sign">无交易可签署</string>
@@ -217,6 +222,10 @@
     <string name="export_secrets">导出秘密</string>
     <string name="key_tools_create_new_key">创建新密钥</string>
     <string name="input_the_secret_json">输入秘密的JSON</string>
+    <string name="input_the_cash_json">输入钞票的JSON</string>
+    <string name="cash_saved_successfully">钞票保存成功</string>
+    <string name="cash_saved_successfully_count">%d个钞票保存成功</string>
+    <string name="no_cash_found">未找到钞票</string>
     <string name="no_secret_found">没有秘密</string>
     <string name="import_keys">导入密钥</string>
     <string name="input_the_key_info_json">输入密钥的JSON</string>
@@ -455,4 +464,37 @@
     <string name="failed_to_initiate">初始化失败</string>
     <string name="error_launching_homeactivity">加载主页失败</string>
     <string name="no_id_found_for_avatar">没有制作头像所需的ID</string>
+
+    <!-- Cash Activity strings -->
+    <string name="error_loading_cash">加载钞票失败：%1$s</string>
+    <string name="cash_loaded"> 张钞票已加载</string>
+    <string name="no_more_cash">没有更多钞票</string>
+    <string name="error_loading_more_cash">加载更多钞票失败：%1$s</string>
+    <string name="send_functionality_not_implemented">发送功能尚未实现</string>
+    <string name="send">发送</string>
+    <string name="cash_creation_guidance">钞票通常从外部源导入。使用导入功能将钞票添加到您的钱包中。</string>
+    <string name="export_functionality_not_implemented">导出功能尚未实现</string>
+    
+    <!-- Create Cash Dialog strings -->
+    <string name="create_cash">创建钞票</string>
+    <string name="birth_time">出生时间</string>
+    <string name="birth_time_hint">输入日期和时间 (YYYY-MM-DD HH:MM:SS)</string>
+    <string name="invalid_date_format_please_use_yyyy_mm_dd">无效的日期格式。请使用 YYYY-MM-DD HH:MM:SS</string>
+    <string name="cash_created_successfully">钞票创建成功</string>
+    <string name="all_cash_must_have_same_owner">所有选中的钞票必须属于同一个所有者FID</string>
+
+    <string name="my_cash">我的钞票</string>
+
+    <string name="update_cash_database">更新我的钞票</string>
+    <string name="update_cash_database_message">是否要更新"我的钞票"？</string>
+    <string name="please_input_phrase">请输入密语</string>
+    
+    <!-- CreateKeyByPhraseActivity strings -->
+    <string name="failed_to_get_keyinfo_from_preview">无法从预览获取密钥信息</string>
+    <string name="warning_failed_to_generate_avatar">警告：生成头像失败，但密钥仍会保存</string>
+    <string name="error_keyinfo_is_null">错误：密钥信息为空</string>
+    <string name="key_saved_successfully">密钥保存成功</string>
+    <string name="error_saving_key_with_message">保存密钥失败：%1$s</string>
+    <string name="key_already_exists_title">密钥已存在</string>
+    <string name="key_already_exists_message">该ID的密钥已存在，是否要替换它？</string>
 </resources>

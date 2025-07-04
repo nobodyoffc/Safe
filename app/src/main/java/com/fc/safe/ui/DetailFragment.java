@@ -34,6 +34,8 @@ import com.fc.safe.utils.IdUtils;
 import com.fc.fc_ajdk.core.crypto.KeyTools;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -49,6 +51,12 @@ public class DetailFragment extends Fragment {
     private FcEntity currentEntity;
     private Class<? extends FcEntity> currentEntityClass;
     private KeyInfoManager keyInfoManager;
+    
+    // Add field for satoshi field list
+    private List<String> satoshiFieldList;
+    
+    // Add field for timestamp field list
+    private List<String> timestampFieldList;
     
     // UI components
     private ImageView avatarView;
@@ -106,6 +114,26 @@ public class DetailFragment extends Fragment {
         // Get key info database
         keyInfoManager = KeyInfoManager.getInstance(requireContext());
         TimberLogger.d(TAG, "DetailFragment onCreate: Key info database obtained");
+        
+        // Get satoshi field list from entity class
+        try {
+            Method getSatoshiFieldListMethod = currentEntityClass.getMethod(FcEntity.METHOD_GET_SATOSHI_FIELD_LIST);
+            satoshiFieldList = (List<String>) getSatoshiFieldListMethod.invoke(null);
+            TimberLogger.d(TAG, "DetailFragment onCreate: satoshiFieldList size = " + (satoshiFieldList != null ? satoshiFieldList.size() : 0));
+        } catch (Exception e) {
+            TimberLogger.e(TAG, "Failed to get satoshi field list: %s", e.getMessage());
+            satoshiFieldList = new ArrayList<>();
+        }
+        
+        // Get timestamp field list from entity class
+        try {
+            Method getTimestampFieldListMethod = currentEntityClass.getMethod(FcEntity.METHOD_GET_TIMESTAMP_FIELD_LIST);
+            timestampFieldList = (List<String>) getTimestampFieldListMethod.invoke(null);
+            TimberLogger.d(TAG, "DetailFragment onCreate: timestampFieldList size = " + (timestampFieldList != null ? timestampFieldList.size() : 0));
+        } catch (Exception e) {
+            TimberLogger.e(TAG, "Failed to get timestamp field list: %s", e.getMessage());
+            timestampFieldList = new ArrayList<>();
+        }
     }
 
     @Nullable
@@ -278,7 +306,10 @@ public class DetailFragment extends Fragment {
     }
 
     private void addEntityFields(FcEntity entity) {
-        // Get all fields including inherited ones
+        // Collect all fields in the order they are defined in the class hierarchy
+        List<Field> orderedFields = new ArrayList<>();
+        
+        // Get all fields including inherited ones in the correct order
         Class<?> currentClass = entity.getClass();
         while (currentClass != null && currentClass != Object.class) {
             Field[] fields = currentClass.getDeclaredFields();
@@ -293,93 +324,133 @@ public class DetailFragment extends Fragment {
                     continue;
                 }
                 
-                try {
-                    Object value = field.get(entity);
-                    
-                    // Skip fields with null values
-                    if (value == null) {
-                        continue;
-                    }
-                    
-                    String displayValue = value.toString();
-                    
-                    // Create a row for each field
-                    LinearLayout row = new LinearLayout(requireContext());
-                    row.setLayoutParams(new LinearLayout.LayoutParams(
-                        LinearLayout.LayoutParams.MATCH_PARENT,
-                        LinearLayout.LayoutParams.WRAP_CONTENT
-                    ));
-                    row.setOrientation(LinearLayout.HORIZONTAL);
-                    row.setPadding(0, 16, 0, 16);
-
-                    // Add field name with colon
-                    TextView nameView = new TextView(requireContext());
-                    nameView.setText(fieldName + ": ");
-                    nameView.setTextSize(16);
-                    nameView.setTypeface(null, Typeface.BOLD);
-                    nameView.setTextColor(ContextCompat.getColor(requireContext(), R.color.field_name));
-                    nameView.setLayoutParams(new LinearLayout.LayoutParams(
-                        LinearLayout.LayoutParams.WRAP_CONTENT,
-                        LinearLayout.LayoutParams.WRAP_CONTENT
-                    ));
-
-                    // Add field value
-                    TextView valueView = new TextView(requireContext());
-                    valueView.setText(displayValue);
-                    valueView.setTextSize(16);
-                    valueView.setLayoutParams(new LinearLayout.LayoutParams(
-                        0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f));
-                    
-                    // Make value copyable when clicked
-                    valueView.setOnClickListener(v -> {
-                        String text = valueView.getText().toString();
-                        if (!text.isEmpty()) {
-                            ClipboardManager clipboard = (ClipboardManager) requireContext().getSystemService(Context.CLIPBOARD_SERVICE);
-                            ClipData clip = ClipData.newPlainText("Copied text", text);
-                            clipboard.setPrimaryClip(clip);
-                            Toast.makeText(requireContext(), getString(R.string.copied), SafeApplication.TOAST_LASTING).show();
-                        }
-                    });
-
-                    // Add long-press decrypt menu for cipher fields
-                    if (fieldName.toLowerCase().contains("cipher")) {
-                        // Add decrypt icon to the end of the row
-                        ImageView decryptIcon = new ImageView(requireContext());
-                        decryptIcon.setImageResource(R.drawable.ic_decrypt);
-                        int iconSize = (int) (24 * density);
-                        LinearLayout.LayoutParams iconParams = new LinearLayout.LayoutParams(
-                            iconSize, iconSize);
-                        iconParams.setMargins((int)(8 * density), 0, 0, 0);
-                        decryptIcon.setLayoutParams(iconParams);
-                        decryptIcon.setClickable(true);
-                        decryptIcon.setFocusable(true);
-                        decryptIcon.setContentDescription(getString(R.string.decrypt));
-                        // Same click logic as before
-                        decryptIcon.setOnClickListener(v -> {
-                            try {
-                                com.fc.safe.utils.ResultDialog.showDecryptDialogForCipher(requireContext(), displayValue, null);
-                            } catch (Exception e) {
-                                Toast.makeText(requireContext(), getString(R.string.failed_to_decrypt) + e.getMessage(), Toast.LENGTH_LONG).show();
-                            }
-                        });
-                        // Add decryptIcon after valueView
-                        row.addView(nameView);
-                        row.addView(valueView);
-                        row.addView(decryptIcon);
-                    } else {
-                        // Add views to row
-                        row.addView(nameView);
-                        row.addView(valueView);
-                    }
-
-                    // Add row to container
-                    detailContainer.addView(row);
-                } catch (IllegalAccessException e) {
-                    e.printStackTrace();
+                // Skip the "id" field since it's already displayed at the top
+                if ("id".equals(fieldName)) {
+                    continue;
                 }
+                
+                orderedFields.add(field);
             }
             // Move to superclass
             currentClass = currentClass.getSuperclass();
+        }
+        
+        // Process fields in the collected order
+        for (Field field : orderedFields) {
+            String fieldName = field.getName();
+            
+            try {
+                Object value = field.get(entity);
+                
+                // Skip fields with null values
+                if (value == null) {
+                    continue;
+                }
+                
+                String displayValue = value.toString();
+                
+                // Format satoshi values using FchUtils.formatSatoshiValue()
+                if (satoshiFieldList != null && satoshiFieldList.contains(fieldName) && value instanceof Number) {
+                    try {
+                        long satoshiValue = ((Number) value).longValue();
+                        displayValue = com.fc.fc_ajdk.utils.FchUtils.formatSatoshiValue(satoshiValue);
+                    } catch (Exception e) {
+                        TimberLogger.e(TAG, "Failed to format satoshi value for field %s: %s", fieldName, e.getMessage());
+                    }
+                }
+                
+                // Format timestamp values using DateUtils.longShortToTime()
+                if (timestampFieldList != null && timestampFieldList.contains(fieldName) && value instanceof Number) {
+                    try {
+                        long timestampValue = ((Number) value).longValue();
+                        displayValue = com.fc.fc_ajdk.utils.DateUtils.longShortToTime(timestampValue, com.fc.fc_ajdk.utils.DateUtils.TO_SECOND);
+                    } catch (Exception e) {
+                        TimberLogger.e(TAG, "Failed to format timestamp value for field %s: %s", fieldName, e.getMessage());
+                    }
+                }
+                
+                // Create a row for each field
+                LinearLayout row = new LinearLayout(requireContext());
+                row.setLayoutParams(new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                ));
+                row.setOrientation(LinearLayout.HORIZONTAL);
+                row.setPadding(0, 16, 0, 16);
+
+                // Add field name with colon
+                TextView nameView = new TextView(requireContext());
+                nameView.setText(fieldName + ": ");
+                nameView.setTextSize(16);
+                nameView.setTypeface(null, Typeface.BOLD);
+                nameView.setTextColor(ContextCompat.getColor(requireContext(), R.color.field_name));
+                nameView.setLayoutParams(new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                ));
+
+                // Add field value
+                TextView valueView = new TextView(requireContext());
+                valueView.setText(displayValue);
+                valueView.setTextSize(16);
+                valueView.setLayoutParams(new LinearLayout.LayoutParams(
+                    0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f));
+                
+                // Make value copyable when clicked
+                valueView.setOnClickListener(v -> {
+                    String text = valueView.getText().toString();
+                    if (!text.isEmpty()) {
+                        ClipboardManager clipboard = (ClipboardManager) requireContext().getSystemService(Context.CLIPBOARD_SERVICE);
+                        ClipData clip = ClipData.newPlainText("Copied text", text);
+                        clipboard.setPrimaryClip(clip);
+                        Toast.makeText(requireContext(), getString(R.string.copied), SafeApplication.TOAST_LASTING).show();
+                    }
+                });
+
+                // Add long-press decrypt menu for cipher fields
+                if (fieldName.toLowerCase().contains("cipher")) {
+                    // Add decrypt icon to the end of the row
+                    ImageView decryptIcon = new ImageView(requireContext());
+                    decryptIcon.setImageResource(R.drawable.ic_decrypt);
+                    int iconSize = (int) (24 * density);
+                    LinearLayout.LayoutParams iconParams = new LinearLayout.LayoutParams(
+                        iconSize, iconSize);
+                    iconParams.setMargins((int)(8 * density), 0, 0, 0);
+                    decryptIcon.setLayoutParams(iconParams);
+                    decryptIcon.setClickable(true);
+                    decryptIcon.setFocusable(true);
+                    decryptIcon.setContentDescription(getString(R.string.decrypt));
+                    // Special handling for priKeyCipher field
+                    String finalDisplayValue = displayValue;
+                    String finalFieldName = fieldName;
+                    decryptIcon.setOnClickListener(v -> {
+                        try {
+                            if ("prikeyCipher".equals(finalFieldName)) {
+                                // Special handling for priKeyCipher - show WIF compressed format
+                                com.fc.safe.utils.ResultDialog.showDecryptDialogForPrikeyCipher(requireContext(), finalDisplayValue, null);
+                            } else {
+                                // Regular cipher decryption
+                                com.fc.safe.utils.ResultDialog.showDecryptDialogForCipher(requireContext(), finalDisplayValue, null);
+                            }
+                        } catch (Exception e) {
+                            Toast.makeText(requireContext(), getString(R.string.failed_to_decrypt) + e.getMessage(), Toast.LENGTH_LONG).show();
+                        }
+                    });
+                    // Add decryptIcon after valueView
+                    row.addView(nameView);
+                    row.addView(valueView);
+                    row.addView(decryptIcon);
+                } else {
+                    // Add views to row
+                    row.addView(nameView);
+                    row.addView(valueView);
+                }
+
+                // Add row to container
+                detailContainer.addView(row);
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            }
         }
     }
 

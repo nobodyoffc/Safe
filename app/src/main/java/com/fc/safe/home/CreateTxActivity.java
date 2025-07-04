@@ -11,11 +11,13 @@ import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -44,6 +46,7 @@ import com.fc.safe.tx.dialog.AddOutputFromFidListDialog;
 import com.fc.safe.tx.view.TxInputCard;
 import com.fc.safe.tx.view.TxOutputCard;
 import com.fc.safe.myKeys.ChooseKeyInfoActivity;
+import com.fc.safe.ui.PopupMenuHelper;
 import com.google.android.material.textfield.TextInputEditText;
 
 import java.util.ArrayList;
@@ -55,6 +58,8 @@ public class CreateTxActivity extends BaseCryptoActivity {
     private static final String TAG = "CreateTxActivity";
     private static final int QR_SCAN_TEXT_REQUEST_CODE = 1001;
     private static final int QR_SCAN_KEY_REQUEST_CODE = 1002;
+    
+    public static final String EXTRA_TX_INFO_JSON = "extra_tx_info_json";
 
     private RawTxInfo rawTxInfo;
     private KeyInfoManager keyInfoManager;
@@ -112,6 +117,19 @@ public class CreateTxActivity extends BaseCryptoActivity {
         // Initialize rawTxInfo
         rawTxInfo = new RawTxInfo();
         TimberLogger.i(TAG, "RawTxInfo initialized");
+
+        // Check if we received RawTxInfo from CashActivity
+        String receivedTxInfoJson = getIntent().getStringExtra(EXTRA_TX_INFO_JSON);
+        if (receivedTxInfoJson != null) {
+            try {
+                RawTxInfo receivedRawTxInfo = RawTxInfo.fromJson(receivedTxInfoJson, RawTxInfo.class);
+                if (receivedRawTxInfo != null) {
+                    handleImportedTxInfo(receivedRawTxInfo);
+                }
+            } catch (Exception e) {
+                TimberLogger.e(TAG, "Error parsing received RawTxInfo JSON: " + e.getMessage());
+            }
+        }
 
         // Initialize chooseKeyLauncher
         chooseKeyLauncher = registerForActivityResult(
@@ -203,23 +221,39 @@ public class CreateTxActivity extends BaseCryptoActivity {
                 imm.hideSoftInputFromWindow(currentFocus.getWindowToken(), 0);
             }
 
-            AddTxInputDialog dialog = new AddTxInputDialog(this, rawTxInfo);
-            currentDialog = dialog;
-            dialog.setOnDoneListener(cash -> {
-                if(cash==null)return;
-                TimberLogger.i(TAG, "AddTxInputDialog done, cash: " + cash);
-                TxInputCard card = new TxInputCard(this);
-                card.setCash(cash);
-                card.setOnDeleteListener(this::removeInputCard);
-                inputCards.add(card);
-                inputCardsContainer.addView(card, inputCardsContainer.getChildCount() - 1);
-                inputHint.setVisibility(View.GONE);
-                currentDialog = null;
-                updateTotalAndFeeText();
-                if(cash.getOwner()!=null)keyInput.setText(cash.getOwner());
+            // Show popup menu for input options
+            PopupMenuHelper popupMenuHelper = new PopupMenuHelper(this);
+            popupMenuHelper.showInputOptionsMenu(v, new PopupMenuHelper.OnInputOptionSelectedListener() {
+                @Override
+                public void onMyCashSelected() {
+                    // Start CashActivity for selecting cash
+                    Intent intent = new Intent(CreateTxActivity.this, CashActivity.class);
+                    intent.putExtra("select_mode", true);
+                    startActivityForResult(intent, 1003);
+                }
+
+                @Override
+                public void onInputSelected() {
+                    // Show the original AddTxInputDialog
+                    AddTxInputDialog dialog = new AddTxInputDialog(CreateTxActivity.this, rawTxInfo);
+                    currentDialog = dialog;
+                    dialog.setOnDoneListener(cash -> {
+                        if(cash==null)return;
+                        TimberLogger.i(TAG, "AddTxInputDialog done, cash: " + cash);
+                        TxInputCard card = new TxInputCard(CreateTxActivity.this);
+                        card.setCash(cash);
+                        card.setOnDeleteListener(CreateTxActivity.this::removeInputCard);
+                        inputCards.add(card);
+                        inputCardsContainer.addView(card, inputCardsContainer.getChildCount() - 1);
+                        inputHint.setVisibility(View.GONE);
+                        currentDialog = null;
+                        updateTotalAndFeeText();
+                        if(cash.getOwner()!=null)keyInput.setText(cash.getOwner());
+                    });
+                    dialog.setOnDismissListener(d -> currentDialog = null);
+                    dialog.show();
+                }
             });
-            dialog.setOnDismissListener(d -> currentDialog = null);
-            dialog.show();
         });
 
         plusOutputButton.setOnClickListener(v -> {
@@ -559,15 +593,29 @@ public class CreateTxActivity extends BaseCryptoActivity {
         opreturnInput.setText("");
         keyInput.setText("");
 
-        // Add input cards
+        // Add input cards - check if we have cash with owner information
         if (rawTxInfo.getInputs() != null) {
+            boolean hasCashWithOwner = false;
             for (Cash cash : rawTxInfo.getInputs()) {
-                TxInputCard card = new TxInputCard(this);
-                card.setCash(cash);
-                card.setOnDeleteListener(this::removeInputCard);
-                inputCards.add(card);
-                inputCardsContainer.addView(card, inputCardsContainer.getChildCount() - 1);
-                if(cash.getOwner()!=null)keyInput.setText(cash.getOwner());
+                if (cash.getOwner() != null && !cash.getOwner().isEmpty()) {
+                    hasCashWithOwner = true;
+                    break;
+                }
+            }
+            
+            if (hasCashWithOwner) {
+                // Use cash cards for cash with owner information
+                addCashCards(rawTxInfo.getInputs());
+            } else {
+                // Use TxInputCard for cash without owner information
+                for (Cash cash : rawTxInfo.getInputs()) {
+                    TxInputCard card = new TxInputCard(this);
+                    card.setCash(cash);
+                    card.setOnDeleteListener(this::removeInputCard);
+                    inputCards.add(card);
+                    inputCardsContainer.addView(card, inputCardsContainer.getChildCount() - 1);
+                    if(cash.getOwner()!=null)keyInput.setText(cash.getOwner());
+                }
             }
         }
 
@@ -701,6 +749,178 @@ public class CreateTxActivity extends BaseCryptoActivity {
         if (currentFocus != null) {
             InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
             imm.hideSoftInputFromWindow(currentFocus.getWindowToken(), 0);
+        }
+    }
+
+    private void addCashCards(List<Cash> cashList) {
+        for (Cash cash : cashList) {
+            View cardView = LayoutInflater.from(this).inflate(R.layout.item_cash_card, inputCardsContainer, false);
+            
+            ImageView avatar = cardView.findViewById(R.id.cash_avatar);
+            TextView ownerValue = cardView.findViewById(R.id.cash_owner_value);
+            TextView amountValue = cardView.findViewById(R.id.cash_amount_value);
+            TextView cdValue = cardView.findViewById(R.id.cash_cd_value);
+            ImageButton deleteButton = cardView.findViewById(R.id.deleteButton);
+
+            // Set owner avatar
+            try {
+                byte[] avatarBytes = com.fc.fc_ajdk.feature.avatar.AvatarMaker.createAvatar(cash.getOwner(), this);
+                if (avatarBytes != null) {
+                    android.graphics.Bitmap bitmap = android.graphics.BitmapFactory.decodeByteArray(avatarBytes, 0, avatarBytes.length);
+                    avatar.setImageBitmap(bitmap);
+                }
+            } catch (Exception e) {
+                TimberLogger.e(TAG, "Failed to create avatar for owner %s: %s", cash.getOwner(), e.getMessage());
+            }
+
+            // Set owner value
+            ownerValue.setText(cash.getOwner());
+
+            // Set amount value
+            String amountText = FchUtils.satoshiToCoin(cash.getValue()) + " F";
+            amountValue.setText(amountText);
+
+            // Set CD value
+            Long cd = cash.getCd();
+            if (cd != null) {
+                cdValue.setText(String.format(Locale.US, "%d cd", cd));
+            } else {
+                cdValue.setText("0 cd");
+            }
+
+            // Set click listeners
+            avatar.setOnClickListener(v -> com.fc.safe.utils.IdUtils.showAvatarDialog(this, cash.getOwner()));
+            ownerValue.setOnClickListener(v -> copyToClipboard(cash.getOwner(), "owner"));
+            amountValue.setOnClickListener(v -> copyToClipboard(amountText, "amount"));
+            cdValue.setOnClickListener(v -> copyToClipboard(cdValue.getText().toString(), "cd"));
+
+            // Add delete button functionality
+            deleteButton.setOnClickListener(v -> {
+                // Remove the cash from rawTxInfo
+                rawTxInfo.getInputs().remove(cash);
+                // Remove the card view
+                inputCardsContainer.removeView(cardView);
+                // Update totals
+                updateTotalAndFeeText();
+                // Show hint if no more inputs
+                if (rawTxInfo.getInputs().isEmpty()) {
+                    inputHint.setVisibility(View.VISIBLE);
+                }
+            });
+
+            inputCardsContainer.addView(cardView, inputCardsContainer.getChildCount() - 1);
+            
+            // Set sender if we have a valid owner
+            if (cash.getOwner() != null && !cash.getOwner().isEmpty()) {
+                keyInput.setText(cash.getOwner());
+            }
+        }
+        
+        // Hide input hint since we have cash cards
+        inputHint.setVisibility(View.GONE);
+    }
+
+    public void copyToClipboard(String text, String label) {
+        ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+        ClipData clip = ClipData.newPlainText(label, text);
+        clipboard.setPrimaryClip(clip);
+        Toast.makeText(this, R.string.copied, Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        
+        if (requestCode == 1003 && resultCode == RESULT_OK && data != null) {
+            // Handle result from CashActivity
+            List<String> cashJsonList = data.getStringArrayListExtra("selected_cash");
+            if (cashJsonList != null && !cashJsonList.isEmpty()) {
+                // Convert JSON strings back to Cash objects
+                List<Cash> selectedCash = new ArrayList<>();
+                for (String cashJson : cashJsonList) {
+                    try {
+                        Cash cash = Cash.fromJson(cashJson);
+                        if (cash != null) {
+                            selectedCash.add(cash);
+                        }
+                    } catch (Exception e) {
+                        TimberLogger.e(TAG, "Error parsing cash JSON: " + e.getMessage());
+                    }
+                }
+                
+                if (!selectedCash.isEmpty()) {
+                    // Add selected cash to the transaction
+                    for (Cash cash : selectedCash) {
+                        rawTxInfo.getInputs().add(cash);
+                        
+                        // Create cash card view
+                        View cardView = LayoutInflater.from(this).inflate(R.layout.item_cash_card, inputCardsContainer, false);
+                        
+                        ImageView avatar = cardView.findViewById(R.id.cash_avatar);
+                        TextView ownerValue = cardView.findViewById(R.id.cash_owner_value);
+                        TextView amountValue = cardView.findViewById(R.id.cash_amount_value);
+                        TextView cdValue = cardView.findViewById(R.id.cash_cd_value);
+                        ImageButton deleteButton = cardView.findViewById(R.id.deleteButton);
+
+                        // Set owner avatar
+                        try {
+                            byte[] avatarBytes = com.fc.fc_ajdk.feature.avatar.AvatarMaker.createAvatar(cash.getOwner(), this);
+                            if (avatarBytes != null) {
+                                android.graphics.Bitmap bitmap = android.graphics.BitmapFactory.decodeByteArray(avatarBytes, 0, avatarBytes.length);
+                                avatar.setImageBitmap(bitmap);
+                            }
+                        } catch (Exception e) {
+                            TimberLogger.e(TAG, "Failed to create avatar for owner %s: %s", cash.getOwner(), e.getMessage());
+                        }
+
+                        // Set owner value
+                        ownerValue.setText(cash.getOwner());
+
+                        // Set amount value
+                        String amountText = FchUtils.satoshiToCoin(cash.getValue()) + " F";
+                        amountValue.setText(amountText);
+
+                        // Set CD value
+                        Long cd = cash.getCd();
+                        if (cd != null) {
+                            cdValue.setText(String.format(Locale.US, "%d cd", cd));
+                        } else {
+                            cdValue.setText("0 cd");
+                        }
+
+                        // Set click listeners
+                        avatar.setOnClickListener(v -> com.fc.safe.utils.IdUtils.showAvatarDialog(this, cash.getOwner()));
+                        ownerValue.setOnClickListener(v -> copyToClipboard(cash.getOwner(), "owner"));
+                        amountValue.setOnClickListener(v -> copyToClipboard(amountText, "amount"));
+                        cdValue.setOnClickListener(v -> copyToClipboard(cdValue.getText().toString(), "cd"));
+
+                        // Add delete button functionality
+                        deleteButton.setOnClickListener(v -> {
+                            // Remove the cash from rawTxInfo
+                            rawTxInfo.getInputs().remove(cash);
+                            // Remove the card view
+                            inputCardsContainer.removeView(cardView);
+                            // Update totals
+                            updateTotalAndFeeText();
+                            // Show hint if no more inputs
+                            if (rawTxInfo.getInputs().isEmpty()) {
+                                inputHint.setVisibility(View.VISIBLE);
+                            }
+                        });
+
+                        inputCardsContainer.addView(cardView, inputCardsContainer.getChildCount() - 1);
+                        
+                        // Set sender if we have a valid owner
+                        if (cash.getOwner() != null && !cash.getOwner().isEmpty()) {
+                            keyInput.setText(cash.getOwner());
+                        }
+                    }
+                    
+                    // Hide input hint since we have cash cards
+                    inputHint.setVisibility(View.GONE);
+                    updateTotalAndFeeText();
+                }
+            }
         }
     }
 } 

@@ -18,4 +18,7 @@
     <color name="headerBackground">#908C8C</color>
     <color name="field_name">#225555</color>
     <color name="input_field_background">#FFFFFF</color>
+    <color name="cash_card_background">#E8F4FD</color>
+    <color name="cash_card_border">#BBDEFB</color>
+    <color name="cash_card_dark_background">#E0E0E0</color>
 </resources>

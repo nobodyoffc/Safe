@@ -28,13 +28,15 @@ import static com.fc.fc_ajdk.constants.FieldNames.VALUE;
 public class Cash extends FcObject {
 
 	//calculated
+	private String owner; 	//address
+	private Long value;		//in satoshi
 	private String issuer; //first input fid when this cash was born.
 
 	//from utxo
 	private Integer birthIndex;		//index of cash. Order in cashs of the tx when created.
 	private String type;	//type of the script. P2PKH,Multisign,OP_RETURN,Unknown,MultiSig
-	private String owner; 	//address
-	private Long value;		//in satoshi
+	private Long cd;		//CoinDays
+
 	private String lockScript;	//LockScript
 	private String birthTxId;		//txid, hash in which this cash was created.
 	private Integer birthTxIndex;		//Order in the block of the tx in which this cash was created.
@@ -53,7 +55,6 @@ public class Cash extends FcObject {
 	private String sigHash;	//sigHash.
 	private String sequence;	//nSequence
 	private Long cdd;		//CoinDays Destroyed
-	private Long cd;		//CoinDays
 	private Boolean valid;	//Is this cash valid (utxo), or spent (stxo);
 	private Long lastTime;
 	private Long lastHeight;
@@ -72,14 +73,15 @@ public class Cash extends FcObject {
 
 	public static LinkedHashMap<String,Integer>getFieldWidthMap(){
 		LinkedHashMap<String,Integer> map = new LinkedHashMap<>();
-		map.put(BIRTH_TIME,TIME_DEFAULT_SHOW_SIZE);
-		map.put(VALID,BOOLEAN_DEFAULT_SHOW_SIZE);
-		map.put(ISSUER,ID_DEFAULT_SHOW_SIZE);
 		map.put(OWNER,ID_DEFAULT_SHOW_SIZE);
 		map.put(VALUE,AMOUNT_DEFAULT_SHOW_SIZE);
 		map.put(CD,CD_DEFAULT_SHOW_SIZE);
-		map.put(CDD,CD_DEFAULT_SHOW_SIZE);
 		map.put(ID,ID_DEFAULT_SHOW_SIZE);
+		map.put(BIRTH_TIME,TIME_DEFAULT_SHOW_SIZE);
+		map.put(VALID,BOOLEAN_DEFAULT_SHOW_SIZE);
+		map.put(ISSUER,ID_DEFAULT_SHOW_SIZE);
+		map.put(CDD,CD_DEFAULT_SHOW_SIZE);
+
 		return map;
 	}
 	public static List<String> getTimestampFieldList(){
@@ -140,6 +142,7 @@ public class Cash extends FcObject {
 	}
 
 	public String makeId(){
+		if(this.birthTxId==null || this.birthIndex==null)return null;
 		this.id = makeCashId(this.getBirthTxId(),this.getBirthIndex());
 		return this.id;
 	}

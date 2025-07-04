@@ -101,6 +101,12 @@ public class FcEntityListFragment<T extends FcEntity> extends Fragment {
     // Field name map for display
     private Map<String, String> fieldNameMap;
     
+    // Add field for satoshi field list
+    private List<String> satoshiFieldList;
+    
+    // Add field for timestamp field list
+    private List<String> timestampFieldList;
+    
     // Add field for All checkbox
     private CheckBox allCheckBox;
     // Add field for All checkbox listener
@@ -143,7 +149,7 @@ public class FcEntityListFragment<T extends FcEntity> extends Fragment {
         Bundle args = new Bundle();
         args.putSerializable("t_class", tClass);
         args.putBoolean("single_choice", singleChoice != null ? singleChoice : false);
-        args.putBoolean("has_single_choice", singleChoice != null);
+        args.putBoolean("has_choice", singleChoice != null);
         fragment.setArguments(args);
         fragment.tList = tList;
         return fragment;
@@ -162,14 +168,14 @@ public class FcEntityListFragment<T extends FcEntity> extends Fragment {
         Bundle args = getArguments();
         if (args != null) {
             tClass = (Class<T>) args.getSerializable("t_class");
-            boolean hasSingleChoice = args.getBoolean("has_single_choice", false);
-            if (hasSingleChoice) {
+            boolean hasChoice = args.getBoolean("has_choice", false);
+            if (hasChoice) {
                 singleChoice = args.getBoolean("single_choice", false);
             } else {
                 singleChoice = null;
             }
             TimberLogger.i(TAG, "FcEntityListFragment onCreate: Arguments parsed - tClass = " + tClass + 
-                ", hasSingleChoice = " + hasSingleChoice + ", singleChoice = " + singleChoice);
+                ", hasChoice = " + hasChoice + ", singleChoice = " + singleChoice);
         } else {
             TimberLogger.w(TAG, "FcEntityListFragment onCreate: No arguments found");
         }
@@ -232,6 +238,50 @@ public class FcEntityListFragment<T extends FcEntity> extends Fragment {
                         TimberLogger.e(TAG, "onCreate: Failed to generate KeyInfo avatars: %s", e.getMessage());
                     }
                 }
+            } else if (tClass.equals(com.fc.fc_ajdk.data.fchData.Cash.class)) {
+                // Handle Cash objects - use owner field for avatar, managed by KeyInfoManager
+                KeyInfoManager kim = KeyInfoManager.getInstance(getContext());
+                LocalDB<KeyInfo> localKeyInfoDB = kim.getKeyInfoDB();
+                List<String> ownersToGenerate = new ArrayList<>();
+
+                // Collect unique owners from cash list
+                List<String> uniqueOwners = new ArrayList<>();
+                for (T entity : tList) {
+                    if (entity instanceof com.fc.fc_ajdk.data.fchData.Cash) {
+                        com.fc.fc_ajdk.data.fchData.Cash cash = (com.fc.fc_ajdk.data.fchData.Cash) entity;
+                        String owner = cash.getOwner();
+                        if (owner != null && !owner.isEmpty() && !uniqueOwners.contains(owner)) {
+                            uniqueOwners.add(owner);
+                        }
+                    }
+                }
+
+                for (String owner : uniqueOwners) {
+                    byte[] avatar = null;
+                    if (localKeyInfoDB != null) {
+                        avatar = localKeyInfoDB.getFromMap(IdUtils.AVATAR_MAP, owner);
+                    }
+                    if (avatar != null) {
+                        idImageBytesMap.put(owner, avatar);
+                    } else {
+                        ownersToGenerate.add(owner); // Mark for generation
+                    }
+                }
+                TimberLogger.i(TAG, "onCreate: Loaded %d avatars from KeyInfoDB for Cash owners", idImageBytesMap.size());
+
+                if (!ownersToGenerate.isEmpty()) {
+                    TimberLogger.i(TAG, "onCreate: Generating %d missing Cash owner avatars", ownersToGenerate.size());
+                    try {
+                        Map<String, byte[]> generatedAvatars = AvatarMaker.makeAvatars(ownersToGenerate.toArray(new String[0]), getContext());
+                        for (Map.Entry<String, byte[]> entry : generatedAvatars.entrySet()) {
+                            idImageBytesMap.put(entry.getKey(), entry.getValue());
+                            kim.saveAvatar(entry.getKey(), entry.getValue()); // Save back to KeyInfoDB
+                        }
+                        TimberLogger.i(TAG, "onCreate: Generated and saved %d Cash owner avatars", generatedAvatars.size());
+                    } catch (IOException e) {
+                        TimberLogger.e(TAG, "onCreate: Failed to generate Cash owner avatars: %s", e.getMessage());
+                    }
+                }
             } else {
                 // Generic fallback for other FcEntity types
                 if (!idList.isEmpty()) {
@@ -263,10 +313,27 @@ public class FcEntityListFragment<T extends FcEntity> extends Fragment {
             try {
                 Method getFieldNameMapMethod = tClass.getMethod(FcEntity.METHOD_GET_SHOW_FIELD_NAME_AS_MAP);
                 fieldNameMap = (Map<String, String>) getFieldNameMapMethod.invoke(null);
-                TimberLogger.i(TAG,"FcEntityListFragment onCreate: fieldNameMap size = " + (fieldNameMap != null ? fieldNameMap.size() : 0));
             } catch (Exception e) {
                 TimberLogger.e(TAG,"Failed to get field name map: %s", e.getMessage());
                 fieldNameMap = new HashMap<>();
+            }
+            
+            // Get satoshi field list
+            try {
+                Method getSatoshiFieldListMethod = tClass.getMethod(FcEntity.METHOD_GET_SATOSHI_FIELD_LIST);
+                satoshiFieldList = (List<String>) getSatoshiFieldListMethod.invoke(null);
+            } catch (Exception e) {
+                TimberLogger.e(TAG,"Failed to get satoshi field list: %s", e.getMessage());
+                satoshiFieldList = new ArrayList<>();
+            }
+            
+            // Get timestamp field list
+            try {
+                Method getTimestampFieldListMethod = tClass.getMethod(FcEntity.METHOD_GET_TIMESTAMP_FIELD_LIST);
+                timestampFieldList = (List<String>) getTimestampFieldListMethod.invoke(null);
+            } catch (Exception e) {
+                TimberLogger.e(TAG,"Failed to get timestamp field list: %s", e.getMessage());
+                timestampFieldList = new ArrayList<>();
             }
         } catch (Exception e) {
             TimberLogger.e(TAG,"Failed to get field maps: %s", e.getMessage());
@@ -278,10 +345,23 @@ public class FcEntityListFragment<T extends FcEntity> extends Fragment {
         showAvatarColumn = false;
         if (tList != null) {
             for (T entity : tList) {
-                String id = entity != null ? entity.getId() : null;
-                if (id != null && KeyTools.isGoodFid(id)) {
-                    showAvatarColumn = true;
-                    break;
+                if (tClass.equals(com.fc.fc_ajdk.data.fchData.Cash.class)) {
+                    // For Cash objects, check if any have a valid owner
+                    if (entity instanceof com.fc.fc_ajdk.data.fchData.Cash) {
+                        com.fc.fc_ajdk.data.fchData.Cash cash = (com.fc.fc_ajdk.data.fchData.Cash) entity;
+                        String owner = cash.getOwner();
+                        if (owner != null && !owner.isEmpty() && KeyTools.isGoodFid(owner)) {
+                            showAvatarColumn = true;
+                            break;
+                        }
+                    }
+                } else {
+                    // For other entities, check if any have a good FID
+                    String id = entity != null ? entity.getId() : null;
+                    if (id != null && KeyTools.isGoodFid(id)) {
+                        showAvatarColumn = true;
+                        break;
+                    }
                 }
             }
         }
@@ -644,9 +724,21 @@ public class FcEntityListFragment<T extends FcEntity> extends Fragment {
             avatarParams.gravity = Gravity.CENTER_VERTICAL;
             avatarParams.setMargins((int) ((AVATAR_FIELD_WIDTH - AVATAR_SIZE) / 2 * density), 0, 0, 0);
             avatarView.setLayoutParams(avatarParams);
-            String id = entity.getId();
-            if (id != null && KeyTools.isGoodFid(id)) {
-                final byte[] finalImageBytes = getAvatar(id, avatarView);
+            
+            String avatarId = null;
+            if (tClass.equals(com.fc.fc_ajdk.data.fchData.Cash.class)) {
+                // For Cash objects, use owner field
+                if (entity instanceof com.fc.fc_ajdk.data.fchData.Cash) {
+                    com.fc.fc_ajdk.data.fchData.Cash cash = (com.fc.fc_ajdk.data.fchData.Cash) entity;
+                    avatarId = cash.getOwner();
+                }
+            } else {
+                // For other entities, use id field
+                avatarId = entity.getId();
+            }
+            
+            if (avatarId != null && KeyTools.isGoodFid(avatarId)) {
+                final byte[] finalImageBytes = getAvatar(avatarId, avatarView);
                 avatarView.setOnClickListener(v -> showAvatarPopup(finalImageBytes));
                 avatarView.setVisibility(View.VISIBLE);
             } else {
@@ -952,6 +1044,26 @@ public class FcEntityListFragment<T extends FcEntity> extends Fragment {
                     }
                 }
                 
+                // Format satoshi values using FchUtils.satoshiToCash()
+                if (satoshiFieldList != null && satoshiFieldList.contains(fieldName) && value instanceof Number) {
+                    try {
+                        long satoshiValue = ((Number) value).longValue();
+                        return com.fc.fc_ajdk.utils.FchUtils.formatSatoshiValue(satoshiValue);
+                    } catch (Exception ex) {
+                        TimberLogger.e(TAG, "Failed to format satoshi value for field %s: %s", fieldName, ex.getMessage());
+                    }
+                }
+                
+                // Format timestamp values using DateUtils.longShortToTime()
+                if (timestampFieldList != null && timestampFieldList.contains(fieldName) && value instanceof Number) {
+                    try {
+                        long timestampValue = ((Number) value).longValue();
+                        return com.fc.fc_ajdk.utils.DateUtils.longShortToTime(timestampValue, com.fc.fc_ajdk.utils.DateUtils.TO_SECOND);
+                    } catch (Exception ex) {
+                        TimberLogger.e(TAG, "Failed to format timestamp value for field %s: %s", fieldName, ex.getMessage());
+                    }
+                }
+                
                 return value;
             } catch (NoSuchMethodException e) {
                 // If standard getter not found, try isXxx for boolean fields
@@ -970,6 +1082,26 @@ public class FcEntityListFragment<T extends FcEntity> extends Fragment {
                         }
                     }
                     
+                    // Format satoshi values using FchUtils.satoshiToCash()
+                    if (satoshiFieldList != null && satoshiFieldList.contains(fieldName) && value instanceof Number) {
+                        try {
+                            long satoshiValue = ((Number) value).longValue();
+                            return com.fc.fc_ajdk.utils.FchUtils.formatSatoshiValue(satoshiValue);
+                        } catch (Exception ex) {
+                            TimberLogger.e(TAG, "Failed to format satoshi value for field %s: %s", fieldName, ex.getMessage());
+                        }
+                    }
+                    
+                    // Format timestamp values using DateUtils.longShortToTime()
+                    if (timestampFieldList != null && timestampFieldList.contains(fieldName) && value instanceof Number) {
+                        try {
+                            long timestampValue = ((Number) value).longValue();
+                            return com.fc.fc_ajdk.utils.DateUtils.longShortToTime(timestampValue, com.fc.fc_ajdk.utils.DateUtils.TO_SECOND);
+                        } catch (Exception ex) {
+                            TimberLogger.e(TAG, "Failed to format timestamp value for field %s: %s", fieldName, ex.getMessage());
+                        }
+                    }
+                    
                     return value;
                 } else {
                     // Try isXxx format for boolean fields
@@ -984,6 +1116,26 @@ public class FcEntityListFragment<T extends FcEntity> extends Fragment {
                             return "✓"; // Green tick for true
                         } else {
                             return "✗"; // Red X for false
+                        }
+                    }
+                    
+                    // Format satoshi values using FchUtils.satoshiToCash()
+                    if (satoshiFieldList != null && satoshiFieldList.contains(fieldName) && value instanceof Number) {
+                        try {
+                            long satoshiValue = ((Number) value).longValue();
+                            return com.fc.fc_ajdk.utils.FchUtils.formatSatoshiValue(satoshiValue);
+                        } catch (Exception ex) {
+                            TimberLogger.e(TAG, "Failed to format satoshi value for field %s: %s", fieldName, ex.getMessage());
+                        }
+                    }
+                    
+                    // Format timestamp values using DateUtils.longShortToTime()
+                    if (timestampFieldList != null && timestampFieldList.contains(fieldName) && value instanceof Number) {
+                        try {
+                            long timestampValue = ((Number) value).longValue();
+                            return com.fc.fc_ajdk.utils.DateUtils.longShortToTime(timestampValue, com.fc.fc_ajdk.utils.DateUtils.TO_SECOND);
+                        } catch (Exception ex) {
+                            TimberLogger.e(TAG, "Failed to format timestamp value for field %s: %s", fieldName, ex.getMessage());
                         }
                     }
                     
@@ -1007,6 +1159,26 @@ public class FcEntityListFragment<T extends FcEntity> extends Fragment {
                         return "✓"; // Green tick for true
                     } else {
                         return "✗"; // Red X for false
+                    }
+                }
+                
+                // Format satoshi values using FchUtils.satoshiToCash()
+                if (satoshiFieldList != null && satoshiFieldList.contains(fieldName) && value instanceof Number) {
+                    try {
+                        long satoshiValue = ((Number) value).longValue();
+                        return com.fc.fc_ajdk.utils.FchUtils.formatSatoshiValue(satoshiValue);
+                    } catch (Exception ex) {
+                        TimberLogger.e(TAG, "Failed to format satoshi value for field %s: %s", fieldName, ex.getMessage());
+                    }
+                }
+                
+                // Format timestamp values using DateUtils.longShortToTime()
+                if (timestampFieldList != null && timestampFieldList.contains(fieldName) && value instanceof Number) {
+                    try {
+                        long timestampValue = ((Number) value).longValue();
+                        return com.fc.fc_ajdk.utils.DateUtils.longShortToTime(timestampValue, com.fc.fc_ajdk.utils.DateUtils.TO_SECOND);
+                    } catch (Exception ex) {
+                        TimberLogger.e(TAG, "Failed to format timestamp value for field %s: %s", fieldName, ex.getMessage());
                     }
                 }
                 
@@ -1097,6 +1269,50 @@ public class FcEntityListFragment<T extends FcEntity> extends Fragment {
                         TimberLogger.i(TAG, "updateList: Generated and saved %d KeyInfo avatars", generatedAvatars.size());
                     } catch (IOException e) {
                         TimberLogger.e(TAG, "updateList: Failed to generate KeyInfo avatars: %s", e.getMessage());
+                    }
+                }
+            } else if (tClass.equals(com.fc.fc_ajdk.data.fchData.Cash.class)) {
+                // Handle Cash objects - use owner field for avatar, managed by KeyInfoManager
+                KeyInfoManager kim = KeyInfoManager.getInstance(getContext());
+                LocalDB<KeyInfo> localKeyInfoDB = kim.getKeyInfoDB();
+                List<String> ownersToGenerate = new ArrayList<>();
+
+                // Collect unique owners from cash list
+                List<String> uniqueOwners = new ArrayList<>();
+                for (T entity : tList) {
+                    if (entity instanceof com.fc.fc_ajdk.data.fchData.Cash) {
+                        com.fc.fc_ajdk.data.fchData.Cash cash = (com.fc.fc_ajdk.data.fchData.Cash) entity;
+                        String owner = cash.getOwner();
+                        if (owner != null && !owner.isEmpty() && !uniqueOwners.contains(owner)) {
+                            uniqueOwners.add(owner);
+                        }
+                    }
+                }
+
+                for (String owner : uniqueOwners) {
+                    byte[] avatar = null;
+                    if (localKeyInfoDB != null) {
+                        avatar = localKeyInfoDB.getFromMap(IdUtils.AVATAR_MAP, owner);
+                    }
+                    if (avatar != null) {
+                        idImageBytesMap.put(owner, avatar);
+                    } else {
+                        ownersToGenerate.add(owner); // Mark for generation
+                    }
+                }
+                TimberLogger.i(TAG, "updateList: Loaded %d avatars from KeyInfoDB for Cash owners", idImageBytesMap.size());
+
+                if (!ownersToGenerate.isEmpty()) {
+                    TimberLogger.i(TAG, "updateList: Generating %d missing Cash owner avatars", ownersToGenerate.size());
+                    try {
+                        Map<String, byte[]> generatedAvatars = AvatarMaker.makeAvatars(ownersToGenerate.toArray(new String[0]), getContext());
+                        for (Map.Entry<String, byte[]> entry : generatedAvatars.entrySet()) {
+                            idImageBytesMap.put(entry.getKey(), entry.getValue());
+                            kim.saveAvatar(entry.getKey(), entry.getValue()); // Save back to KeyInfoDB
+                        }
+                        TimberLogger.i(TAG, "updateList: Generated and saved %d Cash owner avatars", generatedAvatars.size());
+                    } catch (IOException e) {
+                        TimberLogger.e(TAG, "updateList: Failed to generate Cash owner avatars: %s", e.getMessage());
                     }
                 }
             } else {

@@ -56,4 +56,18 @@
         android:textColor="?android:attr/textColorPrimary"
         android:textSize="16sp" />
 
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="?android:attr/listDivider" />
+
+    <TextView
+        android:id="@+id/string_converter"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp"
+        android:text="@string/menu_string_converter"
+        android:textColor="?android:attr/textColorPrimary"
+        android:textSize="16sp" />
+
 </LinearLayout> 

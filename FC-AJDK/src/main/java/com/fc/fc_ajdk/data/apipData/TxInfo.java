@@ -122,7 +122,8 @@ public class TxInfo extends FcObject {
         ArrayList<CashMark> spentCashes = new ArrayList<>();
 
         for (Cash cash : inputCashList) {
-            spentCashes.add(new CashMark(cash.getOwner(),cash.getValue()));
+            if(cash.getId()==null)cash.makeId();
+            spentCashes.add(new CashMark(cash.getOwner(),cash.getValue(),cash.getId()));
             totalInputValue += cash.getValue();
         }
         
@@ -157,7 +158,7 @@ public class TxInfo extends FcObject {
                 }
             }
         
-            if(fid!=null)txInfo.getIssuedCashes().add(new CashMark(fid,output.getValue().value));
+            if(fid!=null)txInfo.getIssuedCashes().add(new CashMark(fid,output.getValue().value,null));
         }
         
         return txInfo;

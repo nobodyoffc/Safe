@@ -95,7 +95,7 @@ public class HomeActivity extends AppCompatActivity {
             generateIconForMenuItem(R.id.menu_totp, getString(R.string.menu_totp));
             generateIconForMenuItem(R.id.menu_qr_code, getString(R.string.menu_qr_code));
         //    generateIconForMenuItem(R.id.menu_test, getString(R.string.menu_test));
-            generateIconForMenuItem(R.id.menu_decode, getString(R.string.menu_decode));
+//            generateIconForMenuItem(R.id.menu_decode, getString(R.string.menu_decode));
             generateIconForMenuItem(R.id.menu_hash, getString(R.string.menu_hash));
             generateIconForMenuItem(R.id.menu_decrypt, getString(R.string.menu_decrypt));
             generateIconForMenuItem(R.id.menu_encrypt, getString(R.string.menu_encrypt));
@@ -103,10 +103,11 @@ public class HomeActivity extends AppCompatActivity {
             generateIconForMenuItem(R.id.menu_sign_message, getString(R.string.menu_sign_words));
             generateIconForMenuItem(R.id.menu_multisign, getString(R.string.menu_multi_sign));
             generateIconForMenuItem(R.id.menu_sign_tx, getString(R.string.menu_sign_tx));
-            generateIconForMenuItem(R.id.menu_convert, getString(R.string.menu_convert));
+            generateIconForMenuItem(R.id.menu_convert, getString(R.string.menu_tools));
             generateIconForMenuItem(R.id.menu_secrets, getString(R.string.menu_secrets));
             generateIconForMenuItem(R.id.menu_my_keys, getString(R.string.menu_my_keys));
             generateIconForMenuItem(R.id.menu_random, getString(R.string.menu_random));
+            generateIconForMenuItem(R.id.menu_cash, getString(R.string.cash));
             // Skip settings as it uses a custom gear icon
         } catch (Exception ex) {
             TimberLogger.e(TAG, "Error generating menu icons: " + ex.getMessage(), ex);
@@ -269,18 +270,6 @@ public class HomeActivity extends AppCompatActivity {
                 TimberLogger.e(TAG, "menu_decrypt view not found");
             }
 
-            // Decode
-            View decodeView = findViewById(R.id.menu_decode);
-            if (decodeView != null) {
-                decodeView.setOnClickListener(v -> {
-                    // Launch DecodeActivity
-                    Intent intent = new Intent(HomeActivity.this, DecodeActivity.class);
-                    startActivity(intent);
-                });
-            } else {
-                TimberLogger.e(TAG, "menu_decode view not found");
-            }
-
             // Hash
             View hashView = findViewById(R.id.menu_hash);
             if (hashView != null) {
@@ -325,6 +314,18 @@ public class HomeActivity extends AppCompatActivity {
                 });
             } else {
                 TimberLogger.e(TAG, "menu_random view not found");
+            }
+
+            // Cash
+            View cashView = findViewById(R.id.menu_cash);
+            if (cashView != null) {
+                cashView.setOnClickListener(v -> {
+                    // Launch CashActivity
+                    Intent intent = new Intent(HomeActivity.this, CashActivity.class);
+                    startActivity(intent);
+                });
+            } else {
+                TimberLogger.e(TAG, "menu_cash view not found");
             }
 
             // Settings

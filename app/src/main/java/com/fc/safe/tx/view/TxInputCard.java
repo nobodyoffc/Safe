@@ -46,6 +46,13 @@ public class TxInputCard extends CardView {
 
     private void init(Context context) {
         LayoutInflater.from(context).inflate(R.layout.layout_tx_input_card, this, true);
+        
+        // Set CardView background to transparent to remove the default white background
+        setCardBackgroundColor(android.graphics.Color.TRANSPARENT);
+        
+        // Remove shadow by setting elevation to 0
+        setCardElevation(0f);
+        
         txIdText = findViewById(R.id.txIdText);
         indexText = findViewById(R.id.indexText);
         amountText = findViewById(R.id.amountText);
@@ -54,7 +61,7 @@ public class TxInputCard extends CardView {
         // Setup copy functionality for TxId
         txIdText.setOnClickListener(v -> {
             if (cash != null) {
-                copyToClipboard(context, "TxId", cash.getBirthTxId());
+                copyToClipboard(context, getContext().getString(R.string.txid), cash.getBirthTxId());
             }
         });
 
@@ -62,7 +69,7 @@ public class TxInputCard extends CardView {
         amountText.setOnClickListener(v -> {
             if (cash != null) {
                 String amount = NumberUtils.formatAmount(FchUtils.satoshiToCash(cash.getValue()));
-                copyToClipboard(context, "Amount", amount);
+                copyToClipboard(context, getContext().getString(R.string.amount), amount);
             }
         });
 
@@ -84,7 +91,7 @@ public class TxInputCard extends CardView {
         this.cash = cash;
         txIdText.setText(StringUtils.omitMiddle(cash.getBirthTxId(), 13));
         indexText.setText(String.valueOf(cash.getBirthIndex()));
-        amountText.setText(NumberUtils.formatAmount(FchUtils.satoshiToCoin(cash.getValue())));
+        amountText.setText(NumberUtils.formatAmount(FchUtils.satoshiToCoin(cash.getValue())) + " F");
     }
 
     public Cash getCash() {

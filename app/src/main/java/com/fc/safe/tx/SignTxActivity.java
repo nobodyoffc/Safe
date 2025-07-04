@@ -10,6 +10,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.app.AlertDialog;
 
 import com.fc.fc_ajdk.core.fch.RawTxInfo;
 import com.fc.fc_ajdk.core.fch.TxCreator;
@@ -29,8 +30,12 @@ import com.fc.safe.home.BaseCryptoActivity;
 import com.fc.safe.initiate.ConfigureManager;
 import com.fc.safe.tx.view.TxOutputCard;
 import com.fc.safe.utils.IdUtils;
+import com.fc.safe.db.CashManager;
+import com.fc.safe.db.KeyInfoManager;
+import com.fc.fc_ajdk.core.crypto.Hash;
 
 import java.util.List;
+import java.util.Locale;
 
 public class SignTxActivity extends BaseCryptoActivity {
     private static final String TAG = "SignTxActivity";
@@ -141,6 +146,10 @@ public class SignTxActivity extends BaseCryptoActivity {
                     Toast.makeText(this, getString(R.string.signed_you_can_broadcast_it), SafeApplication.TOAST_LASTING).show();
                     isSigned = true;
                     updateButtonTexts();
+                    
+                    // Update cash database after successful signing
+                    showUpdateCashConfirmationDialog(signedTx, txInfo);
+                    
                 } else {
                     Toast.makeText(this, getString(R.string.failed_to_sign_transaction), SafeApplication.TOAST_LASTING).show();
                 }
@@ -306,5 +315,91 @@ public class SignTxActivity extends BaseCryptoActivity {
         label.setTypeface(null, android.graphics.Typeface.BOLD);
         label.setPadding(0, 16, 0, 8);
         fragmentContainer.addView(label);
+    }
+
+    /**
+     * Updates the cash database after a transaction is signed
+     * @param signedTx The signed transaction hex string
+     * @param txInfo The transaction info containing all outputs including change
+     */
+    private void updateCashDB(String signedTx, TxInfo txInfo) {
+        if (signedTx == null || txInfo == null) {
+            TimberLogger.e(TAG, "updateCashDB: signedTx or txInfo is null");
+            return;
+        }
+
+        try {
+            // 1. Calculate signedTxId = Hex.toHex(Hash.sha256x2(Hex.fromHex(signedTx)))
+            String signedTxId = Hex.toHex(Hash.sha256x2(Hex.fromHex(signedTx)));
+            TimberLogger.i(TAG, "updateCashDB: signedTxId = %s", signedTxId);
+
+            // Get CashManager and KeyInfoManager instances
+            CashManager cashManager = CashManager.getInstance(this);
+            KeyInfoManager keyInfoManager = KeyInfoManager.getInstance(this);
+
+            // 2. Remove spent cash from CashManager's localDB
+            if (txInfo.getSpentCashes() != null) {
+                for (CashMark spentCashMark : txInfo.getSpentCashes()) {
+                    if (spentCashMark.getId() != null) {
+                        cashManager.removeCash(spentCashMark.getId());
+                    }
+                }
+            }
+
+            // 3. Check issuedCashes and create new cash for own addresses
+            if (txInfo.getIssuedCashes() != null) {
+                for (int i = 0; i < txInfo.getIssuedCashes().size(); i++) {
+                    CashMark cashMark = txInfo.getIssuedCashes().get(i);
+                    
+                    // Check if this output belongs to any of our KeyInfo addresses
+                    if (cashMark.getOwner() != null && keyInfoManager.getKeyInfoById(cashMark.getOwner()) != null) {
+                        // Create new cash for our own address
+                        Cash newCash = new Cash();
+                        newCash.setBirthTxId(signedTxId);
+                        newCash.setBirthIndex(i);
+                        newCash.setBirthTime(System.currentTimeMillis() / 1000 + 300); // Current time + 5 minutes (300 seconds)
+                        newCash.setValue(cashMark.getValue());
+                        newCash.setOwner(cashMark.getOwner());
+                        newCash.setValid(true);
+                        
+                        // Generate cash ID using makeId method
+                        String cashId = newCash.makeId();
+                        newCash.setId(cashId);
+                        
+                        // Add to CashManager's DB
+                        cashManager.addCash(newCash);
+                        TimberLogger.i(TAG, "updateCashDB: Added new cash with ID: %s, owner: %s, amount: %s", 
+                            cashId, cashMark.getOwner(), FchUtils.satoshiToCoin(cashMark.getValue()));
+                    }
+                }
+            }
+
+            // Commit changes to database
+            cashManager.commit();
+            TimberLogger.i(TAG, "updateCashDB: Successfully updated cash database");
+
+        } catch (Exception e) {
+            TimberLogger.e(TAG, "updateCashDB: Error updating cash database: %s", e.getMessage());
+        }
+    }
+
+    /**
+     * Shows a confirmation dialog asking the user if they want to update their cash database
+     * @param signedTx The signed transaction hex string
+     * @param txInfo The transaction info containing all outputs including change
+     */
+    private void showUpdateCashConfirmationDialog(String signedTx, TxInfo txInfo) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(getString(R.string.update_cash_database))
+               .setMessage(getString(R.string.update_cash_database_message))
+               .setPositiveButton(getString(R.string.yes), (dialog, which) -> {
+                   updateCashDB(signedTx, txInfo);
+               })
+               .setNegativeButton(getString(R.string.no), (dialog, which) -> {
+                   // User chose not to update, do nothing
+                   TimberLogger.i(TAG, "User chose not to update cash database");
+               })
+               .setCancelable(false)
+               .show();
     }
 } 
