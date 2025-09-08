@@ -20,7 +20,7 @@ import com.fc.safe.db.KeyInfoManager;
 import com.fc.safe.db.SecretManager;
 import com.fc.safe.initiate.ConfigureManager;
 import com.fc.safe.initiate.CheckPasswordActivity;
-import com.fc.safe.initiate.CreatePasswordActivity;
+import com.fc.fc_ajdk.utils.IdNameUtils;
 import com.fc.safe.db.DatabaseManager;
 import com.fc.safe.db.MultisignManager;
 
@@ -40,7 +40,7 @@ import java.util.Map;
  */
 public class ChangePasswordActivity extends AppCompatActivity {
     private ActivityResultLauncher<Intent> checkPasswordLauncher;
-    private ActivityResultLauncher<Intent> createPasswordLauncher;
+    private ActivityResultLauncher<Intent> newPasswordLauncher;
     private WaitingDialog waitingDialog;
     private Configure oldConfigure;
 
@@ -50,8 +50,9 @@ public class ChangePasswordActivity extends AppCompatActivity {
         // Optionally set a blank layout, or none at all
         // setContentView(new View(this));
         registerActivityResultLaunchers();
-        // Start the flow
+        // Start the flow with a special flag to indicate this is for password change
         Intent intent = new Intent(this, CheckPasswordActivity.class);
+        intent.putExtra("for_password_change", true);
         checkPasswordLauncher.launch(intent);
     }
 
@@ -60,62 +61,25 @@ public class ChangePasswordActivity extends AppCompatActivity {
             new ActivityResultContracts.StartActivityForResult(),
             result -> {
                 if (result.getResultCode() == RESULT_OK) {
+                    // Store old configure BEFORE launching new password activity
                     oldConfigure = ConfigureManager.getInstance().getConfigure();
-                    Intent intent = new Intent(this, CreatePasswordActivity.class);
-                    createPasswordLauncher.launch(intent);
+                    Intent intent = new Intent(this, ChangePasswordInputActivity.class);
+                    newPasswordLauncher.launch(intent);
                 } else {
                     finish();
                 }
             }
         );
-        createPasswordLauncher = registerForActivityResult(
+        newPasswordLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
             result -> {
-                if (result.getResultCode() == RESULT_OK) {
-                    showWaitingDialog("Re-encrypting all keys and secrets...");
-                    new Thread(() -> {
-                        Thread.currentThread().setName("PasswordChangeThread");
-                        try {
-                            // Get new symKey
-                            Configure newConfigure = ConfigureManager.getInstance().getConfigure();
-                            byte[] newSymkey = newConfigure.getSymkey();
-                            // Save new configure
-                            ConfigureManager.getInstance().storeConfigure(this, newConfigure);
-                            
-                            // Update database's current password name before removing old configure
-                            DatabaseManager.getInstance(this).changePassword(newConfigure.getPasswordName());
-
-                            // Reinitialize KeyInfoManager to use new password name
-                            KeyInfoManager.getInstance(this).initialize(this);
-                            SecretManager.getInstance(this).initialize(this);
-                            MultisignManager.getInstance(this).initialize(this);
-
-                            // Re-encrypt all KeyInfos
-                            reEncryptPriKeyOfKeyInfos(newSymkey);
-
-                            // Re-encrypt all SecretDetails
-                            reEncryptContentOfSecrets(newSymkey);
-
-
-                            // Remove old configure
-                            if (oldConfigure.getPasswordName() != null) {
-                                ConfigureManager.getInstance().removeConfigure(this,oldConfigure.getPasswordName());
-                            }
-                            runOnUiThread(() -> {
-                                dismissWaitingDialog();
-                                Toast.makeText(this, R.string.password_changed , Toast.LENGTH_LONG).show();
-                                setResult(RESULT_OK);
-                                finish();
-                            });
-                        } catch (Exception e) {
-                            runOnUiThread(() -> {
-                                dismissWaitingDialog();
-                                Toast.makeText(this, getString(R.string.error_during_password_change) + e.getMessage(), Toast.LENGTH_LONG).show();
-                                setResult(RESULT_CANCELED);
-                                finish();
-                            });
-                        }
-                    }).start();
+                if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                    String newPassword = result.getData().getStringExtra("new_password");
+                    if (newPassword != null) {
+                        performPasswordChange(newPassword);
+                    } else {
+                        finish();
+                    }
                 } else {
                     finish();
                 }
@@ -123,14 +87,75 @@ public class ChangePasswordActivity extends AppCompatActivity {
         );
     }
 
-    private void reEncryptContentOfSecrets(byte[] newSymKey) {
-        SecretManager secretManager = SecretManager.getInstance(this);
-        List<SecretDetail> secretList = secretManager.getAllSecretDetailList();
+    private void performPasswordChange(String newPassword) {
+        showWaitingDialog("Re-encrypting all keys and secrets...");
+        new Thread(() -> {
+            Thread.currentThread().setName("PasswordChangeThread");
+            try {
+                // Create new configure from new password
+                byte[] newPasswordBytes = newPassword.getBytes();
+                String newPasswordName = IdNameUtils.makePasswordHashName(newPasswordBytes);
+                
+                Configure newConfigure = new Configure();
+                newConfigure.makeSymkeyFromPassword(newPasswordBytes);
+                newConfigure.setPasswordName(newPasswordName);
+                byte[] newSymkey = newConfigure.getSymkey();
+
+                // IMPORTANT: Read all data BEFORE changing password context
+                // This must happen while we're still in the old password context
+                Map<String,KeyInfo> keyInfoMap = KeyInfoManager.getInstance(this).getAllKeyInfos();
+                List<SecretDetail> secretList = SecretManager.getInstance(this).getAllSecretDetailList();
+
+                // Re-encrypt all data with new symkey (still using old context to read)
+                reEncryptKeyInfoData(keyInfoMap, oldConfigure.getSymkey(), newSymkey);
+                reEncryptSecretData(secretList, oldConfigure.getSymkey(), newSymkey);
+
+                // Now update the database context
+                DatabaseManager.getInstance(this).changePassword(newPasswordName);
+
+                // Reinitialize managers with new password context
+                KeyInfoManager.getInstance(this).initialize(this);
+                SecretManager.getInstance(this).initialize(this);
+                MultisignManager.getInstance(this).initialize(this);
+
+                // Save all re-encrypted data to new password context
+                KeyInfoManager.getInstance(this).addAllKeyInfo(new ArrayList<>(keyInfoMap.values()));
+                KeyInfoManager.getInstance(this).commit();
+                
+                SecretManager.getInstance(this).addAllSecretDetail(secretList);
+                SecretManager.getInstance(this).commit();
+
+                // Store new configure and remove old one
+                ConfigureManager.getInstance().setConfigure(newConfigure);
+                ConfigureManager.getInstance().storeConfigure(this, newConfigure);
+                
+                if (oldConfigure.getPasswordName() != null) {
+                    ConfigureManager.getInstance().removeConfigure(this, oldConfigure.getPasswordName());
+                }
+
+                runOnUiThread(() -> {
+                    dismissWaitingDialog();
+                    Toast.makeText(this, R.string.password_changed, Toast.LENGTH_LONG).show();
+                    setResult(RESULT_OK);
+                    finish();
+                });
+            } catch (Exception e) {
+                runOnUiThread(() -> {
+                    dismissWaitingDialog();
+                    Toast.makeText(this, getString(R.string.error_during_password_change) + e.getMessage(), Toast.LENGTH_LONG).show();
+                    setResult(RESULT_CANCELED);
+                    finish();
+                });
+            }
+        }).start();
+    }
+
+    private void reEncryptSecretData(List<SecretDetail> secretList, byte[] oldSymKey, byte[] newSymKey) {
         for (SecretDetail secret : secretList) {
             try {
                 String contentCipher = secret.getContentCipher();
                 if (contentCipher != null) {
-                    byte[] contentBytes = Decryptor.decryptPrikey(contentCipher, oldConfigure.getSymkey());
+                    byte[] contentBytes = Decryptor.decryptPrikey(contentCipher, oldSymKey);
                     if (contentBytes != null) {
                         String newCipher = Encryptor.encryptBySymkeyToJson(contentBytes, newSymKey);
                         secret.setContentCipher(newCipher);
@@ -141,22 +166,17 @@ public class ChangePasswordActivity extends AppCompatActivity {
                 throw new RuntimeException("Failed to re-encrypt secret: " + e.getMessage());
             }
         }
-        secretManager.addAllSecretDetail(secretList);
-        secretManager.commit();
     }
 
-    private void reEncryptPriKeyOfKeyInfos(byte[] newSymKey) {
-        KeyInfoManager keyInfoManager = KeyInfoManager.getInstance(this);
-        Map<String,KeyInfo> keyInfoMap = keyInfoManager.getAllKeyInfos();
+    private void reEncryptKeyInfoData(Map<String,KeyInfo> keyInfoMap, byte[] oldSymKey, byte[] newSymKey) {
         for (KeyInfo keyInfo : keyInfoMap.values()) {
             try {
                 String priKeyCipher = keyInfo.getPrikeyCipher();
                 if (priKeyCipher != null) {
-                    byte[] priKeyBytes = Decryptor.decryptPrikey(priKeyCipher, oldConfigure.getSymkey());
+                    byte[] priKeyBytes = Decryptor.decryptPrikey(priKeyCipher, oldSymKey);
                     if (priKeyBytes != null) {
                         String newCipher = Encryptor.encryptBySymkeyToJson(priKeyBytes, newSymKey);
                         keyInfo.setPrikeyCipher(newCipher);
-                        keyInfoMap.put(keyInfo.getId(), keyInfo);
                     }
                 }
             } catch (Exception e) {
@@ -164,9 +184,6 @@ public class ChangePasswordActivity extends AppCompatActivity {
                 throw new RuntimeException("Failed to re-encrypt key info: " + e.getMessage());
             }
         }
-
-        keyInfoManager.addAllKeyInfo(new ArrayList<>(keyInfoMap.values()));
-        keyInfoManager.commit();
     }
 
     private void showWaitingDialog(String hint) {

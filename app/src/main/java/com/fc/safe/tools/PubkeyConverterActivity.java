@@ -151,12 +151,12 @@ public class PubkeyConverterActivity extends BaseCryptoActivity {
                 key;
 
             Map<String, String> resultMap = new LinkedHashMap<>();
-            resultMap.put("FID", KeyTools.pubkeyToFchAddr(pubkey));
-            resultMap.put("Compressed in Hex", pubkey);
-            resultMap.put("UnCompressed in Hex", KeyTools.recoverPK33ToPK65(pubkey));
-            resultMap.put("WIF uncompressed", KeyTools.getPubkeyWifUncompressed(pubkey));
-            resultMap.put("WIF compressed with ver 0", KeyTools.getPubkeyWifCompressedWithVer0(pubkey));
-            resultMap.put("WIF compressed without ver", KeyTools.getPubkeyWifCompressedWithoutVer(pubkey));
+            resultMap.put(getString(R.string.fid), KeyTools.pubkeyToFchAddr(pubkey));
+            resultMap.put(getString(R.string.compressed_in_hex), pubkey);
+            resultMap.put(getString(R.string.uncompressed_in_hex), KeyTools.recoverPK33ToPK65(pubkey));
+            resultMap.put(getString(R.string.wif_uncompressed), KeyTools.getPubkeyWifUncompressed(pubkey));
+            resultMap.put(getString(R.string.wif_compressed_with_ver_0), KeyTools.getPubkeyWifCompressedWithVer0(pubkey));
+            resultMap.put(getString(R.string.wif_compressed_without_ver), KeyTools.getPubkeyWifCompressedWithoutVer(pubkey));
 
             StringBuilder resultBuilder = new StringBuilder();
             for (Map.Entry<String, String> entry : resultMap.entrySet()) {
@@ -189,7 +189,7 @@ public class PubkeyConverterActivity extends BaseCryptoActivity {
         KeyInfo keyInfo = ChooseKeyInfoActivity.getSelectedKeyInfo(data, keyInfoManager).get(0);
         if (keyInfo != null && keyInfo.getPubkey()!= null) {
             // Set the key ID as gray text
-            String text = "Pubkey of " + StringUtils.omitMiddle(keyInfo.getId(), 13);
+            String text = getString(R.string.pubkey_of, StringUtils.omitMiddle(keyInfo.getId(), 13));
             keyEditText.setText(text);
             keyEditText.setTextColor(getResources().getColor(android.R.color.darker_gray, getTheme()));
             keyEditText.setEnabled(false);

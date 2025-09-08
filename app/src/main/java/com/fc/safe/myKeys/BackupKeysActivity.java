@@ -72,7 +72,7 @@ public class BackupKeysActivity extends BaseCryptoActivity {
         // Get all KeyInfo from KeyInfoManager
         keyInfoList = KeyInfoManager.getInstance(this).getAllKeyInfoList();
         if (keyInfoList == null || keyInfoList.isEmpty()) {
-            Toast.makeText(this, "KeyInfo list is empty", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, getString(R.string.keyinfo_list_is_empty), Toast.LENGTH_LONG).show();
             finish();
             return;
         }
@@ -125,7 +125,7 @@ public class BackupKeysActivity extends BaseCryptoActivity {
             }
             QRCodeGenerator.showQRDialog(this, flattenedBitmaps);
         } else {
-            Toast.makeText(this, "No data to make QR code.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.no_data_to_make_qr_code), Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -167,9 +167,9 @@ public class BackupKeysActivity extends BaseCryptoActivity {
                 ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
                 ClipData clip = ClipData.newPlainText("Exported Keys", textToCopy);
                 clipboard.setPrimaryClip(clip);
-                Toast.makeText(this, "Copied to clipboard", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, getString(R.string.copied_to_clipboard), Toast.LENGTH_SHORT).show();
             } else {
-                Toast.makeText(this, "Nothing to copy", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, getString(R.string.nothing_to_copy), Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -199,7 +199,7 @@ public class BackupKeysActivity extends BaseCryptoActivity {
             return file.getAbsolutePath();
         } catch (IOException e) {
             TimberLogger.e(TAG, "Failed to save file: %s", e.getMessage());
-            Toast.makeText(this, "Failed to save file", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.failed_to_save_file), Toast.LENGTH_SHORT).show();
             return null;
         }
     }

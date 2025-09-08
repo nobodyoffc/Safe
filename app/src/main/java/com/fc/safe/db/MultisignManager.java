@@ -9,6 +9,7 @@ import com.fc.fc_ajdk.data.fchData.Multisign;
 import com.fc.fc_ajdk.db.LocalDB;
 import com.fc.fc_ajdk.utils.DateUtils;
 import com.fc.fc_ajdk.utils.TimberLogger;
+import com.fc.safe.R;
 import com.fc.safe.SafeApplication;
 
 import java.util.ArrayList;
@@ -106,7 +107,7 @@ public class MultisignManager {
     public void addMultisign(String script,Context context) {
         Multisign multisign = Multisign.parseMultisignRedeemScript(script);
         if(multisign ==null){
-            Toast.makeText(context,"Failed to parse script to multisign.",Toast.LENGTH_LONG).show();
+            Toast.makeText(context, context.getString(R.string.failed_to_parse_script_to_multisign), Toast.LENGTH_LONG).show();
             return;
         }
         multisign.setSaveTime(DateUtils.longToTime(System.currentTimeMillis(), DateUtils.TO_MINUTE));

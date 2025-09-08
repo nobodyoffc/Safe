@@ -106,7 +106,7 @@ public class CreateKeyByPrikeyActivity extends BaseCryptoActivity {
 
         byte[] prikey32 = KeyTools.getPrikey32(prikey);
         if(prikey32 ==null){
-            Toast.makeText(this, "Invalid private key", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.invalid_private_key), Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -157,12 +157,12 @@ public class CreateKeyByPrikeyActivity extends BaseCryptoActivity {
         String label = labelInput.getText() != null ? labelInput.getText().toString() : "";
 
         if (prikey.isEmpty()) {
-            Toast.makeText(this, "Private key is empty", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.private_key_is_empty), Toast.LENGTH_SHORT).show();
             return null;
         }
         byte[] prikey32 = KeyTools.getPrikey32(prikey);
         if(prikey32==null){
-            Toast.makeText(this, "Invalid private key", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.invalid_private_key), Toast.LENGTH_SHORT).show();
             return null;
         }
 
@@ -174,12 +174,12 @@ public class CreateKeyByPrikeyActivity extends BaseCryptoActivity {
         // Check if the key already exists
         if (keyInfoManager.checkIfExisted(keyInfo.getId())) {
             new AlertDialog.Builder(this)
-                .setTitle("Key Already Exists")
-                .setMessage("A key with this ID already exists. Do you want to replace it?")
-                .setPositiveButton("Replace", (dialog, which) -> {
+                .setTitle(getString(R.string.key_already_exists_title))
+                .setMessage(getString(R.string.key_already_exists_message))
+                .setPositiveButton(getString(R.string.replace), (dialog, which) -> {
                     saveAndFinish(keyInfo);
                 })
-                .setNegativeButton("Cancel", null)
+                .setNegativeButton(getString(R.string.cancel), null)
                 .show();
         } else {
             saveAndFinish(keyInfo);

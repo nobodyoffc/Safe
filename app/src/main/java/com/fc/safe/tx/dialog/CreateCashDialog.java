@@ -102,10 +102,25 @@ public class CreateCashDialog extends Dialog {
             }
             
             String txId = txIdInput.getText().toString();
-            int index = Integer.parseInt(indexInput.getText().toString());
-            double amount = Double.parseDouble(amountInput.getText().toString());
             String owner = ownerInput.getText().toString();
             String birthTimeStr = birthTimeInput.getText().toString();
+            
+            int index;
+            double amount;
+            
+            try {
+                index = Integer.parseInt(indexInput.getText().toString());
+            } catch (NumberFormatException e) {
+                Toast.makeText(getContext(), R.string.invalid_number_format, SafeApplication.TOAST_LASTING).show();
+                return;
+            }
+            
+            try {
+                amount = Double.parseDouble(amountInput.getText().toString());
+            } catch (NumberFormatException e) {
+                Toast.makeText(getContext(), R.string.invalid_number_format, SafeApplication.TOAST_LASTING).show();
+                return;
+            }
 
             // Validate amount range
             if (amount < Constants.MIN_AMOUNT || amount > Constants.MAX_AMOUNT) {
@@ -126,14 +141,17 @@ public class CreateCashDialog extends Dialog {
             cash.setValid(true);
 
             // If birthTime is not null, calculate CD
-            if (birthTime != null) {
-                cash.makeCd();
-            }
+            cash.makeCd();
 
-            if (onDoneListener != null) {
-                onDoneListener.onDone(cash);
+            try {
+                if (onDoneListener != null) {
+                    onDoneListener.onDone(cash);
+                }
+            } catch (Exception e) {
+                TimberLogger.e(TAG, "Error in onDone callback: %s", e.getMessage());
+            } finally {
+                dismiss();
             }
-            dismiss();
         });
     }
 

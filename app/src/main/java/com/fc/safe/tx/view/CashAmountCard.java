@@ -42,14 +42,14 @@ public class CashAmountCard extends CardView {
         // Setup copy functionality for CashId
         cashIdText.setOnClickListener(v -> {
             if (cashId != null) {
-                copyToClipboard(context, "CashId", cashId);
+                copyToClipboard(context, getContext().getString(R.string.cash), cashId);
             }
         });
 
         // Setup copy functionality for Amount
         amountText.setOnClickListener(v -> {
             if (amount != null) {
-                copyToClipboard(context, "Amount", amount);
+                copyToClipboard(context, getContext().getString(R.string.amount), amount);
             }
         });
     }
@@ -63,7 +63,7 @@ public class CashAmountCard extends CardView {
 
     public void setCashId(String cashId) {
         this.cashId = cashId;
-        cashIdText.setText("CashId: " + StringUtils.omitMiddle(cashId, 13));
+        cashIdText.setText(getContext().getString(R.string.cash) + ": " + StringUtils.omitMiddle(cashId, 13));
     }
 
     public String getAmount() {

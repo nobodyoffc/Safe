@@ -785,7 +785,7 @@ public class QrCodeActivity extends AppCompatActivity {
             } catch (com.google.zxing.NotFoundException e) {
                 Toast.makeText(this, getString(R.string.cannot_decode_image) ,Toast.LENGTH_SHORT).show();
             } catch (Exception e) {
-                Toast.makeText(this, "Error scanning QR: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                Toast.makeText(this, getString(R.string.error_scanning_qr_with_message, e.getMessage()), Toast.LENGTH_LONG).show();
             } finally {
                 if (!rgbBitmap.isRecycled()) {
                     rgbBitmap.recycle();
@@ -793,9 +793,9 @@ public class QrCodeActivity extends AppCompatActivity {
             }
 
         } catch (IOException e) {
-            Toast.makeText(this, "Error reading image: " + e.getMessage(), Toast.LENGTH_LONG).show();
+            Toast.makeText(this, getString(R.string.error_reading_image_with_message, e.getMessage()), Toast.LENGTH_LONG).show();
         } catch (Exception e) {
-            Toast.makeText(this, "Unexpected error: " + e.getMessage(), Toast.LENGTH_LONG).show();
+            Toast.makeText(this, getString(R.string.unexpected_error_with_message, e.getMessage()), Toast.LENGTH_LONG).show();
         }
     }
 

@@ -207,9 +207,9 @@ public class ExportSecretActivity extends BaseCryptoActivity {
                 ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
                 ClipData clip = ClipData.newPlainText("Exported Secrets", textToCopy);
                 clipboard.setPrimaryClip(clip);
-                Toast.makeText(this, "Copied to clipboard", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, getString(R.string.copied_to_clipboard), Toast.LENGTH_SHORT).show();
             } else {
-                Toast.makeText(this, "Nothing to copy", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, getString(R.string.nothing_to_copy), Toast.LENGTH_SHORT).show();
             }
         });
         
@@ -326,7 +326,7 @@ public class ExportSecretActivity extends BaseCryptoActivity {
             }
         } catch (Exception e) {
             TimberLogger.e(TAG, "Error encrypting secret: %s", secret.getTitle());
-            Toast.makeText(this, "Error encrypting secret: " + secret.getTitle(), Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.error_encrypting_secret, secret.getTitle()), Toast.LENGTH_SHORT).show();
             return;
         }
         jsonList.add(encryptedJson);

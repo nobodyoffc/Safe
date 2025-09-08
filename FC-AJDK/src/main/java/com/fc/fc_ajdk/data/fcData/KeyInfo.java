@@ -71,6 +71,94 @@ public class KeyInfo extends Cid {
         map.put(WATCH_ONLY,"Watch Only");
         return map;
     }
+
+    public static String getShowFieldName(String fieldName, String language) {
+        switch (language.toLowerCase()) {
+            case "zh":
+            case "zh-cn":
+                return getShowFieldNameZh(fieldName);
+            case "en":
+            default:
+                return getShowFieldNameEn(fieldName);
+        }
+    }
+
+    private static String getShowFieldNameEn(String fieldName) {
+        return switch (fieldName) {
+            case "id" -> "FID";
+            case "label" -> "Label";
+            case "prikeyCipher" -> "Prikey";
+            case "watchOnly" -> "Watch Only";
+            case "saveTime" -> "Save Time";
+            case "isNobody" -> "Nobody";
+            case "pubkey" -> "Pubkey";
+            case "btcAddr" -> "BTC Address";
+            case "ethAddr" -> "ETH Address";
+            case "bchAddr" -> "BCH Address";
+            case "ltcAddr" -> "LTC Address";
+            case "dogeAddr" -> "DOGE Address";
+            case "trxAddr" -> "TRX Address";
+            case "birthHeight" -> "Birth Height";
+            case "lastHeight" -> "Last Height";
+            case "nameTime" -> "Name Time";
+            case "balance" -> "Balance";
+            case "cash" -> "Cash";
+            case "income" -> "Income";
+            case "expend" -> "Expend";
+            case "cd" -> "CoinDays";
+            case "cdd" -> "CoinDays Destroyed";
+            case "reputation" -> "Reputation";
+            case "hot" -> "Hot";
+            case "weight" -> "Weight";
+            default -> fieldName;
+        };
+    }
+
+    private static String getShowFieldNameZh(String fieldName) {
+        switch (fieldName) {
+            case "id": return "FID";
+            case "label": return "标签";
+            case "prikeyCipher": return "私钥";
+            case "watchOnly": return "观察";
+            case "saveTime": return "保存时间";
+            case "isNobody": return "明人";
+            case "pubkey": return "公钥";
+            case "btcAddr": return "BTC地址";
+            case "ethAddr": return "ETH地址";
+            case "bchAddr": return "BCH地址";
+            case "ltcAddr": return "LTC地址";
+            case "dogeAddr": return "DOGE地址";
+            case "trxAddr": return "TRX地址";
+            case "birthHeight": return "创建高度";
+            case "lastHeight": return "最后高度";
+            case "nameTime": return "命名时间";
+            case "balance": return "余额";
+            case "cash": return "钞票";
+            case "income": return "收入";
+            case "expend": return "支出";
+            case "cd": return "币天";
+            case "cdd": return "币天销毁";
+            case "reputation": return "声誉";
+            case "hot": return "热度";
+            case "weight": return "权重";
+            default: return fieldName;
+        }
+    }
+
+    public static LinkedHashMap<String, Map<String, String>> getFieldNameMap() {
+        LinkedHashMap<String, Map<String, String>> fieldMap = new LinkedHashMap<>();
+
+        // Add KeyInfo fields first (lines 32-35)
+        addFieldToMap(fieldMap, "prikeyCipher", "Private Key", "私钥");
+        addFieldToMap(fieldMap, "label", "Label", "标签");
+        addFieldToMap(fieldMap, "watchOnly", "Watch Only", "观察");
+        addFieldToMap(fieldMap, "saveTime", "Save Time", "保存时间");
+
+        // Add Cid fields by calling Cid.getFieldNameMap()
+        fieldMap.putAll(Cid.getFieldNameMap());
+
+        return fieldMap;
+    }
     public static Map<String, String> getFieldOrderMap() {
         Map<String, String> map = new HashMap<>();
         map.put(SAVE_TIME,DESC);

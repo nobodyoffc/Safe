@@ -2,8 +2,10 @@ package com.fc.safe.initiate;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -28,15 +30,23 @@ public class CheckPasswordActivity extends AppCompatActivity {
     
     private EditText passwordInput;
     private TextInputLayout passwordInputLayout;
+    private View loadingContainer;
+    private Button verifyButton;
+    private Button createPasswordButton;
+    private Button clearButton;
     private static final String TAG = "CryptoSign";
     private static final int QR_CODE_REQUEST_CODE = 1001;
     private ActivityResultLauncher<Intent> createPasswordLauncher;
+    private boolean isForPasswordChange = false;
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getWindow().setSoftInputMode(android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
         setContentView(R.layout.activity_check_password);
+
+        // Check if this is for password change flow
+        isForPasswordChange = getIntent().getBooleanExtra("for_password_change", false);
 
         // Set up toolbar
         ToolbarUtils.setupToolbar(this, getString(R.string.check_password));
@@ -71,9 +81,10 @@ public class CheckPasswordActivity extends AppCompatActivity {
         // Initialize UI components
         passwordInputLayout = findViewById(R.id.passwordInputLayout);
         passwordInput = findViewById(R.id.password_input);
-        Button verifyButton = findViewById(R.id.verify_button);
-        Button createPasswordButton = findViewById(R.id.create_password_button);
-        Button clearButton = findViewById(R.id.clear_button);
+        loadingContainer = findViewById(R.id.loading_container);
+        verifyButton = findViewById(R.id.verify_button);
+        createPasswordButton = findViewById(R.id.create_password_button);
+        clearButton = findViewById(R.id.clear_button);
         
         // Add click listener for the scan icon
         passwordInputLayout.setEndIconOnClickListener(v -> startQrCodeScanner());
@@ -103,6 +114,46 @@ public class CheckPasswordActivity extends AppCompatActivity {
         if (getIntent().getBooleanExtra("from_background_timeout", false)) {
             Toast.makeText(this, R.string.please_verify_your_password , Toast.LENGTH_SHORT).show();
         }
+        
+        // Setup keyboard hiding for better UX
+        setupKeyboardHiding();
+    }
+    
+    private void setupKeyboardHiding() {
+        View rootView = findViewById(android.R.id.content);
+        if (rootView != null) {
+            rootView.setOnTouchListener((v, event) -> {
+                if (event.getAction() == android.view.MotionEvent.ACTION_DOWN) {
+                    // Check if the touch is on a button or input field
+                    View touchedView = v;
+                    boolean shouldHideKeyboard = true;
+                    
+                    // Check if touching a button, input field, or their containers
+                    while (touchedView != null) {
+                        if (touchedView instanceof android.widget.Button ||
+                            touchedView instanceof android.widget.EditText ||
+                            touchedView instanceof com.google.android.material.textfield.TextInputLayout ||
+                            (touchedView instanceof android.widget.LinearLayout && touchedView.getId() == R.id.button_container)) {
+                            shouldHideKeyboard = false;
+                            break;
+                        }
+                        touchedView = (View) touchedView.getParent();
+                    }
+                    
+                    if (shouldHideKeyboard) {
+                        hideKeyboard();
+                    }
+                }
+                return false;
+            });
+        }
+    }
+    
+    private void hideKeyboard() {
+        android.view.inputmethod.InputMethodManager imm = (android.view.inputmethod.InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+        if (imm != null && passwordInput != null) {
+            imm.hideSoftInputFromWindow(passwordInput.getWindowToken(), 0);
+        }
     }
 
     private void startQrCodeScanner() {
@@ -131,6 +182,37 @@ public class CheckPasswordActivity extends AppCompatActivity {
         createPasswordLauncher.launch(intent);
     }
     
+    private void showLoading(boolean show) {
+        if (show) {
+            loadingContainer.setVisibility(View.VISIBLE);
+            verifyButton.setEnabled(false);
+            createPasswordButton.setEnabled(false);
+            clearButton.setEnabled(false);
+            passwordInput.setEnabled(false);
+            
+            // Disable touch events on root view during loading
+            View rootView = findViewById(android.R.id.content);
+            if (rootView != null) {
+                rootView.setOnTouchListener(null);
+            }
+            
+            // Hide keyboard when loading starts
+            android.view.inputmethod.InputMethodManager imm = (android.view.inputmethod.InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+            if (imm != null) {
+                imm.hideSoftInputFromWindow(passwordInput.getWindowToken(), 0);
+            }
+        } else {
+            loadingContainer.setVisibility(View.GONE);
+            verifyButton.setEnabled(true);
+            createPasswordButton.setEnabled(true);
+            clearButton.setEnabled(true);
+            passwordInput.setEnabled(true);
+            
+            // Re-enable touch events after loading
+            setupKeyboardHiding();
+        }
+    }
+    
     private void verifyPassword() {
         String enteredPassword = passwordInput.getText().toString();
         
@@ -139,33 +221,80 @@ public class CheckPasswordActivity extends AppCompatActivity {
             return;
         }
         
-        byte[] passwordBytes = enteredPassword.getBytes();
-        String passwordName = IdNameUtils.makePasswordHashName(passwordBytes);
-        Configure configure = ConfigureManager.getInstance().getConfigure(this, passwordName);
+        // Show loading state
+        showLoading(true);
+        
+        // Run verification in background thread
+        new Thread(() -> {
+            try {
+                byte[] passwordBytes = enteredPassword.getBytes();
+                String passwordName = IdNameUtils.makePasswordHashName(passwordBytes);
+                Configure configure = ConfigureManager.getInstance().getConfigure(CheckPasswordActivity.this, passwordName);
 
-        if (configure != null) {
-            configure.makeSymkeyFromPassword(passwordBytes);
-            
-            // Get DatabaseManager instance
-            DatabaseManager dbManager = DatabaseManager.getInstance(this);
-            
-            // Set the new password name, which will trigger database cleanup if needed
-            dbManager.setCurrentPasswordName(passwordName);
-            
-            // Reinitialize all managers with the new password
-            KeyInfoManager.getInstance(this).initialize(this);
-            SecretManager.getInstance(this).initialize(this);
-            MultisignManager.getInstance(this).initialize(this);
-            
-            // Store the Configure object in ConfigureManager for sharing across activities
-            ConfigureManager.getInstance().setConfigure(configure);
-            
-            // Simply return success result
-            setResult(RESULT_OK);
-            finish();
-        } else {
-            Toast.makeText(this, getString(R.string.incorrect_password), Toast.LENGTH_SHORT).show();
-        }
+                if (configure != null) {
+                    configure.makeSymkeyFromPassword(passwordBytes);
+                    
+                    if (isForPasswordChange) {
+                        // For password change flow, only verify password without changing context
+                        // Store the Configure object in ConfigureManager for the change password flow
+                        ConfigureManager.getInstance().setConfigure(configure);
+                        
+                        // Return to main thread to finish activity
+                        runOnUiThread(() -> {
+                            showLoading(false);
+                            setResult(RESULT_OK);
+                            finish();
+                        });
+                    } else {
+                        // Normal flow - full initialization
+                        // Get DatabaseManager instance
+                        DatabaseManager dbManager = DatabaseManager.getInstance(CheckPasswordActivity.this);
+                        
+                        // Check if password context has changed
+                        String currentPasswordName = dbManager.getCurrentPasswordName();
+                        boolean passwordContextChanged = currentPasswordName != null && !currentPasswordName.equals(passwordName);
+                        
+                        // Set the new password name, which will trigger database cleanup if needed
+                        dbManager.setCurrentPasswordName(passwordName);
+                        
+                        // Reinitialize all managers with the new password
+                        KeyInfoManager.getInstance(CheckPasswordActivity.this).initialize(CheckPasswordActivity.this);
+                        SecretManager.getInstance(CheckPasswordActivity.this).initialize(CheckPasswordActivity.this);
+                        MultisignManager.getInstance(CheckPasswordActivity.this).initialize(CheckPasswordActivity.this);
+                        
+                        // Store the Configure object in ConfigureManager for sharing across activities
+                        ConfigureManager.getInstance().setConfigure(configure);
+                        
+                        // Return to main thread to finish activity
+                        runOnUiThread(() -> {
+                            showLoading(false);
+                            
+                            // If password context changed, clear all activities and go to HomeActivity
+                            if (passwordContextChanged) {
+                                Intent homeIntent = new Intent(CheckPasswordActivity.this, com.fc.safe.home.HomeActivity.class);
+                                homeIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                startActivity(homeIntent);
+                                finish();
+                            } else {
+                                setResult(RESULT_OK);
+                                finish();
+                            }
+                        });
+                    }
+                } else {
+                    runOnUiThread(() -> {
+                        showLoading(false);
+                        Toast.makeText(CheckPasswordActivity.this, getString(R.string.incorrect_password), Toast.LENGTH_SHORT).show();
+                    });
+                }
+            } catch (Exception e) {
+                TimberLogger.e(TAG, "Error during password verification: " + e.getMessage());
+                runOnUiThread(() -> {
+                    showLoading(false);
+                    Toast.makeText(CheckPasswordActivity.this, getString(R.string.error_verifying_password), Toast.LENGTH_SHORT).show();
+                });
+            }
+        }).start();
     }
 
     @Override

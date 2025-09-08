@@ -59,6 +59,45 @@ public class Secret extends FcObject {
 	public Boolean getActive() {
 		return active;
 	}
+
+	public static String getShowFieldName(String fieldName, String language) {
+		switch (language.toLowerCase()) {
+			case "zh":
+			case "zh-cn":
+				return getShowFieldNameZh(fieldName);
+			case "en":
+			default:
+				return getShowFieldNameEn(fieldName);
+		}
+	}
+
+	private static String getShowFieldNameEn(String fieldName) {
+		switch (fieldName) {
+			case "id": return "ID";
+			case "alg": return "Algorithm";
+			case "cipher": return "Cipher";
+			case "owner": return "Owner";
+			case "birthTime": return "Birth Time";
+			case "birthHeight": return "Birth Height";
+			case "lastHeight": return "Last Height";
+			case "active": return "Active";
+			default: return fieldName;
+		}
+	}
+
+	private static String getShowFieldNameZh(String fieldName) {
+        return switch (fieldName) {
+            case "id" -> "ID";
+            case "alg" -> "算法";
+            case "cipher" -> "密文";
+            case "owner" -> "拥有者";
+            case "birthTime" -> "创建时间";
+            case "birthHeight" -> "创建高度";
+            case "lastHeight" -> "最后高度";
+            case "active" -> "活跃中";
+            default -> fieldName;
+        };
+	}
 	
 	
 }

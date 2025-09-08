@@ -178,7 +178,7 @@ public class PrikeyConverterActivity extends BaseCryptoActivity {
         KeyInfo keyInfo = ChooseKeyInfoActivity.getSelectedKeyInfo(data, keyInfoManager).get(0);
         if (keyInfo != null && keyInfo.getPrikeyCipher() != null) {
             // Set the key ID as gray text
-            String text = "Prikey of " + StringUtils.omitMiddle(keyInfo.getId(), 13);
+            String text = getString(R.string.prikey_of, StringUtils.omitMiddle(keyInfo.getId(), 13));
             keyEditText.setText(text);
             keyEditText.setTextColor(getResources().getColor(android.R.color.darker_gray, getTheme()));
             keyEditText.setEnabled(false);

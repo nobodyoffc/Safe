@@ -75,11 +75,11 @@ public class AddTxInputDialog extends Dialog {
         cancelButton.setOnClickListener(v -> dismiss());
 
         doneButton.setOnClickListener(v -> {
-            if(txIdInput.getText() ==null || indexInput.getText()==null || amountInput.getText()==null){
+            if(txIdInput.getText() == null || indexInput.getText() == null || amountInput.getText() == null){
                 Toast.makeText(getContext(), R.string.please_input_all_fields, SafeApplication.TOAST_LASTING).show();
                 return;
             }
-            if(txIdInput.getText().toString().isEmpty() || indexInput.getText().toString().isEmpty() || amountInput.toString().isEmpty()){
+            if(txIdInput.getText().toString().isEmpty() || indexInput.getText().toString().isEmpty() || amountInput.getText().toString().isEmpty()){
 
                 Toast.makeText(getContext(), R.string.please_input_all_fields , SafeApplication.TOAST_LASTING).show();
                 return;
@@ -120,7 +120,7 @@ public class AddTxInputDialog extends Dialog {
                 } else if (requestCode == QR_SCAN_TEXT_REQUEST_CODE) {
                     txIdInput.setText(qrContent);
                 } else {
-                    showToast(getContext().getString(R.string.failed_to_scan_qr_code) );
+                    showToast(getContext().getString(R.string.failed_to_scan_qr_code));
                 }
             });
         } else {

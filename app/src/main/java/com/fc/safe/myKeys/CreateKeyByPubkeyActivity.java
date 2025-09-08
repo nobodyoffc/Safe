@@ -162,7 +162,7 @@ public class CreateKeyByPubkeyActivity extends BaseCryptoActivity {
         }
 
         if(!KeyTools.isPubkey(pubkey)){
-            Toast.makeText(this, "Invalid public key", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.invalid_public_key), Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -214,12 +214,12 @@ public class CreateKeyByPubkeyActivity extends BaseCryptoActivity {
         String label = labelInput.getText() != null ? labelInput.getText().toString() : "";
 
         if (pubkey.isEmpty()) {
-            Toast.makeText(this, "Public key is empty", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.public_key_is_empty), Toast.LENGTH_SHORT).show();
             return null;
         }
 
         if(!KeyTools.isPubkey(pubkey)){
-            Toast.makeText(this, "Invalid public key", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.invalid_public_key), Toast.LENGTH_SHORT).show();
             return null;
         }
 
@@ -230,12 +230,12 @@ public class CreateKeyByPubkeyActivity extends BaseCryptoActivity {
         // Check if the key already exists
         if (keyInfoManager.checkIfExisted(keyInfo.getId())) {
             new AlertDialog.Builder(this)
-                .setTitle("Key Already Exists")
-                .setMessage("A key with this ID already exists. Do you want to replace it?")
-                .setPositiveButton("Replace", (dialog, which) -> {
+                .setTitle(getString(R.string.key_already_exists_title))
+                .setMessage(getString(R.string.key_already_exists_message))
+                .setPositiveButton(getString(R.string.replace), (dialog, which) -> {
                     saveAndFinish(keyInfo);
                 })
-                .setNegativeButton("Cancel", null)
+                .setNegativeButton(getString(R.string.cancel), null)
                 .show();
         } else {
             saveAndFinish(keyInfo);

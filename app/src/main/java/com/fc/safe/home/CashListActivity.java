@@ -39,17 +39,17 @@ public class CashListActivity extends AppCompatActivity {
 
         // Set up listeners
         cashCardManager.setOnCashListChangedListener(cashList -> {
-            Toast.makeText(this, "Selected: " + cashList.size() + " cashes", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.selected_cashes_count, cashList.size()), Toast.LENGTH_SHORT).show();
         });
 
         cashCardManager.setOnMenuItemClickListener((menuItem, cash) -> {
             switch (menuItem) {
                 case "Copy ID":
-                    Toast.makeText(this, "Copied cash ID: " + cash.getId(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, getString(R.string.copied_cash_id, cash.getId()), Toast.LENGTH_SHORT).show();
                     break;
                 case "Copy Amount":
                     String amount = FchUtils.satoshiToCoin(cash.getValue()) + " F";
-                    Toast.makeText(this, "Copied amount: " + amount, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, getString(R.string.copied_amount, amount), Toast.LENGTH_SHORT).show();
                     break;
             }
         });

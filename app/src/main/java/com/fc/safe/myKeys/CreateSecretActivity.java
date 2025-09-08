@@ -156,7 +156,7 @@ public class CreateSecretActivity extends BaseCryptoActivity {
 
         if(typeDisplay.equals("TOTP" )) {
             if(!com.fc.fc_ajdk.utils.Base32.isBase32(content)) {
-                Toast.makeText(this, "Failed to save! TOTP key have to be base32 encoded", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, getString(R.string.failed_to_save_totp_key_base32), Toast.LENGTH_SHORT).show();
                 return;
             }
         }
@@ -183,7 +183,7 @@ public class CreateSecretActivity extends BaseCryptoActivity {
         // Encrypt content
         byte[] symKey = ConfigureManager.getInstance().getSymkey();
         if (symKey == null) {
-            Toast.makeText(this, "Symmetric key not found. Please login again.", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, getString(R.string.symmetric_key_not_found_login_again), Toast.LENGTH_LONG).show();
             return;
         }
         String contentCipher = Encryptor.encryptBySymkeyToJson(content.getBytes(), symKey);

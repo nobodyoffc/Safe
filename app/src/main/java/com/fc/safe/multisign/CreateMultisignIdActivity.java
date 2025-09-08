@@ -381,7 +381,7 @@ public class CreateMultisignIdActivity extends BaseCryptoActivity {
 
     private void showLabelDialog(Multisign multisign) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Enter Label for Multisign ID");
+        builder.setTitle(getString(R.string.enter_label_for_multisign_id));
         
         View dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_multisign_label, null);
         builder.setView(dialogView);

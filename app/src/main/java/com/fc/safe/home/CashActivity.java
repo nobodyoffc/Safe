@@ -6,12 +6,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ScrollView;
+import android.widget.TextView;
 import android.widget.Toast;
 import android.app.Dialog;
 
 import com.fc.fc_ajdk.constants.Constants;
 import com.fc.fc_ajdk.data.fchData.Cash;
 import com.fc.fc_ajdk.db.LocalDB;
+import com.fc.fc_ajdk.utils.FchUtils;
 import com.fc.fc_ajdk.utils.TimberLogger;
 import com.fc.safe.SafeApplication;
 import com.fc.safe.R;
@@ -43,6 +45,11 @@ public class CashActivity extends BaseCryptoActivity {
     private Button importButton;
     private PopupMenuHelper popupMenuHelper;
     
+    // Summary card UI elements
+    private TextView selectedCashCountTextView;
+    private TextView selectedCashAmountTextView;
+    private TextView selectedCashCdTextView;
+    
     private final List<Cash> cashList = new ArrayList<>();
     private Long lastIndex = null;
     private boolean isLoadingMore = false;
@@ -56,24 +63,38 @@ public class CashActivity extends BaseCryptoActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Initialize CashManager
-        cashManager = CashManager.getInstance(this);
+        try {
+            // Initialize CashManager
+            cashManager = CashManager.getInstance(this);
 
-        // Initialize PopupMenuHelper
-        popupMenuHelper = new PopupMenuHelper(this);
+            // Initialize PopupMenuHelper
+            popupMenuHelper = new PopupMenuHelper(this);
 
-        // Check if we're in selection mode
-        boolean isSelectMode = getIntent().getBooleanExtra(EXTRA_SELECT_MODE, false);
-        if (isSelectMode) {
-            // Change the send button to return button
-            sendButton = findViewById(R.id.send_button);
-            if (sendButton != null) {
-                sendButton.setText(R.string.return_text);
+            // Check if we're in selection mode
+            boolean isSelectMode = getIntent().getBooleanExtra(EXTRA_SELECT_MODE, false);
+            if (isSelectMode) {
+                // Change the send button to return button
+                sendButton = findViewById(R.id.send_button);
+                if (sendButton != null) {
+                    sendButton.setText(R.string.return_text);
+                }
             }
-        }
 
-        // Load initial page of Cash objects
-        loadInitialData();
+            // Load initial page of Cash objects
+            loadInitialData();
+        } catch (Exception e) {
+            TimberLogger.e(TAG, "Error initializing CashActivity: %s", e.getMessage());
+            showToast(getString(R.string.error_initializing_cash_activity)+":"+e.getMessage());
+            
+            // Initialize empty state to prevent crash
+            cashList.clear();
+            hasMoreData = false;
+            lastIndex = null;
+            
+            // Initialize empty fragment
+            loadListFragment();
+            updateButtonStates();
+        }
     }
 
     @Override
@@ -93,6 +114,14 @@ public class CashActivity extends BaseCryptoActivity {
         createNewButton = findViewById(R.id.create_button);
         sendButton = findViewById(R.id.send_button);
         importButton = findViewById(R.id.import_button);
+        
+        // Initialize summary card UI elements
+        selectedCashCountTextView = findViewById(R.id.selectedCashCount);
+        selectedCashAmountTextView = findViewById(R.id.selectedCashAmount);
+        selectedCashCdTextView = findViewById(R.id.selectedCashCd);
+        
+        // Initialize summary card with zeros
+        updateSummaryCard();
     }
 
     @Override
@@ -119,6 +148,8 @@ public class CashActivity extends BaseCryptoActivity {
                 dismissWaitingDialog();
                 showToast(getString(R.string.no_cash_found));
                 updateButtonStates();
+                // Initialize empty fragment even when no cash found
+                loadListFragment();
                 return;
             }
 
@@ -169,8 +200,16 @@ public class CashActivity extends BaseCryptoActivity {
                 .replace(R.id.fragment_container, entityListFragment)
                 .commit();
 
+        // Set up selection change listener for the fragment
+        entityListFragment.setOnSelectionChangeListener(() -> {
+            updateButtonStates();
+            updateSummaryCard(); // Update summary when selection changes
+        });
+
         // Update button states after fragment is loaded
         updateButtonStates();
+        // Update summary card after fragment is loaded
+        updateSummaryCard();
     }
 
     /**
@@ -268,8 +307,9 @@ public class CashActivity extends BaseCryptoActivity {
                         // Update the fragment's list
                         entityListFragment.updateList(cashList);
                         updateButtonStates();
+                        updateSummaryCard();
 
-                        Toast.makeText(this, moreCash.size()+R.string.cash_loaded, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(this, getString(R.string.cash_loaded, moreCash.size()), Toast.LENGTH_SHORT).show();
                         
                         if (!hasMoreData) {
                             Toast.makeText(this, R.string.no_more_cash, Toast.LENGTH_LONG).show();
@@ -317,6 +357,7 @@ public class CashActivity extends BaseCryptoActivity {
             
             // Update button states
             updateButtonStates();
+            updateSummaryCard();
             
             // Show confirmation message
             Toast.makeText(this, R.string.deleted , SafeApplication.TOAST_LASTING).show();
@@ -335,10 +376,13 @@ public class CashActivity extends BaseCryptoActivity {
                 cashList.add(0, cash); // Add to the beginning of the list
                 
                 // Update the fragment's list
-                entityListFragment.updateList(cashList);
+                if (entityListFragment != null) {
+                    entityListFragment.updateList(cashList);
+                }
                 
                 // Update button states
                 updateButtonStates();
+                updateSummaryCard();
                 
                 // Show success message
                 Toast.makeText(this, R.string.cash_created_successfully, SafeApplication.TOAST_LASTING).show();
@@ -420,13 +464,6 @@ public class CashActivity extends BaseCryptoActivity {
             Intent intent = new Intent(CashActivity.this, ImportCashActivity.class);
             startActivityForResult(intent, 2001);
         });
-
-        // Set up selection change listener for the fragment
-        if (entityListFragment != null) {
-            entityListFragment.setOnSelectionChangeListener(() -> {
-                updateButtonStates();
-            });
-        }
     }
     
     private void refreshList() {
@@ -465,6 +502,62 @@ public class CashActivity extends BaseCryptoActivity {
                     setupScrollListener();
                 }
             }, 100);
+        }
+    }
+
+    /**
+     * Updates the summary card with totals from selected cash list
+     */
+    private void updateSummaryCard() {
+        List<Cash> selectedCashList = entityListFragment != null ? entityListFragment.getSelectedObjects() : new ArrayList<>();
+        
+        // Calculate totals
+        int cashCount = selectedCashList.size();
+        long totalValue = 0;  // in satoshi
+        long totalCd = 0;
+        
+        for (Cash cash : selectedCashList) {
+            // Sum values
+            if (cash.getValue() != null) {
+                totalValue += cash.getValue();
+            }
+            
+            // Sum CD (Coin Days)
+            if (cash.getCd() != null) {
+                totalCd += cash.getCd();
+            }
+        }
+        
+        // Update UI elements
+        if (selectedCashCountTextView != null) {
+            selectedCashCountTextView.setText(String.valueOf(cashCount));
+        }
+        
+        if (selectedCashAmountTextView != null) {
+            // Convert satoshi to formatted string using FchUtils.formatSatoshiValue
+            String formattedAmount = FchUtils.formatSatoshiValue(totalValue);
+            selectedCashAmountTextView.setText(formattedAmount);
+        }
+        
+        if (selectedCashCdTextView != null) {
+            // Format large number for CD (using the same format from HomeActivity)
+            String formattedCd = formatLargeNumber(totalCd);
+            selectedCashCdTextView.setText(formattedCd);
+        }
+    }
+    
+    /**
+     * Helper method to format large numbers (borrowed from HomeActivity pattern)
+     */
+    private String formatLargeNumber(long number) {
+        if (number >= 1000000000) {
+            return String.format("%.1fb", number / 1000000000.0);
+        } else if (number >= 1000000) {
+            return String.format("%.1fm", number / 1000000.0);
+        } else if (number >= 1000) {
+            return String.format("%.1fk", number / 1000.0);
+        } else {
+            return String.valueOf(number);
         }
     }
 

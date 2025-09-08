@@ -27,6 +27,8 @@
     <string name="confirm">验证</string>
     <string name="please_enter_password">请输入密码</string>
     <string name="incorrect_password">密码错误</string>
+    <string name="verifying_password">正在验证密码...</string>
+    <string name="error_verifying_password">验证密码时出错</string>
 
     <!-- CreatePassword Activity -->
     <string name="create_password">创建密码</string>
@@ -323,10 +325,11 @@
     <string name="failed_to_load_avatar">加载头像失败</string>
     <string name="keys_saved_successfully">密钥已保存</string>
     <string name="failed_to_save_key">保存密钥失败！</string>
-    <string name="remember_backup_keys">请记住：所有密钥和秘密都必须备份。</string>
+    <string name="remember_backup_keys">已创建！请务必备份您添加的密钥和秘密。</string>
     <string name="remove_me">删除本号</string>
     <string name="all_data_cleared_successfully">所有数据已被清除</string>
     <string name="password_changed">密码已更新.</string>
+    <string name="password_already_exists">该密码已存在，请选择不同的密码。</string>
     <string name="no_more_secrets">没有更多了</string>
     <string name="secrets_loaded">%d 个秘密已加载.</string>
     <string name="check_password">验证密码</string>
@@ -342,7 +345,7 @@
     <string name="detail">详情</string>
     <string name="menu_json_converter">JSON转换</string>
     <string name="input_json">输入JSON字符串</string>
-    <string name="safe_v_by_no1_nrc7">密库 v0.10 By No1_NrC7</string>
+    <string name="safe_v_by_no1_nrc7">密库 v0.29 By No1_NrC7</string>
     <string name="failed_to_parse_multisign">解析多签失败</string>
     <string name="input_the_script_or_multisign_or_select_a_multisign_fid">输入脚本或多签JSON，或选择多签FID</string>
     <string name="failed_to_create_multisign_tx">创建多签交易失败</string>
@@ -355,7 +358,9 @@
     <string name="please_enter_cipher">请输入密文</string>
     <string name="please_enter_key">请输入密钥</string>
     <string name="no_avatar_to_save">没有头像可保存</string>
+    <string name="failed_to_decode_image">解析图片失败</string>
     <string name="avatar_saved_to_gallery">头像已保存到相册</string>
+    <string name="error_saving_avatar">保存头像失败: %1$s</string>
     <string name="failed_to_save_avatar">保存头像失败</string>
     <string name="qr_scanning_not_supported">不支持二维码扫描</string>
     <string name="no_symmetric_key_found">未找到对称密钥</string>
@@ -467,7 +472,7 @@
 
     <!-- Cash Activity strings -->
     <string name="error_loading_cash">加载钞票失败：%1$s</string>
-    <string name="cash_loaded"> 张钞票已加载</string>
+    <string name="cash_loaded">%d 张钞票已加载</string>
     <string name="no_more_cash">没有更多钞票</string>
     <string name="error_loading_more_cash">加载更多钞票失败：%1$s</string>
     <string name="send_functionality_not_implemented">发送功能尚未实现</string>
@@ -497,4 +502,55 @@
     <string name="error_saving_key_with_message">保存密钥失败：%1$s</string>
     <string name="key_already_exists_title">密钥已存在</string>
     <string name="key_already_exists_message">该ID的密钥已存在，是否要替换它？</string>
+    <string name="invalid_private_key">无效的私钥</string>
+    <string name="private_key_is_empty">私钥为空</string>
+    <string name="no_key_selected">未选择密钥</string>
+    <string name="public_key_is_empty">公钥为空</string>
+    <string name="failed_to_save_key_info">保存密钥信息失败</string>
+    <string name="fid_is_empty">FID为空</string>
+    <string name="keyinfo_list_is_empty">密钥列表为空</string>
+    <string name="failed_to_save_totp_key_base32">保存失败！TOTP密钥必须是base32编码</string>
+    <string name="symmetric_key_not_found_login_again">未找到对称密钥，请重新登录</string>
+    <string name="keyinfo_list_is_null">密钥列表为空</string>
+    <string name="private_key_cipher_is_empty">私钥密文为空</string>
+    <string name="password_is_empty">密码为空</string>
+    <string name="failed_to_decrypt_private_key">解密私钥失败</string>
+    <string name="no_keys_selected">未选择密钥</string>
+    <string name="find_nice_keys">搜索靓名</string>
+    <string name="please_select_at_least_one_multisign">请至少选择一个多签</string>
+    <string name="tx_is_well_signed_build_it">交易已完全签名！可以组装了。</string>
+    <string name="failed_to_get_prikey_of">获取私钥失败：%1$s</string>
+    <string name="selected_key_not_part_of_multisign">选中的密钥不是此多签交易的成员</string>
+    <string name="failed_to_get_key_info_of">获取密钥信息失败：%1$s</string>
+    <string name="enter_label_for_multisign_id">输入多签ID标签</string>
+    <string name="selected_cashes_count">已选择：%1$d 张钞票</string>
+    <string name="copied_cash_id">已复制钞票ID：%1$s</string>
+    <string name="copied_amount">已复制金额：%1$s</string>
+    <string name="avatar_checking_stopped">头像检查已停止</string>
+    <string name="no_image_to_save">没有图片可保存</string>
+    <string name="image_saved_successfully">图片保存成功</string>
+    <string name="password_display">密码：%1$s</string>
+    <string name="square_icon_created_successfully">方形图标创建成功</string>
+    <string name="round_icon_created_successfully">圆形图标创建成功</string>
+    <string name="circle_image_test">圆形图片测试</string>
+    <string name="pubkey_of">公钥：%1$s</string>
+    <string name="prikey_of">私钥：%1$s</string>
+    <string name="compressed_in_hex">压缩格式（Hex）</string>
+    <string name="uncompressed_in_hex">非压缩格式（Hex）</string>
+    <string name="wif_uncompressed">WIF非压缩</string>
+    <string name="wif_compressed_with_ver_0">WIF压缩（版本0）</string>
+    <string name="wif_compressed_without_ver">WIF压缩（无版本）</string>
+    <string name="failed_to_parse_script_to_multisign">解析脚本到多签失败。</string>
+    <string name="app_password_cannot_be_shown">应用密码无法显示，请妥善保管。</string>
+    
+    <!-- Toast Messages -->
+    <string name="please_enter_your_password">请输入您的密码</string>
+    <string name="error_scanning_qr_with_message">扫描二维码错误：%1$s</string>
+    <string name="error_reading_image_with_message">读取图片错误：%1$s</string>
+    <string name="unexpected_error_with_message">意外错误：%1$s</string>
+    <string name="error_parsing_tx_json">解析交易失败</string>
+    <string name="invalid_tx_json_format">无效的交易JSON</string>
+    <string name="error_no_entity_data_available">错误：实体数据不可用</string>
+    <string name="error_initializing_cash_activity">初始化钞票页面错误</string>
+    <string name="change">更改</string>
 </resources>

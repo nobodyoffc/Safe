@@ -106,7 +106,7 @@ public class CreateKeyByFidActivity extends BaseCryptoActivity {
     private void previewKeyInfo() {
         String fid = fidInput.getText() != null ? fidInput.getText().toString() : "";
         if(!KeyTools.isGoodFid(fid)){
-            Toast.makeText(this, "Invalid FID", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.invalid_fid), Toast.LENGTH_SHORT).show();
             return;
         }
         String label = labelInput.getText() != null ? labelInput.getText().toString() : "";
@@ -152,7 +152,7 @@ public class CreateKeyByFidActivity extends BaseCryptoActivity {
             // Use the previewed KeyInfo
             KeyInfo keyInfo = (KeyInfo) detailFragment.getCurrentEntity();
             if (keyInfo == null) {
-                Toast.makeText(this, "Failed to save key info", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, getString(R.string.failed_to_save_key_info), Toast.LENGTH_SHORT).show();
                 return;
             }
             saveKeyInfoToDatabase(keyInfo);
@@ -162,13 +162,13 @@ public class CreateKeyByFidActivity extends BaseCryptoActivity {
     private KeyInfo createKeyInfoFromInputs() {
         String fid = fidInput.getText() != null ? fidInput.getText().toString() : "";
         if(!KeyTools.isGoodFid(fid)){
-            Toast.makeText(this, "Invalid FID", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.invalid_fid), Toast.LENGTH_SHORT).show();
             return null;
         }
         String label = labelInput.getText() != null ? labelInput.getText().toString() : "";
 
         if (fid.isEmpty()) {
-            Toast.makeText(this, "FID is empty", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.fid_is_empty), Toast.LENGTH_SHORT).show();
             return null;
         }
 
@@ -179,12 +179,12 @@ public class CreateKeyByFidActivity extends BaseCryptoActivity {
         // Check if the key already exists
         if (keyInfoManager.checkIfExisted(keyInfo.getId())) {
             new AlertDialog.Builder(this)
-                .setTitle("Key Already Exists")
-                .setMessage("A key with this ID already exists. Do you want to replace it?")
-                .setPositiveButton("Replace", (dialog, which) -> {
+                .setTitle(getString(R.string.key_already_exists_title))
+                .setMessage(getString(R.string.key_already_exists_message))
+                .setPositiveButton(getString(R.string.replace), (dialog, which) -> {
                     saveAndFinish(keyInfo);
                 })
-                .setNegativeButton("Cancel", null)
+                .setNegativeButton(getString(R.string.cancel), null)
                 .show();
         } else {
             saveAndFinish(keyInfo);

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    
+    <!-- 背景色 - 使用更明显的白色/深色 -->
+    <solid android:color="@color/dialog_background" />
+    
+    <!-- 圆角 -->
+    <corners android:radius="12dp" />
+    
+    <!-- 边框 -->
+    <stroke
+        android:width="2dp"
+        android:color="@color/dialog_border" />
+    
+    <!-- 阴影效果 -->
+    <padding
+        android:left="2dp"
+        android:top="2dp"
+        android:right="2dp"
+        android:bottom="2dp" />
+</shape> 

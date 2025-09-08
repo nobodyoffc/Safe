@@ -50,7 +50,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
+import java.util.HashSet;
 
 public class FcEntityListFragment<T extends FcEntity> extends Fragment {
     public final static String TAG = "FcEntityListFragment";
@@ -58,7 +61,9 @@ public class FcEntityListFragment<T extends FcEntity> extends Fragment {
     private static final int ROW_HEIGHT = 60;
     private static final int AVATAR_SIZE = 48;
     private static final int AVATAR_FIELD_WIDTH = ROW_HEIGHT-6;
-    private static final int CHECKBOX_FIELD_WIDTH = 36;
+    private static final int CHECKBOX_FIELD_WIDTH = 48; // Better touch target
+    private static final int HEADER_HEIGHT = 56; // Standard material design header height
+    private static final int SORT_BUTTON_HEIGHT = 40;
     
     // Sort states
     private static final String SORT_NONE = "none";
@@ -98,8 +103,14 @@ public class FcEntityListFragment<T extends FcEntity> extends Fragment {
     // Field width map
     private LinkedHashMap<String, Integer> fieldWidthMap;
     
-    // Field name map for display
-    private Map<String, String> fieldNameMap;
+    // Field name map for display - language aware
+    private LinkedHashMap<String, Map<String, String>> fieldNameMap;
+    
+    // Cache for field accessor methods to improve performance
+    private final Map<String, Method> fieldAccessorCache = new HashMap<>();
+    
+    // Cache for localized field names to avoid repeated lookups
+    private final Map<String, String> localizedFieldNameCache = new HashMap<>();
     
     // Add field for satoshi field list
     private List<String> satoshiFieldList;
@@ -231,9 +242,16 @@ public class FcEntityListFragment<T extends FcEntity> extends Fragment {
                         Map<String, byte[]> generatedAvatars = AvatarMaker.makeAvatars(idsToGenerate.toArray(new String[0]),getContext());
                         for (Map.Entry<String, byte[]> entry : generatedAvatars.entrySet()) {
                             idImageBytesMap.put(entry.getKey(), entry.getValue());
-                            kim.saveAvatar(entry.getKey(), entry.getValue()); // Save back to DB
+                            // Save avatars asynchronously to avoid deadlock
+                            new Thread(() -> {
+                                try {
+                                    kim.saveAvatar(entry.getKey(), entry.getValue());
+                                } catch (Exception e) {
+                                    TimberLogger.e(TAG, "Failed to save avatar asynchronously: %s", e.getMessage());
+                                }
+                            }).start();
                         }
-                        TimberLogger.i(TAG, "onCreate: Generated and saved %d KeyInfo avatars", generatedAvatars.size());
+                        TimberLogger.i(TAG, "onCreate: Generated %d KeyInfo avatars", generatedAvatars.size());
                     } catch (IOException e) {
                         TimberLogger.e(TAG, "onCreate: Failed to generate KeyInfo avatars: %s", e.getMessage());
                     }
@@ -275,9 +293,16 @@ public class FcEntityListFragment<T extends FcEntity> extends Fragment {
                         Map<String, byte[]> generatedAvatars = AvatarMaker.makeAvatars(ownersToGenerate.toArray(new String[0]), getContext());
                         for (Map.Entry<String, byte[]> entry : generatedAvatars.entrySet()) {
                             idImageBytesMap.put(entry.getKey(), entry.getValue());
-                            kim.saveAvatar(entry.getKey(), entry.getValue()); // Save back to KeyInfoDB
+                            // Save avatars asynchronously to avoid deadlock
+                            new Thread(() -> {
+                                try {
+                                    kim.saveAvatar(entry.getKey(), entry.getValue());
+                                } catch (Exception e) {
+                                    TimberLogger.e(TAG, "Failed to save avatar asynchronously: %s", e.getMessage());
+                                }
+                            }).start();
                         }
-                        TimberLogger.i(TAG, "onCreate: Generated and saved %d Cash owner avatars", generatedAvatars.size());
+                        TimberLogger.i(TAG, "onCreate: Generated %d Cash owner avatars", generatedAvatars.size());
                     } catch (IOException e) {
                         TimberLogger.e(TAG, "onCreate: Failed to generate Cash owner avatars: %s", e.getMessage());
                     }
@@ -309,13 +334,13 @@ public class FcEntityListFragment<T extends FcEntity> extends Fragment {
                 sortStates.put(fieldName, SORT_NONE);
             }
             
-            // Get field name map for display
+            // Get language-aware field name map for display
             try {
-                Method getFieldNameMapMethod = tClass.getMethod(FcEntity.METHOD_GET_SHOW_FIELD_NAME_AS_MAP);
-                fieldNameMap = (Map<String, String>) getFieldNameMapMethod.invoke(null);
+                Method getFieldNameMapMethod = tClass.getMethod("getFieldNameMap");
+                fieldNameMap = (LinkedHashMap<String, Map<String, String>>) getFieldNameMapMethod.invoke(null);
             } catch (Exception e) {
                 TimberLogger.e(TAG,"Failed to get field name map: %s", e.getMessage());
-                fieldNameMap = new HashMap<>();
+                fieldNameMap = new LinkedHashMap<>();
             }
             
             // Get satoshi field list
@@ -338,7 +363,7 @@ public class FcEntityListFragment<T extends FcEntity> extends Fragment {
         } catch (Exception e) {
             TimberLogger.e(TAG,"Failed to get field maps: %s", e.getMessage());
             fieldWidthMap = new LinkedHashMap<>();
-            fieldNameMap = new HashMap<>();
+            fieldNameMap = new LinkedHashMap<>();
         }
 
         // Determine if any entity has a good FID
@@ -384,19 +409,7 @@ public class FcEntityListFragment<T extends FcEntity> extends Fragment {
         // Check if tList is null or empty
         if (tList == null || tList.isEmpty()) {
             TimberLogger.e(TAG,"FcEntityListFragment onCreateView: tList is null or empty");
-            
-            // Create a simple view with a message
-            TextView messageView = new TextView(requireContext());
-            messageView.setText("No data available");
-            messageView.setTextSize(18);
-            messageView.setGravity(Gravity.CENTER);
-            
-            LinearLayout.LayoutParams messageParams = new LinearLayout.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
-            messageView.setLayoutParams(messageParams);
-            
-            allContainer.addView(messageView);
-            return allContainer;
+            return createEmptyView();
         }
         
         // Create a horizontal scroll view to wrap all content
@@ -417,13 +430,6 @@ public class FcEntityListFragment<T extends FcEntity> extends Fragment {
                 ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.MATCH_PARENT);
         contentContainer.setLayoutParams(contentParams);
         
-        // Add top horizontal line
-        View topDivider = new View(requireContext());
-        topDivider.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.field_name));
-        LinearLayout.LayoutParams topDividerParams = new LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, (int) (1 * density));
-        topDivider.setLayoutParams(topDividerParams);
-        contentContainer.addView(topDivider);
         
         // Create the three main containers
         createHeaderContainer();
@@ -435,13 +441,6 @@ public class FcEntityListFragment<T extends FcEntity> extends Fragment {
         contentContainer.addView(verticalListScrollView);
         contentContainer.addView(orderScrollView);
         
-        // Add bottom horizontal line
-        View bottomDivider = new View(requireContext());
-        bottomDivider.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.field_name));
-        LinearLayout.LayoutParams bottomDividerParams = new LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, (int) (1 * density));
-        bottomDivider.setLayoutParams(bottomDividerParams);
-        contentContainer.addView(bottomDivider);
         
         // Add the content container to the main scroll view
         mainScrollView.addView(contentContainer);
@@ -476,7 +475,7 @@ public class FcEntityListFragment<T extends FcEntity> extends Fragment {
         
         // Set layout parameters for the header container
         LinearLayout.LayoutParams containerParams = new LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.WRAP_CONTENT, (int) (ROW_HEIGHT * density));
+                ViewGroup.LayoutParams.WRAP_CONTENT, (int) (40 * density));
         headerContainer.setLayoutParams(containerParams);
         
         // Create fixed part container (for checkbox and avatar spaces)
@@ -536,11 +535,8 @@ public class FcEntityListFragment<T extends FcEntity> extends Fragment {
             
             TextView headerView = new TextView(requireContext());
             
-            // Use display name from fieldNameMap if available, otherwise use the original field name
-            String displayName = fieldName;
-            if (fieldNameMap != null && fieldNameMap.containsKey(fieldName)) {
-                displayName = fieldNameMap.get(fieldName);
-            }
+            // Get localized display name from fieldNameMap
+            String displayName = getLocalizedFieldName(fieldName);
             
             headerView.setText(displayName);
             headerView.setTextSize(14);
@@ -603,8 +599,13 @@ public class FcEntityListFragment<T extends FcEntity> extends Fragment {
         LinearLayout row = new LinearLayout(requireContext());
         row.setOrientation(LinearLayout.HORIZONTAL);
         
-        // Use theme-aware background color
-        row.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.main_background));
+        // Use alternating row colors for better readability
+        int position = tList.indexOf(entity);
+        if (position % 2 == 0) {
+            row.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.main_background));
+        } else {
+            row.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.background_dark));
+        }
         
         // Set row height
         LinearLayout.LayoutParams rowParams = new LinearLayout.LayoutParams(
@@ -832,7 +833,7 @@ public class FcEntityListFragment<T extends FcEntity> extends Fragment {
         
         // Set layout parameters for the order container
         LinearLayout.LayoutParams containerParams = new LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.WRAP_CONTENT, (int) (30 * density));
+                ViewGroup.LayoutParams.WRAP_CONTENT, (int) (40 * density));
         orderContainer.setLayoutParams(containerParams);
         
         // Create fixed part container (for checkbox and avatar spaces)
@@ -906,7 +907,7 @@ public class FcEntityListFragment<T extends FcEntity> extends Fragment {
         // Add the fixed part to the order container
         orderContainer.addView(fixedPart);
         
-        // Add sort buttons for each field
+        // Add sort buttons for each field with improved styling
         TimberLogger.i(TAG,"FcEntityListFragment createOrderContainer: Adding " + fieldWidthMap.size() + " sort buttons");
         for (Map.Entry<String, Integer> entry : fieldWidthMap.entrySet()) {
             String fieldName = entry.getKey();
@@ -916,11 +917,16 @@ public class FcEntityListFragment<T extends FcEntity> extends Fragment {
             sortButton.setBackgroundResource(android.R.color.transparent);
             updateSortButtonIcon(sortButton, fieldName);
             
+            // Add ripple effect for better interaction feedback
+            android.util.TypedValue outValue = new android.util.TypedValue();
+            requireContext().getTheme().resolveAttribute(android.R.attr.selectableItemBackgroundBorderless, outValue, true);
+            sortButton.setForeground(ContextCompat.getDrawable(requireContext(), outValue.resourceId));
+
             // Store the button reference in the map
             sortButtonsMap.put(fieldName, sortButton);
             
             LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                    (int) (fieldWidth * 8 * density), (int) (30 * density));
+                    (int) (fieldWidth * 8 * density), (int) (SORT_BUTTON_HEIGHT * density));
             sortButton.setLayoutParams(params);
             
             // Set up click listener to cycle through sort states
@@ -1028,165 +1034,79 @@ public class FcEntityListFragment<T extends FcEntity> extends Fragment {
     
     private Object getFieldValue(T obj, String fieldName) {
         try {
-            // Try standard getter naming convention first
-            String getterName = "get" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
+            Object value = invokeGetter(obj, fieldName);
+            return formatFieldValue(value, fieldName);
+        } catch (Exception e) {
+            TimberLogger.e(TAG,"Failed to get field value for %s: %s", fieldName, e.getMessage());
+            return tryDirectFieldAccess(obj, fieldName);
+        }
+    }
+    
+    private Object invokeGetter(T obj, String fieldName) throws Exception {
+        // Use cached method if available for better performance
+        Method cachedMethod = fieldAccessorCache.get(fieldName);
+        if (cachedMethod != null) {
+            return cachedMethod.invoke(obj);
+        }
+        
+        String[] getterPatterns = {
+            "get" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1),
+            fieldName.startsWith("is") ? fieldName : "is" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1)
+        };
+        
+        for (String getterName : getterPatterns) {
             try {
                 Method getter = tClass.getMethod(getterName);
-                Object value = getter.invoke(obj);
-                
-                // Format boolean values with colored X or tick
-                if (value instanceof Boolean) {
-                    boolean boolValue = (Boolean) value;
-                    if (boolValue) {
-                        return "✓"; // Green tick for true
-                    } else {
-                        return "✗"; // Red X for false
-                    }
-                }
-                
-                // Format satoshi values using FchUtils.satoshiToCash()
-                if (satoshiFieldList != null && satoshiFieldList.contains(fieldName) && value instanceof Number) {
-                    try {
-                        long satoshiValue = ((Number) value).longValue();
-                        return com.fc.fc_ajdk.utils.FchUtils.formatSatoshiValue(satoshiValue);
-                    } catch (Exception ex) {
-                        TimberLogger.e(TAG, "Failed to format satoshi value for field %s: %s", fieldName, ex.getMessage());
-                    }
-                }
-                
-                // Format timestamp values using DateUtils.longShortToTime()
-                if (timestampFieldList != null && timestampFieldList.contains(fieldName) && value instanceof Number) {
-                    try {
-                        long timestampValue = ((Number) value).longValue();
-                        return com.fc.fc_ajdk.utils.DateUtils.longShortToTime(timestampValue, com.fc.fc_ajdk.utils.DateUtils.TO_SECOND);
-                    } catch (Exception ex) {
-                        TimberLogger.e(TAG, "Failed to format timestamp value for field %s: %s", fieldName, ex.getMessage());
-                    }
-                }
-                
-                return value;
-            } catch (NoSuchMethodException e) {
-                // If standard getter not found, try isXxx for boolean fields
-                if (fieldName.startsWith("is")) {
-                    // Already in isXxx format
-                    Method getter = tClass.getMethod(fieldName);
-                    Object value = getter.invoke(obj);
-                    
-                    // Format boolean values with colored X or tick
-                    if (value instanceof Boolean) {
-                        boolean boolValue = (Boolean) value;
-                        if (boolValue) {
-                            return "✓"; // Green tick for true
-                        } else {
-                            return "✗"; // Red X for false
-                        }
-                    }
-                    
-                    // Format satoshi values using FchUtils.satoshiToCash()
-                    if (satoshiFieldList != null && satoshiFieldList.contains(fieldName) && value instanceof Number) {
-                        try {
-                            long satoshiValue = ((Number) value).longValue();
-                            return com.fc.fc_ajdk.utils.FchUtils.formatSatoshiValue(satoshiValue);
-                        } catch (Exception ex) {
-                            TimberLogger.e(TAG, "Failed to format satoshi value for field %s: %s", fieldName, ex.getMessage());
-                        }
-                    }
-                    
-                    // Format timestamp values using DateUtils.longShortToTime()
-                    if (timestampFieldList != null && timestampFieldList.contains(fieldName) && value instanceof Number) {
-                        try {
-                            long timestampValue = ((Number) value).longValue();
-                            return com.fc.fc_ajdk.utils.DateUtils.longShortToTime(timestampValue, com.fc.fc_ajdk.utils.DateUtils.TO_SECOND);
-                        } catch (Exception ex) {
-                            TimberLogger.e(TAG, "Failed to format timestamp value for field %s: %s", fieldName, ex.getMessage());
-                        }
-                    }
-                    
-                    return value;
-                } else {
-                    // Try isXxx format for boolean fields
-                    getterName = "is" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
-                    Method getter = tClass.getMethod(getterName);
-                    Object value = getter.invoke(obj);
-                    
-                    // Format boolean values with colored X or tick
-                    if (value instanceof Boolean) {
-                        boolean boolValue = (Boolean) value;
-                        if (boolValue) {
-                            return "✓"; // Green tick for true
-                        } else {
-                            return "✗"; // Red X for false
-                        }
-                    }
-                    
-                    // Format satoshi values using FchUtils.satoshiToCash()
-                    if (satoshiFieldList != null && satoshiFieldList.contains(fieldName) && value instanceof Number) {
-                        try {
-                            long satoshiValue = ((Number) value).longValue();
-                            return com.fc.fc_ajdk.utils.FchUtils.formatSatoshiValue(satoshiValue);
-                        } catch (Exception ex) {
-                            TimberLogger.e(TAG, "Failed to format satoshi value for field %s: %s", fieldName, ex.getMessage());
-                        }
-                    }
-                    
-                    // Format timestamp values using DateUtils.longShortToTime()
-                    if (timestampFieldList != null && timestampFieldList.contains(fieldName) && value instanceof Number) {
-                        try {
-                            long timestampValue = ((Number) value).longValue();
-                            return com.fc.fc_ajdk.utils.DateUtils.longShortToTime(timestampValue, com.fc.fc_ajdk.utils.DateUtils.TO_SECOND);
-                        } catch (Exception ex) {
-                            TimberLogger.e(TAG, "Failed to format timestamp value for field %s: %s", fieldName, ex.getMessage());
-                        }
-                    }
-                    
-                    return value;
-                }
+                // Cache the successful method for future use
+                fieldAccessorCache.put(fieldName, getter);
+                return getter.invoke(obj);
+            } catch (NoSuchMethodException ignored) {
+                // Try next pattern
             }
-        } catch (Exception e) {
-            // Log the specific error for debugging
-            TimberLogger.e(TAG,"Failed to get field value for %s: %s", fieldName, e.getMessage());
-            
-            // Try direct field access as a fallback
+        }
+        throw new NoSuchMethodException("No getter found for field: " + fieldName);
+    }
+    
+    private Object formatFieldValue(Object value, String fieldName) {
+        if (value == null) return null;
+        
+        // Format boolean values
+        if (value instanceof Boolean) {
+            return (Boolean) value ? "✓" : "✗";
+        }
+        
+        // Format satoshi values
+        if (satoshiFieldList != null && satoshiFieldList.contains(fieldName) && value instanceof Number) {
             try {
-                Field field = tClass.getDeclaredField(fieldName);
-                field.setAccessible(true);
-                Object value = field.get(obj);
-                
-                // Format boolean values with colored X or tick
-                if (value instanceof Boolean) {
-                    boolean boolValue = (Boolean) value;
-                    if (boolValue) {
-                        return "✓"; // Green tick for true
-                    } else {
-                        return "✗"; // Red X for false
-                    }
-                }
-                
-                // Format satoshi values using FchUtils.satoshiToCash()
-                if (satoshiFieldList != null && satoshiFieldList.contains(fieldName) && value instanceof Number) {
-                    try {
-                        long satoshiValue = ((Number) value).longValue();
-                        return com.fc.fc_ajdk.utils.FchUtils.formatSatoshiValue(satoshiValue);
-                    } catch (Exception ex) {
-                        TimberLogger.e(TAG, "Failed to format satoshi value for field %s: %s", fieldName, ex.getMessage());
-                    }
-                }
-                
-                // Format timestamp values using DateUtils.longShortToTime()
-                if (timestampFieldList != null && timestampFieldList.contains(fieldName) && value instanceof Number) {
-                    try {
-                        long timestampValue = ((Number) value).longValue();
-                        return com.fc.fc_ajdk.utils.DateUtils.longShortToTime(timestampValue, com.fc.fc_ajdk.utils.DateUtils.TO_SECOND);
-                    } catch (Exception ex) {
-                        TimberLogger.e(TAG, "Failed to format timestamp value for field %s: %s", fieldName, ex.getMessage());
-                    }
-                }
-                
-                return value;
+                long satoshiValue = ((Number) value).longValue();
+                return com.fc.fc_ajdk.utils.FchUtils.formatSatoshiValue(satoshiValue);
             } catch (Exception ex) {
-                TimberLogger.e(TAG,"Failed to access field directly for %s: %s", fieldName, ex.getMessage());
-                return null;
+                TimberLogger.e(TAG, "Failed to format satoshi value for field %s: %s", fieldName, ex.getMessage());
             }
+        }
+        
+        // Format timestamp values
+        if (timestampFieldList != null && timestampFieldList.contains(fieldName) && value instanceof Number) {
+            try {
+                long timestampValue = ((Number) value).longValue();
+                return com.fc.fc_ajdk.utils.DateUtils.longShortToTime(timestampValue, com.fc.fc_ajdk.utils.DateUtils.TO_SECOND);
+            } catch (Exception ex) {
+                TimberLogger.e(TAG, "Failed to format timestamp value for field %s: %s", fieldName, ex.getMessage());
+            }
+        }
+        
+        return value;
+    }
+    
+    private Object tryDirectFieldAccess(T obj, String fieldName) {
+        try {
+            Field field = tClass.getDeclaredField(fieldName);
+            field.setAccessible(true);
+            Object value = field.get(obj);
+            return formatFieldValue(value, fieldName);
+        } catch (Exception ex) {
+            TimberLogger.e(TAG,"Failed to access field directly for %s: %s", fieldName, ex.getMessage());
+            return null;
         }
     }
     
@@ -1264,9 +1184,16 @@ public class FcEntityListFragment<T extends FcEntity> extends Fragment {
                         Map<String, byte[]> generatedAvatars = IdUtils.makeCircleImageFromIdList(idsToGenerateForKeyInfo);
                         for (Map.Entry<String, byte[]> entry : generatedAvatars.entrySet()) {
                             idImageBytesMap.put(entry.getKey(), entry.getValue());
-                            kim.saveAvatar(entry.getKey(), entry.getValue()); // Save back to DB
+                            // Save avatars asynchronously to avoid deadlock
+                            new Thread(() -> {
+                                try {
+                                    kim.saveAvatar(entry.getKey(), entry.getValue());
+                                } catch (Exception e) {
+                                    TimberLogger.e(TAG, "Failed to save avatar asynchronously: %s", e.getMessage());
+                                }
+                            }).start();
                         }
-                        TimberLogger.i(TAG, "updateList: Generated and saved %d KeyInfo avatars", generatedAvatars.size());
+                        TimberLogger.i(TAG, "updateList: Generated %d KeyInfo avatars", generatedAvatars.size());
                     } catch (IOException e) {
                         TimberLogger.e(TAG, "updateList: Failed to generate KeyInfo avatars: %s", e.getMessage());
                     }
@@ -1308,9 +1235,16 @@ public class FcEntityListFragment<T extends FcEntity> extends Fragment {
                         Map<String, byte[]> generatedAvatars = AvatarMaker.makeAvatars(ownersToGenerate.toArray(new String[0]), getContext());
                         for (Map.Entry<String, byte[]> entry : generatedAvatars.entrySet()) {
                             idImageBytesMap.put(entry.getKey(), entry.getValue());
-                            kim.saveAvatar(entry.getKey(), entry.getValue()); // Save back to KeyInfoDB
+                            // Save avatars asynchronously to avoid deadlock
+                            new Thread(() -> {
+                                try {
+                                    kim.saveAvatar(entry.getKey(), entry.getValue());
+                                } catch (Exception e) {
+                                    TimberLogger.e(TAG, "Failed to save avatar asynchronously: %s", e.getMessage());
+                                }
+                            }).start();
                         }
-                        TimberLogger.i(TAG, "updateList: Generated and saved %d Cash owner avatars", generatedAvatars.size());
+                        TimberLogger.i(TAG, "updateList: Generated %d Cash owner avatars", generatedAvatars.size());
                     } catch (IOException e) {
                         TimberLogger.e(TAG, "updateList: Failed to generate Cash owner avatars: %s", e.getMessage());
                     }
@@ -1331,15 +1265,22 @@ public class FcEntityListFragment<T extends FcEntity> extends Fragment {
             }
         }
         
-        // Restore selection state for existing items
+        // Efficiently restore selection state for existing items
         selectedObjects.clear();
         checkboxStates.clear();
+        
+        // Use HashSet for O(1) lookup performance
+        Set<T> previouslySelectedSet = new HashSet<>(previouslySelected);
+        
         for (T entity : tList) {
-            if (previouslySelected.contains(entity)) {
+            if (previouslySelectedSet.contains(entity)) {
                 selectedObjects.add(entity);
                 checkboxStates.put(entity, true);
-            } else if (previousCheckboxStates.containsKey(entity)) {
-                checkboxStates.put(entity, previousCheckboxStates.get(entity));
+            } else {
+                Boolean previousState = previousCheckboxStates.get(entity);
+                if (previousState != null) {
+                    checkboxStates.put(entity, previousState);
+                }
             }
         }
         
@@ -1458,5 +1399,66 @@ public class FcEntityListFragment<T extends FcEntity> extends Fragment {
                 refreshList();
             }
         }
+    }
+    
+    /**
+     * Gets localized field name based on current device language with caching for performance
+     */
+    private String getLocalizedFieldName(String fieldName) {
+        // Check cache first for performance
+        String cachedName = localizedFieldNameCache.get(fieldName);
+        if (cachedName != null) {
+            return cachedName;
+        }
+        
+        if (fieldNameMap == null || !fieldNameMap.containsKey(fieldName)) {
+            localizedFieldNameCache.put(fieldName, fieldName);
+            return fieldName; // Fallback to original field name
+        }
+        
+        Map<String, String> languageMap = fieldNameMap.get(fieldName);
+        if (languageMap == null) {
+            localizedFieldNameCache.put(fieldName, fieldName);
+            return fieldName;
+        }
+        
+        // Get current device language
+        String currentLanguage = Locale.getDefault().getLanguage();
+        
+        // Try to get localized name for current language
+        String localizedName = languageMap.get(currentLanguage);
+        if (localizedName != null && !localizedName.isEmpty()) {
+            localizedFieldNameCache.put(fieldName, localizedName);
+            return localizedName;
+        }
+        
+        // Fallback to English
+        localizedName = languageMap.get("en");
+        if (localizedName != null && !localizedName.isEmpty()) {
+            localizedFieldNameCache.put(fieldName, localizedName);
+            return localizedName;
+        }
+        
+        // Final fallback to original field name
+        localizedFieldNameCache.put(fieldName, fieldName);
+        return fieldName;
+    }
+    
+    /**
+     * Creates an empty view when no data is available
+     */
+    private View createEmptyView() {
+        TextView messageView = new TextView(requireContext());
+        messageView.setText("No data available");
+        messageView.setTextSize(18);
+        messageView.setGravity(Gravity.CENTER);
+        messageView.setTextColor(ContextCompat.getColor(requireContext(), R.color.text_color));
+        
+        LinearLayout.LayoutParams messageParams = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+        messageView.setLayoutParams(messageParams);
+        
+        allContainer.addView(messageView);
+        return allContainer;
     }
 } 

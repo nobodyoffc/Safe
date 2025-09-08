@@ -66,13 +66,13 @@ public class ExportKeysActivity extends BaseCryptoActivity {
         // Get and parse the key info list from intent
         String keyInfoListJson = getIntent().getStringExtra("keyInfoList");
         if(keyInfoListJson == null){
-            Toast.makeText(this,"KeyInfo list is null", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, getString(R.string.keyinfo_list_is_null), Toast.LENGTH_LONG).show();
             finish();
             return;
         }
         keyInfoList = JsonUtils.listFromJson(keyInfoListJson, KeyInfo.class);
         if (keyInfoList == null || keyInfoList.isEmpty()) {
-            Toast.makeText(this, "KeyInfo list is empty", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, getString(R.string.keyinfo_list_is_empty), Toast.LENGTH_LONG).show();
             finish();
             return;
         }
@@ -126,7 +126,7 @@ public class ExportKeysActivity extends BaseCryptoActivity {
             }
             QRCodeGenerator.showQRDialog(this, flattenedBitmaps);
         } else {
-            Toast.makeText(this, "No data to make QR code.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.no_data_to_make_qr_code), Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -168,9 +168,9 @@ public class ExportKeysActivity extends BaseCryptoActivity {
                 ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
                 ClipData clip = ClipData.newPlainText("Exported Keys", textToCopy);
                 clipboard.setPrimaryClip(clip);
-                Toast.makeText(this, "Copied to clipboard", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, getString(R.string.copied_to_clipboard), Toast.LENGTH_SHORT).show();
             } else {
-                Toast.makeText(this, "Nothing to copy", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, getString(R.string.nothing_to_copy), Toast.LENGTH_SHORT).show();
             }
         });
     }

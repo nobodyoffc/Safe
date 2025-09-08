@@ -3,7 +3,7 @@
     <color name="black">#000000</color>
     <color name="white">#FFFFFF</color>
     <color name="background_light">#FFFFFF</color>
-    <color name="background_dark">#333333</color>
+    <color name="background_dark">#DDDDDD</color>
     <color name="main_background">#F5F5F5</color>
     <color name="text_area_background">#F0F0F0</color>
     <color name="text_color">#000000</color>
@@ -21,4 +21,6 @@
     <color name="cash_card_background">#E8F4FD</color>
     <color name="cash_card_border">#BBDEFB</color>
     <color name="cash_card_dark_background">#E0E0E0</color>
+    <color name="dialog_background">#FFFFFF</color>
+    <color name="dialog_border">#2196F3</color>
 </resources>

@@ -70,7 +70,7 @@ public class FindNiceKeysActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setTitle("Find Nice Keys");
+        getSupportActionBar().setTitle(getString(R.string.find_nice_keys));
         toolbar.setNavigationOnClickListener(v -> {
             if (isFinding.get()) {
                 Toast.makeText(this, R.string.stop_finding_progress_first, Toast.LENGTH_SHORT).show();

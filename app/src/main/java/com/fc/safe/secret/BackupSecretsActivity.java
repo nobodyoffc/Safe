@@ -80,7 +80,7 @@ public class BackupSecretsActivity extends BaseCryptoActivity {
         // Get all secrets from SecretManager
         secretList = SecretManager.getInstance(this).getAllSecretDetailList();
         if (secretList == null || secretList.isEmpty()) {
-            Toast.makeText(this, "Secret list is empty", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, getString(R.string.secret_list_is_empty), Toast.LENGTH_LONG).show();
             finish();
             return;
         }
@@ -91,7 +91,7 @@ public class BackupSecretsActivity extends BaseCryptoActivity {
                     CryptoDataByte cryptoDataByte = CryptoDataByte.fromJson(secret.getContentCipher());
                     byte[] symKey = ConfigureManager.getInstance().getSymkey();
                     if(symKey==null){
-                        Toast.makeText(this,"SymKey is null", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(this, getString(R.string.symkey_is_null), Toast.LENGTH_SHORT).show();
                         return;
                     }
                     Decryptor.decryptBySymkey(cryptoDataByte, com.fc.fc_ajdk.utils.Hex.toHex(symKey));
@@ -125,7 +125,7 @@ public class BackupSecretsActivity extends BaseCryptoActivity {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 // Permission granted
             } else {
-                Toast.makeText(this, "Storage permission is required to save backup files", Toast.LENGTH_LONG).show();
+                Toast.makeText(this, getString(R.string.storage_permission_is_required_to_read_backup_files), Toast.LENGTH_LONG).show();
             }
         }
     }
@@ -177,7 +177,7 @@ public class BackupSecretsActivity extends BaseCryptoActivity {
             }
             QRCodeGenerator.showQRDialog(this, flattenedBitmaps);
         } else {
-            Toast.makeText(this, "No data to make QR code.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.no_data_to_make_qr_code), Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -219,9 +219,9 @@ public class BackupSecretsActivity extends BaseCryptoActivity {
                 ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
                 ClipData clip = ClipData.newPlainText("Exported Secrets", textToCopy);
                 clipboard.setPrimaryClip(clip);
-                Toast.makeText(this, "Copied to clipboard", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, getString(R.string.copied_to_clipboard), Toast.LENGTH_SHORT).show();
             } else {
-                Toast.makeText(this, "Nothing to copy", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, getString(R.string.nothing_to_copy), Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -232,7 +232,7 @@ public class BackupSecretsActivity extends BaseCryptoActivity {
             String filePath = saveResultToFile(result);
             if (filePath != null) {
                 displayFilePath(filePath);
-                Toast.makeText(this, "Exported to: " + filePath, Toast.LENGTH_LONG).show();
+                Toast.makeText(this, getString(R.string.exported_to, filePath), Toast.LENGTH_LONG).show();
             }
         }
         updateButtonStates();
@@ -251,7 +251,7 @@ public class BackupSecretsActivity extends BaseCryptoActivity {
             return file.getAbsolutePath();
         } catch (IOException e) {
             TimberLogger.e(TAG, "Failed to save file: %s", e.getMessage());
-            Toast.makeText(this, "Failed to save file", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.failed_to_save_file), Toast.LENGTH_SHORT).show();
             return null;
         }
     }
@@ -361,7 +361,7 @@ public class BackupSecretsActivity extends BaseCryptoActivity {
             }
         } catch (Exception e) {
             TimberLogger.e(TAG, "Error encrypting secret: %s", secret.getTitle());
-            Toast.makeText(this, "Error encrypting secret: " + secret.getTitle(), Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.error_encrypting_secret, secret.getTitle()), Toast.LENGTH_SHORT).show();
             return;
         }
         jsonList.add(encryptedJson);

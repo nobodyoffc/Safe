@@ -188,7 +188,7 @@ public class AddressConverterActivity extends BaseCryptoActivity {
             String text;
             String tag;
             if(keyInfo.getPubkey() != null) {
-                text = "Pubkey of " + StringUtils.omitMiddle(keyInfo.getId(), 13);
+                text = getString(R.string.pubkey_of, StringUtils.omitMiddle(keyInfo.getId(), 13));
                 tag = keyInfo.getPubkey();
             } else {
                 text = keyInfo.getId();

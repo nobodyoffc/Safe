@@ -285,6 +285,11 @@
             android:windowSoftInputMode="adjustResize" />
 
         <activity
+            android:name="com.fc.safe.ui.ChangePasswordInputActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
             android:name=".home.FidListActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />

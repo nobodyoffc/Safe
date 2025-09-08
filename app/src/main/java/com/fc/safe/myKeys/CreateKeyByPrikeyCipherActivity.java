@@ -122,12 +122,12 @@ public class CreateKeyByPrikeyCipherActivity extends BaseCryptoActivity {
         String label = labelInput.getText() != null ? labelInput.getText().toString() : "";
 
         if (prikeyCipher.isEmpty()) {
-            Toast.makeText(this, "Private key cipher is empty", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.private_key_cipher_is_empty), Toast.LENGTH_SHORT).show();
             return;
         }
 
         if (password.isEmpty()) {
-            Toast.makeText(this, "Password is empty", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.password_is_empty), Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -137,7 +137,7 @@ public class CreateKeyByPrikeyCipherActivity extends BaseCryptoActivity {
 
         byte[] prikey32 = KeyTools.getPrikey32(prikey);
         if(prikey32 == null){
-            Toast.makeText(this, "Invalid private key", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.invalid_private_key), Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -189,12 +189,12 @@ public class CreateKeyByPrikeyCipherActivity extends BaseCryptoActivity {
         String label = labelInput.getText() != null ? labelInput.getText().toString() : "";
 
         if (prikeyCipher.isEmpty()) {
-            Toast.makeText(this, "Private key cipher is empty", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.private_key_cipher_is_empty), Toast.LENGTH_SHORT).show();
             return null;
         }
 
         if (password.isEmpty()) {
-            Toast.makeText(this, "Password is empty", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.password_is_empty), Toast.LENGTH_SHORT).show();
             return null;
         }
 
@@ -204,7 +204,7 @@ public class CreateKeyByPrikeyCipherActivity extends BaseCryptoActivity {
 
         byte[] prikey32 = KeyTools.getPrikey32(prikey);
         if(prikey32 == null){
-            Toast.makeText(this, "Invalid private key", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.invalid_private_key), Toast.LENGTH_SHORT).show();
             return null;
         }
 
@@ -215,12 +215,12 @@ public class CreateKeyByPrikeyCipherActivity extends BaseCryptoActivity {
         // Check if the key already exists
         if (keyInfoManager.checkIfExisted(keyInfo.getId())) {
             new AlertDialog.Builder(this)
-                .setTitle("Key Already Exists")
-                .setMessage("A key with this ID already exists. Do you want to replace it?")
-                .setPositiveButton("Replace", (dialog, which) -> {
+                .setTitle(getString(R.string.key_already_exists_title))
+                .setMessage(getString(R.string.key_already_exists_message))
+                .setPositiveButton(getString(R.string.replace), (dialog, which) -> {
                     saveAndFinish(keyInfo);
                 })
-                .setNegativeButton("Cancel", null)
+                .setNegativeButton(getString(R.string.cancel), null)
                 .show();
         } else {
             saveAndFinish(keyInfo);
@@ -238,12 +238,12 @@ public class CreateKeyByPrikeyCipherActivity extends BaseCryptoActivity {
     private byte[] decryptPrikey(String prikeyCipher, String password) {
         CryptoDataByte cryptoDataByte = Decryptor.decryptByPassword(prikeyCipher, password);
         if(cryptoDataByte.getCode() != 0){
-            Toast.makeText(this,"Failed to decrypt private key",Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.failed_to_decrypt_private_key), Toast.LENGTH_SHORT).show();
             return null;
         }
         byte[] prikey = cryptoDataByte.getData();
         if (prikey == null) {
-            Toast.makeText(this, "Failed to decrypt private key", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.failed_to_decrypt_private_key), Toast.LENGTH_SHORT).show();
             return null;
         }
         return prikey;

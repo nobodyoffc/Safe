@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.widget.Toast;
 import com.fc.safe.db.DatabaseManager;
 import com.fc.fc_ajdk.utils.TimberLogger;
+import com.fc.fc_ajdk.feature.avatar.AvatarMaker;
 import com.orhanobut.hawk.Hawk;
 import com.fc.safe.utils.BackgroundTimeoutManager;
 import java.util.ArrayList;
@@ -22,6 +23,9 @@ public class SafeApplication extends Application {
         
         // Initialize Hawk at the application level
         Hawk.init(this).build();
+        
+        // Initialize AvatarMaker early to avoid performance issues during avatar generation
+        AvatarMaker.init(this);
         
         // Register activity lifecycle callbacks
         registerActivityLifecycleCallbacks(new android.app.Application.ActivityLifecycleCallbacks() {

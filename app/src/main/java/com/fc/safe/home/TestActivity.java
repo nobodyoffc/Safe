@@ -82,7 +82,7 @@ public class TestActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            getSupportActionBar().setTitle("Circle Image Test");
+            getSupportActionBar().setTitle(getString(R.string.circle_image_test));
         }
 
         // Initialize views
@@ -145,7 +145,7 @@ public class TestActivity extends AppCompatActivity {
     private void stopAvatarChecking() {
         if (avatarDialog != null && avatarDialog.isShowing()) {
             avatarDialog.dismiss();
-            Toast.makeText(this, "Avatar checking stopped", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.avatar_checking_stopped), Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -241,14 +241,14 @@ public class TestActivity extends AppCompatActivity {
 
     private void saveImage() {
         if (currentImageBytes == null) {
-            Toast.makeText(this, "No image to save", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.no_image_to_save), Toast.LENGTH_SHORT).show();
             return;
         }
 
         try {
             // Here you would typically save the image to a file or database
             // For this test, we'll just show a success message
-            Toast.makeText(this, "Image saved successfully", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.image_saved_successfully), Toast.LENGTH_SHORT).show();
             TimberLogger.i(TAG, "Image saved successfully");
         } catch (Exception e) {
             String errorMsg = "Error saving image: " + e.getMessage();
@@ -452,7 +452,7 @@ public class TestActivity extends AppCompatActivity {
         if (requestCode == REQUEST_CODE_SINGLE_INPUT && resultCode == RESULT_OK && data != null) {
             String input = data.getStringExtra(SingleInputActivity.EXTRA_RESULT);
             if (input != null) {
-                Toast.makeText(this, "Password: " + input, Toast.LENGTH_LONG).show();
+                Toast.makeText(this, getString(R.string.password_display, input), Toast.LENGTH_LONG).show();
             }
         }
     }
@@ -492,7 +492,7 @@ public class TestActivity extends AppCompatActivity {
             // Display the icon
             imageView.setImageBitmap(icon);
             
-            Toast.makeText(this, "Square icon created successfully", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.square_icon_created_successfully), Toast.LENGTH_SHORT).show();
         } catch (Exception e) {
             String errorMsg = "Error creating square icon: " + e.getMessage();
             Toast.makeText(this, errorMsg, Toast.LENGTH_SHORT).show();
@@ -514,7 +514,7 @@ public class TestActivity extends AppCompatActivity {
             // Display the icon
             imageView.setImageBitmap(icon);
             
-            Toast.makeText(this, "Round icon created successfully", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.round_icon_created_successfully), Toast.LENGTH_SHORT).show();
         } catch (Exception e) {
             String errorMsg = "Error creating round icon: " + e.getMessage();
             Toast.makeText(this, errorMsg, Toast.LENGTH_SHORT).show();

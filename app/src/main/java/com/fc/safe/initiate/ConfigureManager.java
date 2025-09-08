@@ -179,6 +179,25 @@ public class ConfigureManager {
     }
 
     /**
+     * Checks if a password already exists in the stored configurations.
+     * @param context The application context
+     * @param passwordBytes The password bytes to check
+     * @return true if the password already exists, false otherwise
+     */
+    public boolean passwordExists(Context context, byte[] passwordBytes) {
+        if (passwordBytes == null || context == null) {
+            return false;
+        }
+        
+        String passwordName = IdNameUtils.makePasswordHashName(passwordBytes);
+        SharedPreferences prefs = context.getSharedPreferences(CONFIG_PREFS_NAME, Context.MODE_PRIVATE);
+        String configJson = prefs.getString(CONFIG_KEY, "{}");
+        Map<String, Configure> configMap = JsonUtils.jsonToMap(configJson, String.class, Configure.class);
+        
+        return configMap != null && configMap.containsKey(passwordName);
+    }
+
+    /**
      * Removes a Configure object from SharedPreferences using its password name as the key.
      * @param context The application context
      * @param passwordName The password name to remove

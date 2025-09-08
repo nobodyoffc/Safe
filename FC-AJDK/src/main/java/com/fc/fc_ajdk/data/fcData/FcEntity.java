@@ -261,4 +261,10 @@ public abstract class FcEntity implements Serializable {
     public void setePid(String ePid) {
         this.ePid = ePid;
     }
+    public static void addFieldToMap(LinkedHashMap<String, Map<String, String>> fieldMap, String fieldName, String enName, String zhName) {
+        Map<String, String> languageMap = new HashMap<>();
+        languageMap.put("en", enName);
+        languageMap.put("zh", zhName);
+        fieldMap.put(fieldName, languageMap);
+    }
 }

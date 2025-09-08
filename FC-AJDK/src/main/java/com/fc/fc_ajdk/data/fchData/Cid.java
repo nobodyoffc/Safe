@@ -95,6 +95,38 @@ public class Cid extends FcSubject {
         this.weight = Weight.calcWeight(this.cd, this.cdd, this.reputation);
     }
 
+    public static LinkedHashMap<String, Map<String, String>> getFieldNameMap() {
+        LinkedHashMap<String, Map<String, String>> fieldMap = new LinkedHashMap<>();
+
+        // Add Cid fields (lines 32-58)
+        addFieldToMap(fieldMap, "prikey", "Private Key", "私钥");
+        addFieldToMap(fieldMap, "balance", "Balance", "余额");
+        addFieldToMap(fieldMap, "cash", "Cash", "钞票");
+        addFieldToMap(fieldMap, "income", "Income", "收入");
+        addFieldToMap(fieldMap, "expend", "Expend", "支出");
+        addFieldToMap(fieldMap, "cd", "CoinDays", "币天");
+        addFieldToMap(fieldMap, "cdd", "CoinDays Destroyed", "币天销毁");
+        addFieldToMap(fieldMap, "reputation", "Reputation", "声誉");
+        addFieldToMap(fieldMap, "hot", "Hot", "热度");
+        addFieldToMap(fieldMap, "weight", "Weight", "权重");
+        addFieldToMap(fieldMap, "master", "Master", "主控");
+        addFieldToMap(fieldMap, "guide", "Guide", "引导");
+        addFieldToMap(fieldMap, "noticeFee", "Notice Fee", "通知费");
+        addFieldToMap(fieldMap, "homepages", "Homepages", "主页");
+        addFieldToMap(fieldMap, "btcAddr", "BTC Address", "BTC地址");
+        addFieldToMap(fieldMap, "ethAddr", "ETH Address", "ETH地址");
+        addFieldToMap(fieldMap, "ltcAddr", "LTC Address", "LTC地址");
+        addFieldToMap(fieldMap, "dogeAddr", "DOGE Address", "DOGE地址");
+        addFieldToMap(fieldMap, "trxAddr", "TRX Address", "TRX地址");
+        addFieldToMap(fieldMap, "bchAddr", "BCH Address", "BCH地址");
+        addFieldToMap(fieldMap, "birthHeight", "Birth Height", "创建高度");
+        addFieldToMap(fieldMap, "nameTime", "Name Time", "命名时间");
+        addFieldToMap(fieldMap, "lastHeight", "Last Height", "最后高度");
+        addFieldToMap(fieldMap, "multisign", "Multisign", "多重签名");
+
+        return fieldMap;
+    }
+
     public Long getWeight() {
         return weight;
     }

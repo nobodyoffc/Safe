@@ -33,6 +33,8 @@ import com.fc.safe.db.KeyInfoManager;
 import com.fc.safe.utils.IdUtils;
 import com.fc.fc_ajdk.core.crypto.KeyTools;
 
+import java.util.Locale;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -369,6 +371,16 @@ public class DetailFragment extends Fragment {
                     }
                 }
                 
+                // Get nice field name using getShowFieldName method
+                String displayFieldName = fieldName;
+                try {
+                    String currentLanguage = Locale.getDefault().getLanguage();
+                    Method getShowFieldNameMethod = currentEntityClass.getMethod("getShowFieldName", String.class, String.class);
+                    displayFieldName = (String) getShowFieldNameMethod.invoke(null, fieldName, currentLanguage);
+                } catch (Exception e) {
+                    TimberLogger.d(TAG, "No getShowFieldName method found for field %s, using original name: %s", fieldName, e.getMessage());
+                }
+                
                 // Create a row for each field
                 LinearLayout row = new LinearLayout(requireContext());
                 row.setLayoutParams(new LinearLayout.LayoutParams(
@@ -380,7 +392,7 @@ public class DetailFragment extends Fragment {
 
                 // Add field name with colon
                 TextView nameView = new TextView(requireContext());
-                nameView.setText(fieldName + ": ");
+                nameView.setText(displayFieldName + ": ");
                 nameView.setTextSize(16);
                 nameView.setTypeface(null, Typeface.BOLD);
                 nameView.setTextColor(ContextCompat.getColor(requireContext(), R.color.field_name));

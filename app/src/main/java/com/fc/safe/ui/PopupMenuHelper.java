@@ -48,12 +48,21 @@ public class PopupMenuHelper {
         showPopup(anchorView);
     }
 
-    public void showKeyToolsMenu(View anchorView) {
+    public void showConvertMenu(View anchorView) {
         View popupView = LayoutInflater.from(context).inflate(R.layout.popup_menu_key_tools, null);
         popupWindow = new PopupWindow(popupView, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, true);
         popupWindow.setElevation(10f);
 
         setupKeyToolsMenuItems(popupView);
+        showPopup(anchorView);
+    }
+
+    public void showToolsMenu(View anchorView) {
+        View popupView = LayoutInflater.from(context).inflate(R.layout.popup_menu_tools, null);
+        popupWindow = new PopupWindow(popupView, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, true);
+        popupWindow.setElevation(10f);
+
+        setupToolsMenuItems(popupView);
         showPopup(anchorView);
     }
 
@@ -156,6 +165,45 @@ public class PopupMenuHelper {
         stringConverter.setOnClickListener(v -> {
             popupWindow.dismiss();
             context.startActivity(new Intent(context, com.fc.safe.home.DecodeActivity.class));
+        });
+    }
+
+    private void setupToolsMenuItems(View popupView) {
+        TextView toolsRandom = popupView.findViewById(R.id.tools_random);
+        TextView toolsHash = popupView.findViewById(R.id.tools_hash);
+        TextView toolsEncrypt = popupView.findViewById(R.id.tools_encrypt);
+        TextView toolsDecrypt = popupView.findViewById(R.id.tools_decrypt);
+        TextView toolsSignWords = popupView.findViewById(R.id.tools_sign_words);
+        TextView toolsVerify = popupView.findViewById(R.id.tools_verify);
+
+        toolsRandom.setOnClickListener(v -> {
+            popupWindow.dismiss();
+            context.startActivity(new Intent(context, com.fc.safe.tools.RandomBytesGeneratorActivity.class));
+        });
+
+        toolsHash.setOnClickListener(v -> {
+            popupWindow.dismiss();
+            context.startActivity(new Intent(context, com.fc.safe.home.HashActivity.class));
+        });
+
+        toolsEncrypt.setOnClickListener(v -> {
+            popupWindow.dismiss();
+            context.startActivity(new Intent(context, com.fc.safe.home.EncryptActivity.class));
+        });
+
+        toolsDecrypt.setOnClickListener(v -> {
+            popupWindow.dismiss();
+            context.startActivity(new Intent(context, com.fc.safe.home.DecryptActivity.class));
+        });
+
+        toolsSignWords.setOnClickListener(v -> {
+            popupWindow.dismiss();
+            context.startActivity(new Intent(context, com.fc.safe.home.SignMsgActivity.class));
+        });
+
+        toolsVerify.setOnClickListener(v -> {
+            popupWindow.dismiss();
+            context.startActivity(new Intent(context, com.fc.safe.home.VerifyActivity.class));
         });
     }
 

@@ -118,13 +118,13 @@ public class SignMultisignTxActivity extends BaseCryptoActivity {
                                 TxCreator.signSchnorrMultiSignTx(rawTxInfo, priKeyBytes);
                                 multisignTxDetail = MultisignTxDetail.fromMultiSigData(rawTxInfo, this);
                                 refreshFragmentContainer();
-                                if(isFullSigned)Toast.makeText(this,"The TX is well signed! Build it.", SafeApplication.TOAST_LASTING).show();
-                                else Toast.makeText(this,"Signed!", SafeApplication.TOAST_LASTING).show();
+                                if(isFullSigned)Toast.makeText(this, getString(R.string.tx_is_well_signed_build_it), SafeApplication.TOAST_LASTING).show();
+                                else Toast.makeText(this, getString(R.string.signed), SafeApplication.TOAST_LASTING).show();
                             } else {
-                                Toast.makeText(this, "Failed to get the priKey of " + chosenKeyInfo.getId(), SafeApplication.TOAST_LASTING).show();
+                                Toast.makeText(this, getString(R.string.failed_to_get_prikey_of, chosenKeyInfo.getId()), SafeApplication.TOAST_LASTING).show();
                             }
                         } else {
-                            Toast.makeText(this, "Selected key is not part of this multisign transaction", SafeApplication.TOAST_LASTING).show();
+                            Toast.makeText(this, getString(R.string.selected_key_not_part_of_multisign), SafeApplication.TOAST_LASTING).show();
                         }
                     }
                 }
@@ -190,10 +190,6 @@ public class SignMultisignTxActivity extends BaseCryptoActivity {
                 return;
             }
             if (isFullSigned) {
-                if(isBuilt){
-                    Toast.makeText(this, getString(R.string.built_you_can_broadcast_it), SafeApplication.TOAST_LASTING).show();
-                    return;
-                }
                 buildResult = TxCreator.buildSchnorrMultiSignTx(rawTxInfo);
                 if(!Hex.isHexString(buildResult)){
                     Toast.makeText(this, getString(R.string.failed_to_build_multisign_tx), SafeApplication.TOAST_LASTING).show();
@@ -203,7 +199,7 @@ public class SignMultisignTxActivity extends BaseCryptoActivity {
                     Toast.makeText(this, getString(R.string.built_you_can_broadcast_it), SafeApplication.TOAST_LASTING).show();
                     
                     // Update cash database after successful building
-                    showUpdateCashConfirmationDialog(buildResult, txInfo);
+                    updateCashDB(buildResult, txInfo);
                 }
                 return;
             }
@@ -338,12 +334,12 @@ public class SignMultisignTxActivity extends BaseCryptoActivity {
                         TxCreator.signSchnorrMultiSignTx(rawTxInfo, priKeyBytes);
                         multisignTxDetail = MultisignTxDetail.fromMultiSigData(rawTxInfo, this);
                         refreshFragmentContainer();
-                        Toast.makeText(this, "Signed!", SafeApplication.TOAST_LASTING).show();
+                        Toast.makeText(this, getString(R.string.signed), SafeApplication.TOAST_LASTING).show();
                     } else {
-                        Toast.makeText(this, "Failed to get the priKey of " + keyInfo.getId(), SafeApplication.TOAST_LASTING).show();
+                        Toast.makeText(this, getString(R.string.failed_to_get_prikey_of, keyInfo.getId()), SafeApplication.TOAST_LASTING).show();
                     }
                 } else {
-                    Toast.makeText(this, "Failed to get the key info of " + keyInfo.getId(), SafeApplication.TOAST_LASTING).show();
+                    Toast.makeText(this, getString(R.string.failed_to_get_key_info_of, keyInfo.getId()), SafeApplication.TOAST_LASTING).show();
                 }
             }
         });
@@ -419,23 +415,5 @@ public class SignMultisignTxActivity extends BaseCryptoActivity {
         }
     }
 
-    /**
-     * Shows a confirmation dialog asking the user if they want to update their cash database
-     * @param builtTx The built transaction hex string
-     * @param txInfo The transaction info containing all outputs including change
-     */
-    private void showUpdateCashConfirmationDialog(String builtTx, TxInfo txInfo) {
-        android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(this);
-        builder.setTitle(getString(R.string.update_cash_database))
-               .setMessage(getString(R.string.update_cash_database_message))
-               .setPositiveButton(getString(R.string.yes), (dialog, which) -> {
-                   updateCashDB(builtTx, txInfo);
-               })
-               .setNegativeButton(getString(R.string.no), (dialog, which) -> {
-                   // User chose not to update, do nothing
-                   TimberLogger.i(TAG, "User chose not to update cash database");
-               })
-               .setCancelable(false)
-               .show();
-    }
+
 } 

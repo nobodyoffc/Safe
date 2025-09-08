@@ -129,7 +129,7 @@ public class ChooseKeyInfoActivity extends BaseCryptoActivity {
             
             if (selectedObjects.isEmpty()) {
                 TimberLogger.d(TAG, "No objects selected");
-                Toast.makeText(this, "No key selected", SafeApplication.TOAST_LASTING).show();
+                Toast.makeText(this, getString(R.string.no_key_selected), SafeApplication.TOAST_LASTING).show();
                 return;
             }
             

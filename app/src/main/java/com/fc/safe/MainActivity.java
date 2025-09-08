@@ -8,24 +8,21 @@ import androidx.activity.EdgeToEdge;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
-
-import com.fc.fc_ajdk.config.Configure;
 import com.fc.fc_ajdk.utils.TimberLogger;
-import com.fc.fc_ajdk.ui.UIManager;
 import com.fc.safe.db.DatabaseManager;
 import com.fc.safe.home.HomeActivity;
 import com.fc.safe.initiate.CheckPasswordActivity;
 import com.fc.safe.initiate.CreatePasswordActivity;
 import com.fc.safe.initiate.ConfigureManager;
+import com.fc.safe.ui.RemindDialog;
 
 import java.util.Objects;
 
 public class MainActivity extends AppCompatActivity {
-    public static final String TAG = "CryptoSign";
+    public static final String TAG = "MainActivity";
     private DatabaseManager dbManager;
+    private ActivityResultLauncher<Intent> passwordLauncher;
+    private boolean hasLaunchedPasswordActivity = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,10 +30,19 @@ public class MainActivity extends AppCompatActivity {
         // TimberLogger is now initialized in SafeApplication
         setContentView(R.layout.activity_main);
         
+        // Register the activity result launcher
+        passwordLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                this::handlePasswordResult
+        );
+        
         setupEdgeToEdge();
-//        setupUI();
         initializeDatabase();
-        initiate();
+        
+        // Only initiate if this is a fresh start (not returning from another activity)
+        if (savedInstanceState == null) {
+            initiate();
+        }
     }
 
     private void setupEdgeToEdge() {
@@ -47,56 +53,37 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-//    private void setupUI() {
-//        UIManager uiManager = new UIManager(this, this);
-//        uiManager.setDisplayContainer(findViewById(R.id.main));
-//
-//        try {
-//            ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-//                Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-//                v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-//                return insets;
-//            });
-//        } catch (Exception ex) {
-//            TimberLogger.e(TAG, "Failed to set window insets listener: " + ex.getMessage(), ex);
-//        }
-//    }
 
     private void initializeDatabase() {
         dbManager = DatabaseManager.getInstance(this);
     }
 
     private void initiate() {
-        ActivityResultLauncher<Intent> passwordLauncher = registerForActivityResult(
-                new ActivityResultContracts.StartActivityForResult(),
-                this::handlePasswordResult
-        );
-        
-        Intent intent;
-        
         // Check if there are any Configure objects in ConfigureManager
         if (ConfigureManager.getInstance().isConfigEmpty(this)) {
-            intent = new Intent(this, CreatePasswordActivity.class);
+            // Show security guidelines dialog before creating password
+            RemindDialog dialog = new RemindDialog(this, getString(R.string.safe_v_by_no1_nrc7)+"\n\n"+getString(R.string.offline_notation));
+            dialog.setOnDismissListener(dialogInterface -> {
+                if (!hasLaunchedPasswordActivity) {
+                    hasLaunchedPasswordActivity = true;
+                    Intent createPasswordIntent = new Intent(this, CreatePasswordActivity.class);
+                    passwordLauncher.launch(createPasswordIntent);
+                }
+            });
+            dialog.show();
         } else {
-            intent = new Intent(this, CheckPasswordActivity.class);
+            Intent checkPasswordIntent = new Intent(this, CheckPasswordActivity.class);
+            passwordLauncher.launch(checkPasswordIntent);
         }
-        
-        passwordLauncher.launch(intent);
     }
 
     private void handlePasswordResult(androidx.activity.result.ActivityResult result) {
-        String activityName = result.getData() != null ? 
-            Objects.requireNonNull(result.getData().getComponent()).getClassName() : "Unknown";
-        
         if (result.getResultCode() == RESULT_OK) {
-            Configure configure = ConfigureManager.getInstance().getConfigure();
-            if (configure == null) {
-                handleError("Configure object not found in ConfigureManager");
-                return;
-            }
-            
+            // Password creation/verification was successful, proceed to home
             launchHomeActivity();
         } else {
+            String activityName = result.getData() != null ? 
+                Objects.requireNonNull(result.getData().getComponent()).getClassName() : "Unknown";
             handleError(activityName + " failed with result code: " + result.getResultCode());
         }
     }
@@ -117,13 +104,4 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    /**
-     * Clears all data
-     */
-    private void clearDatabase() {
-        if (dbManager != null) {
-            dbManager.clearAllDatabases();
-            ConfigureManager.getInstance().clearConfig(this);
-        }
-    }
 }

@@ -1111,7 +1111,6 @@ public class KeyTools {
                 break;
             case 52:
                 if (!(prikey.substring(0, 1).equals("L") || prikey.substring(0, 1).equals("K"))) {
-                    System.out.println("It's not a private key.");
                     return null;
                 }
                 prikeyBytes = Base58.decode(prikey);
@@ -1138,7 +1137,6 @@ public class KeyTools {
                 break;
             case 51:
                 if (!prikey.substring(0, 1).equals("5")) {
-                    System.out.println("It's not a private key.");
                     return null;
                 }
 
@@ -1165,7 +1163,6 @@ public class KeyTools {
                 System.arraycopy(prikeyForHash, 1, prikey32Bytes, 0, 32);
                 break;
             default:
-                System.out.println("It's not a private key.");
                 return null;
         }
 

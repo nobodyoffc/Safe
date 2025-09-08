@@ -60,7 +60,7 @@ public class HomeActivity extends AppCompatActivity {
             TextView safeTextView = findViewById(R.id.safe_text);
             if (safeTextView != null) {
                 safeTextView.setOnClickListener(v -> {
-                    RemindDialog dialog = new RemindDialog(this, getString(R.string.safe_v_by_no1_nrc7));
+                    RemindDialog dialog = new RemindDialog(this, getString(R.string.safe_v_by_no1_nrc7)+"\n\n"+getString(R.string.offline_notation));
                     dialog.show();
                 });
             }
@@ -92,21 +92,15 @@ public class HomeActivity extends AppCompatActivity {
         try {
             // Generate icons for all menu items except settings
             generateIconForMenuItem(R.id.menu_list, getString(R.string.menu_list));
+            generateIconForMenuItem(R.id.menu_tools, getString(R.string.menu_tools));
             generateIconForMenuItem(R.id.menu_totp, getString(R.string.menu_totp));
-            generateIconForMenuItem(R.id.menu_qr_code, getString(R.string.menu_qr_code));
         //    generateIconForMenuItem(R.id.menu_test, getString(R.string.menu_test));
 //            generateIconForMenuItem(R.id.menu_decode, getString(R.string.menu_decode));
-            generateIconForMenuItem(R.id.menu_hash, getString(R.string.menu_hash));
-            generateIconForMenuItem(R.id.menu_decrypt, getString(R.string.menu_decrypt));
-            generateIconForMenuItem(R.id.menu_encrypt, getString(R.string.menu_encrypt));
-            generateIconForMenuItem(R.id.menu_verify_message, getString(R.string.menu_verify));
-            generateIconForMenuItem(R.id.menu_sign_message, getString(R.string.menu_sign_words));
             generateIconForMenuItem(R.id.menu_multisign, getString(R.string.menu_multi_sign));
             generateIconForMenuItem(R.id.menu_sign_tx, getString(R.string.menu_sign_tx));
-            generateIconForMenuItem(R.id.menu_convert, getString(R.string.menu_tools));
+            generateIconForMenuItem(R.id.menu_convert, getString(R.string.menu_convert));
             generateIconForMenuItem(R.id.menu_secrets, getString(R.string.menu_secrets));
             generateIconForMenuItem(R.id.menu_my_keys, getString(R.string.menu_my_keys));
-            generateIconForMenuItem(R.id.menu_random, getString(R.string.menu_random));
             generateIconForMenuItem(R.id.menu_cash, getString(R.string.cash));
             // Skip settings as it uses a custom gear icon
         } catch (Exception ex) {
@@ -192,14 +186,24 @@ public class HomeActivity extends AppCompatActivity {
                 TimberLogger.e(TAG, "menu_secrets view not found");
             }
 
-            // Key Tools
-            View keyToolsView = findViewById(R.id.menu_convert);
-            if (keyToolsView != null) {
-                keyToolsView.setOnClickListener(v -> {
-                    popupMenuHelper.showKeyToolsMenu(keyToolsView);
+            // Convert
+            View convertView = findViewById(R.id.menu_convert);
+            if (convertView != null) {
+                convertView.setOnClickListener(v -> {
+                    popupMenuHelper.showConvertMenu(convertView);
                 });
             } else {
-                TimberLogger.e(TAG, "menu_key_tools view not found");
+                TimberLogger.e(TAG, "menu_convert view not found");
+            }
+
+            // Tools
+            View toolsView = findViewById(R.id.menu_tools);
+            if (toolsView != null) {
+                toolsView.setOnClickListener(v -> {
+                    popupMenuHelper.showToolsMenu(toolsView);
+                });
+            } else {
+                TimberLogger.e(TAG, "menu_tools view not found");
             }
 
             // Sign TX
@@ -224,75 +228,7 @@ public class HomeActivity extends AppCompatActivity {
                 TimberLogger.e(TAG, "menu_multisign view not found");
             }
 
-            // Sign Message
-            View signMessageView = findViewById(R.id.menu_sign_message);
-            if (signMessageView != null) {
-                signMessageView.setOnClickListener(v -> {
-                    Intent intent = new Intent(HomeActivity.this, SignMsgActivity.class);
-                    startActivity(intent);
-                });
-            } else {
-                TimberLogger.e(TAG, "menu_sign_message view not found");
-            }
 
-            // Verify Message
-            View verifyMessageView = findViewById(R.id.menu_verify_message);
-            if (verifyMessageView != null) {
-                verifyMessageView.setOnClickListener(v -> {
-                    Intent intent = new Intent(HomeActivity.this, VerifyActivity.class);
-                    startActivity(intent);
-                });
-            } else {
-                TimberLogger.e(TAG, "menu_verify_message view not found");
-            }
-
-            // Encrypt
-            View encryptView = findViewById(R.id.menu_encrypt);
-            if (encryptView != null) {
-                encryptView.setOnClickListener(v -> {
-                    // Launch EncryptActivity
-                    Intent intent = new Intent(HomeActivity.this, EncryptActivity.class);
-                    startActivity(intent);
-                });
-            } else {
-                TimberLogger.e(TAG, "menu_encrypt view not found");
-            }
-
-            // Decrypt
-            View decryptView = findViewById(R.id.menu_decrypt);
-            if (decryptView != null) {
-                decryptView.setOnClickListener(v -> {
-                    // Launch DecryptActivity
-                    Intent intent = new Intent(HomeActivity.this, DecryptActivity.class);
-                    startActivity(intent);
-                });
-            } else {
-                TimberLogger.e(TAG, "menu_decrypt view not found");
-            }
-
-            // Hash
-            View hashView = findViewById(R.id.menu_hash);
-            if (hashView != null) {
-                hashView.setOnClickListener(v -> {
-                    // Launch HashActivity
-                    Intent intent = new Intent(HomeActivity.this, HashActivity.class);
-                    startActivity(intent);
-                });
-            } else {
-                TimberLogger.e(TAG, "menu_hash view not found");
-            }
-
-            // QR Code
-            View qrCodeView = findViewById(R.id.menu_qr_code);
-            if (qrCodeView != null) {
-                qrCodeView.setOnClickListener(v -> {
-                    // Launch QRCodeActivity
-                    Intent intent = new Intent(HomeActivity.this, com.fc.safe.qr.QrCodeActivity.class);
-                    startActivity(intent);
-                });
-            } else {
-                TimberLogger.e(TAG, "menu_qr_code view not found");
-            }
 
             // TOTP
             View totpView = findViewById(R.id.menu_totp);
@@ -305,16 +241,6 @@ public class HomeActivity extends AppCompatActivity {
                 TimberLogger.e(TAG, "menu_totp view not found");
             }
 
-            // Random
-            View randomView = findViewById(R.id.menu_random);
-            if (randomView != null) {
-                randomView.setOnClickListener(v -> {
-                    Intent intent = new Intent(HomeActivity.this, com.fc.safe.tools.RandomBytesGeneratorActivity.class);
-                    startActivity(intent);
-                });
-            } else {
-                TimberLogger.e(TAG, "menu_random view not found");
-            }
 
             // Cash
             View cashView = findViewById(R.id.menu_cash);
@@ -326,6 +252,18 @@ public class HomeActivity extends AppCompatActivity {
                 });
             } else {
                 TimberLogger.e(TAG, "menu_cash view not found");
+            }
+
+            // Scan QR (in top bar)
+            View scanQrView = findViewById(R.id.menu_scan_qr);
+            if (scanQrView != null) {
+                scanQrView.setOnClickListener(v -> {
+                    // Launch QRCodeActivity
+                    Intent intent = new Intent(HomeActivity.this, com.fc.safe.qr.QrCodeActivity.class);
+                    startActivity(intent);
+                });
+            } else {
+                TimberLogger.e(TAG, "menu_scan_qr view not found");
             }
 
             // Settings

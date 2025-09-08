@@ -91,7 +91,7 @@ public class TxInputCard extends CardView {
         this.cash = cash;
         txIdText.setText(StringUtils.omitMiddle(cash.getBirthTxId(), 13));
         indexText.setText(String.valueOf(cash.getBirthIndex()));
-        amountText.setText(NumberUtils.formatAmount(FchUtils.satoshiToCoin(cash.getValue())) + " F");
+        amountText.setText(NumberUtils.formatAmount(FchUtils.satoshiToCoin(cash.getValue())) + " " + getContext().getString(R.string.currency_fch));
     }
 
     public Cash getCash() {

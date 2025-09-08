@@ -126,15 +126,15 @@ public class SignTxActivity extends BaseCryptoActivity {
 
         copyButton.setOnClickListener(v -> {
             if (signedTx != null) {
-                copyToClipboard(signedTx, "signed_tx");
+                copyToClipboard(signedTx, getString(R.string.signed));
             }else{
-                copyToClipboard(rawTxInfo.toNiceJson(), "raw_tx");
+                copyToClipboard(rawTxInfo.toNiceJson(), getString(R.string.unsigned));
             }
         });
 
         signButton.setOnClickListener(v -> {
             if(isSigned) {
-                copyToClipboard(signedTx, "signed_tx");
+                copyToClipboard(signedTx, getString(R.string.signed));
                 setResult(RESULT_SIGNED);
                 finish();
                 return;
@@ -148,7 +148,7 @@ public class SignTxActivity extends BaseCryptoActivity {
                     updateButtonTexts();
                     
                     // Update cash database after successful signing
-                    showUpdateCashConfirmationDialog(signedTx, txInfo);
+                    updateCashDB(signedTx, txInfo);
                     
                 } else {
                     Toast.makeText(this, getString(R.string.failed_to_sign_transaction), SafeApplication.TOAST_LASTING).show();
@@ -199,7 +199,7 @@ public class SignTxActivity extends BaseCryptoActivity {
                 avatar.setImageBitmap(bitmap);
             }
         } catch (Exception e) {
-            Toast.makeText(this, "Failed to create avatar", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.failed_to_create_avatar), Toast.LENGTH_SHORT).show();
         }
         
         keyLabel.setText(senderKeyInfo.getLabel());
@@ -208,7 +208,7 @@ public class SignTxActivity extends BaseCryptoActivity {
         keyId.setText(senderKeyInfo.getId());
         
         avatar.setOnClickListener(v -> IdUtils.showAvatarDialog(this, senderKeyInfo.getId()));
-        keyId.setOnClickListener(v -> copyToClipboard(senderKeyInfo.getId(), "sender_id"));
+        keyId.setOnClickListener(v -> copyToClipboard(senderKeyInfo.getId(), getString(R.string.sender)));
         
         fragmentContainer.addView(cardView);
     }
@@ -250,7 +250,7 @@ public class SignTxActivity extends BaseCryptoActivity {
         for (Cash cash : inputCashList) {
             spendingSum += cash.getValue();
         }
-        addTextLine(getString(R.string.sum) + ": " + FchUtils.satoshiToCoin(spendingSum) + " F");
+        addTextLine(getString(R.string.sum) + ": " + FchUtils.satoshiToCoin(spendingSum) + " " + getString(R.string.currency_fch));
 
         // Paying sum
         long payingSum = 0;
@@ -263,7 +263,7 @@ public class SignTxActivity extends BaseCryptoActivity {
 
         // Fee
         long fee = spendingSum - payingSum;
-        addTextLine(getString(R.string.fee) + ": " + FchUtils.satoshiToCash(fee) + " c");
+        addTextLine(getString(R.string.fee) + ": " + FchUtils.satoshiToCash(fee) + " " + getString(R.string.currency_cash));
 
         // CDD
         if (cdd != null) {
@@ -288,7 +288,7 @@ public class SignTxActivity extends BaseCryptoActivity {
             fieldValue.setText(parts[1]);
             fieldValue.setTextColor(getResources().getColor(R.color.text_color, getTheme()));
             fieldValue.setTypeface(null, android.graphics.Typeface.NORMAL);
-            fieldValue.setOnClickListener(v -> copyToClipboard(parts[1], "summary_value"));
+            fieldValue.setOnClickListener(v -> copyToClipboard(parts[1], getString(R.string.result)));
             fieldValue.setClickable(true);
             fieldValue.setFocusable(true);
 
@@ -299,7 +299,7 @@ public class SignTxActivity extends BaseCryptoActivity {
             fieldValue.setText("\t"+text);
             fieldValue.setTextColor(getResources().getColor(R.color.text_color, getTheme()));
             fieldValue.setTypeface(null, android.graphics.Typeface.NORMAL);
-            fieldValue.setOnClickListener(v -> copyToClipboard(text, "summary_value"));
+            fieldValue.setOnClickListener(v -> copyToClipboard(text, getString(R.string.result)));
             fieldValue.setClickable(true);
             fieldValue.setFocusable(true);
             rowLayout.addView(fieldValue);
@@ -383,23 +383,5 @@ public class SignTxActivity extends BaseCryptoActivity {
         }
     }
 
-    /**
-     * Shows a confirmation dialog asking the user if they want to update their cash database
-     * @param signedTx The signed transaction hex string
-     * @param txInfo The transaction info containing all outputs including change
-     */
-    private void showUpdateCashConfirmationDialog(String signedTx, TxInfo txInfo) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle(getString(R.string.update_cash_database))
-               .setMessage(getString(R.string.update_cash_database_message))
-               .setPositiveButton(getString(R.string.yes), (dialog, which) -> {
-                   updateCashDB(signedTx, txInfo);
-               })
-               .setNegativeButton(getString(R.string.no), (dialog, which) -> {
-                   // User chose not to update, do nothing
-                   TimberLogger.i(TAG, "User chose not to update cash database");
-               })
-               .setCancelable(false)
-               .show();
-    }
+
 } 

@@ -29,6 +29,8 @@
     <string name="confirm">Confirm</string>
     <string name="please_enter_password">Please enter password</string>
     <string name="incorrect_password">Incorrect password</string>
+    <string name="verifying_password">Verifying password...</string>
+    <string name="error_verifying_password">Error verifying password</string>
 
     <!-- CreatePassword Activity -->
     <string name="create_password">Create Password</string>
@@ -58,7 +60,7 @@
     <string name="menu_qr_code">QR Code</string>
     <string name="menu_settings">Settings</string>
     <string name="menu_test">Test</string>
-    <string name="home_slogan">protect your passwords, keys, secrets and privacy with cryptography.</string>
+    <string name="home_slogan">Protect your passwords, keys, secrets and privacy with cryptography.</string>
     <string name="failed_decode">Could not decode. Please check the text.</string>
     <string name="hash_input_hint">Enter text to be hashed</string>
     <string name="failed_hash">Failed to hash input</string>
@@ -337,10 +339,11 @@
     <string name="exported">Exported.</string>
     <string name="failed_to_load_avatar">Failed to load avatar.</string>
     <string name="failed_to_save_key">Failed to save key</string>
-    <string name="remember_backup_keys">Remember: all keys and secrets must be backed up.</string>
+    <string name="remember_backup_keys">Created! Remember to backup the new keys and secrets.</string>
     <string name="remove_me">Remove me</string>
     <string name="all_data_cleared_successfully">All data cleared successfully</string>
     <string name="password_changed">Password changed.</string>
+    <string name="password_already_exists">This password already exists. Please choose a different password.</string>
     <string name="no_more_secrets">No more secrets</string>
     <string name="check_password">Check Password</string>
     <string name="please_enter_matching_characters">Please enter matching characters</string>
@@ -349,12 +352,12 @@
     <string name="please_input_text">Please input text</string>
     <string name="no_content_to_generate_qr_code">No content to generate QR code</string>
     <string name="no_key_available">No key available</string>
-    <string name="offline_notation">Only offline data is truly safe data. Please keep your device offline. Turn off WIFI, mobile data, Bluetooth, etc.</string>
+    <string name="offline_notation">Only offline data is truly safe. Please keep your device offline. Turn off WIFI, mobile data, Bluetooth, etc.</string>
     <string name="detail">Detail</string>
     <string name="json_converter">JSON Converter</string>
     <string name="menu_json_converter">JSON Convert</string>
     <string name="input_json">Input JSON string</string>
-    <string name="safe_v_by_no1_nrc7">Safe v0.21 By No1_NrC7</string>
+    <string name="safe_v_by_no1_nrc7">Safe v0.29 By No1_NrC7</string>
     <string name="failed_to_parse_multisign">Failed to parse Multisign.</string>
     <string name="input_the_script_or_multisign_or_select_a_multisign_fid">Input the script or Multisign. Or select a multisign FID.</string>
     <string name="failed_to_create_multisign_tx">Failed to create multisign TX.</string>
@@ -485,7 +488,7 @@
     <!-- Cash Activity strings -->
     <string name="no_cash_found">No cash found</string>
     <string name="error_loading_cash">Error loading cash: %1$s</string>
-    <string name="cash_loaded"> cash loaded</string>
+    <string name="cash_loaded"> %d cash loaded</string>
     <string name="no_more_cash">No more cash</string>
     <string name="error_loading_more_cash">Error loading more cash: %1$s</string>
     <string name="send_functionality_not_implemented">Send functionality not implemented yet</string>
@@ -515,4 +518,65 @@
     <string name="error_saving_key_with_message">Error saving key: %1$s</string>
     <string name="key_already_exists_title">Key Already Exists</string>
     <string name="key_already_exists_message">A key with this ID already exists. Do you want to replace it?</string>
+    <string name="invalid_private_key">Invalid private key</string>
+    <string name="private_key_is_empty">Private key is empty</string>
+    <string name="no_key_selected">No key selected</string>
+    <string name="public_key_is_empty">Public key is empty</string>
+    <string name="failed_to_save_key_info">Failed to save key info</string>
+    <string name="fid_is_empty">FID is empty</string>
+    <string name="keyinfo_list_is_empty">KeyInfo list is empty</string>
+    <string name="failed_to_save_totp_key_base32">Failed to save! TOTP key have to be base32 encoded</string>
+    <string name="symmetric_key_not_found_login_again">Symmetric key not found. Please login again.</string>
+    <string name="keyinfo_list_is_null">KeyInfo list is null</string>
+    <string name="private_key_cipher_is_empty">Private key cipher is empty</string>
+    <string name="password_is_empty">Password is empty</string>
+    <string name="failed_to_decrypt_private_key">Failed to decrypt private key</string>
+    <string name="no_keys_selected">No keys selected</string>
+    <string name="find_nice_keys">Find Nice Keys</string>
+    <string name="please_select_at_least_one_multisign">Please select at least one multisign</string>
+    <string name="tx_is_well_signed_build_it">The TX is well signed! Build it.</string>
+    <string name="failed_to_get_prikey_of">Failed to get the priKey of %1$s</string>
+    <string name="selected_key_not_part_of_multisign">Selected key is not part of this multisign transaction</string>
+    <string name="failed_to_get_key_info_of">Failed to get the key info of %1$s</string>
+    <string name="enter_label_for_multisign_id">Enter Label for Multisign ID</string>
+    <string name="selected_cashes_count">Selected: %1$d cashes</string>
+    <string name="copied_cash_id">Copied cash ID: %1$s</string>
+    <string name="copied_amount">Copied amount: %1$s</string>
+    <string name="avatar_checking_stopped">Avatar checking stopped</string>
+    <string name="no_image_to_save">No image to save</string>
+    <string name="image_saved_successfully">Image saved successfully</string>
+    <string name="password_display">Password: %1$s</string>
+    <string name="square_icon_created_successfully">Square icon created successfully</string>
+    <string name="round_icon_created_successfully">Round icon created successfully</string>
+    <string name="circle_image_test">Circle Image Test</string>
+    <string name="pubkey_of">Pubkey of %1$s</string>
+    <string name="prikey_of">Prikey of %1$s</string>
+    <string name="compressed_in_hex">Compressed in Hex</string>
+    <string name="uncompressed_in_hex">UnCompressed in Hex</string>
+    <string name="wif_uncompressed">WIF uncompressed</string>
+    <string name="wif_compressed_with_ver_0">WIF compressed with ver 0</string>
+    <string name="wif_compressed_without_ver">WIF compressed without ver</string>
+    <string name="failed_to_parse_script_to_multisign">Failed to parse script to multisign.</string>
+    <string name="app_password_cannot_be_shown">App password can not be shown. Please keep it carefully.</string>
+    
+    <!-- Toast Messages -->
+    <string name="please_enter_your_password">Please enter your password</string>
+    <string name="error_scanning_qr_with_message">Error scanning QR: %1$s</string>
+    <string name="error_reading_image_with_message">Error reading image: %1$s</string>
+    <string name="unexpected_error_with_message">Unexpected error: %1$s</string>
+    
+    <!-- TX Activity strings -->
+    <string name="error_parsing_tx_json">Error parsing transaction JSON</string>
+    <string name="invalid_tx_json_format">Invalid transaction JSON format</string>
+    
+    <!-- Currency units -->
+    <string name="currency_fch" translatable="false">F</string>
+    <string name="currency_cash" translatable="false">c</string>
+    
+    <!-- UI Toast Messages -->
+    <string name="error_no_entity_data_available">Error: No entity data available</string>
+    <string name="failed_to_decode_image">Failed to decode image</string>
+    <string name="error_saving_avatar">Error saving avatar: %1$s</string>
+    <string name="error_initializing_cash_activity">Error initializing cash activity.</string>
+    <string name="change">Change</string>
 </resources>

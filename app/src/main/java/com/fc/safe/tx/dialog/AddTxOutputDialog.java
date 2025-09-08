@@ -67,7 +67,7 @@ public class AddTxOutputDialog extends Dialog {
         // Set up MaxText
         DecimalFormat df = new DecimalFormat("0.########");
         df.setDecimalSeparatorAlwaysShown(false);
-        String maxTextStr = String.format(Locale.US, "Max: %s F", df.format(FchUtils.satoshiToCoin(rest)));
+        String maxTextStr = String.format(Locale.US, "Max: %s %s", df.format(FchUtils.satoshiToCoin(rest)), getContext().getString(R.string.currency_fch));
         maxText.setText(maxTextStr);
         maxText.setOnClickListener(v -> {
             amountInput.setText(df.format(FchUtils.satoshiToCoin(rest)));
@@ -93,7 +93,7 @@ public class AddTxOutputDialog extends Dialog {
                 return;
             }
             if(fidInput.getText().toString().isEmpty() || amountInput.getText().toString().isEmpty()){
-                Toast.makeText(getContext(),  R.string.please_input_all_fields , SafeApplication.TOAST_LASTING).show();
+                Toast.makeText(getContext(), R.string.please_input_all_fields, SafeApplication.TOAST_LASTING).show();
                 return;
             }
             String fid = fidInput.getText().toString();
@@ -112,7 +112,7 @@ public class AddTxOutputDialog extends Dialog {
 
             // Validate against rest
             if (amount > FchUtils.satoshiToCoin(rest)) {
-                Toast.makeText(getContext(),  R.string.total_amount_exceeds_available_balance, SafeApplication.TOAST_LASTING).show();
+                Toast.makeText(getContext(), R.string.total_amount_exceeds_available_balance, SafeApplication.TOAST_LASTING).show();
                 return;
             }
 
@@ -129,7 +129,7 @@ public class AddTxOutputDialog extends Dialog {
 
     public void handleQrScanResult(int requestCode, String qrContent) {
         if (qrContent == null || qrContent.isEmpty()) {
-            showToast(getContext().getString(R.string.invalid_qr_code_content ));
+            showToast(getContext().getString(R.string.invalid_qr_code_content));
             return;
         }
 

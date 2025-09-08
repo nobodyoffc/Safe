@@ -78,7 +78,7 @@ public class AddOutputFromFidListDialog extends Dialog {
             // Validate total amount against rest
             double totalAmount = amount * fidList.size();
             if (totalAmount > FchUtils.satoshiToCoin(rest)) {
-                Toast.makeText(getContext(),  R.string.total_amount_exceeds_available_balance, SafeApplication.TOAST_LASTING).show();
+                Toast.makeText(getContext(), R.string.total_amount_exceeds_available_balance, SafeApplication.TOAST_LASTING).show();
                 return;
             }
 

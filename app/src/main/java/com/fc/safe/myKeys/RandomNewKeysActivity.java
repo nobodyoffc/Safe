@@ -60,7 +60,7 @@ public class RandomNewKeysActivity extends AppCompatActivity {
         saveButton.setOnClickListener(v -> {
             List<KeyInfo> selectedKeys = keyCardManager.getSelectedKeys();
             if (selectedKeys.isEmpty()) {
-                Toast.makeText(this, "No keys selected", SafeApplication.TOAST_LASTING).show();
+                Toast.makeText(this, getString(R.string.no_keys_selected), SafeApplication.TOAST_LASTING).show();
                 return;
             }
             keyLabelManager.saveSelectedKeys(selectedKeys);

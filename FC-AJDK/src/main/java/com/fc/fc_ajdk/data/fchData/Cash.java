@@ -416,4 +416,117 @@ public class Cash extends FcObject {
 	public void setLastHeight(Long lastHeight) {
 		this.lastHeight = lastHeight;
 	}
+
+	public static String getShowFieldName(String fieldName, String language) {
+        return switch (language.toLowerCase()) {
+            case "zh", "zh-cn" -> getShowFieldNameZh(fieldName);
+            default -> getShowFieldNameEn(fieldName);
+        };
+	}
+
+	private static String getShowFieldNameEn(String fieldName) {
+		switch (fieldName) {
+			case "id": return "Cash ID";
+			case "owner": return "Owner";
+			case "value": return "Value";
+			case "issuer": return "Issuer";
+			case "birthIndex": return "Birth Index";
+			case "type": return "Type";
+			case "cd": return "Coin Days";
+			case "lockScript": return "Lock Script";
+			case "birthTxId": return "Birth Transaction";
+			case "birthTxIndex": return "Birth TX Index";
+			case "birthBlockId": return "Birth Block";
+			case "birthTime": return "Birth Time";
+			case "birthHeight": return "Birth Height";
+			case "spendTime": return "Spend Time";
+			case "spendTxId": return "Spend Transaction";
+			case "spendHeight": return "Spend Height";
+			case "spendTxIndex": return "Spend TX Index";
+			case "spendBlockId": return "Spend Block";
+			case "spendIndex": return "Spend Index";
+			case "unlockScript": return "Unlock Script";
+			case "sigHash": return "Signature Hash";
+			case "sequence": return "Sequence";
+			case "cdd": return "Coin Days Destroyed";
+			case "valid": return "Valid";
+			case "lastTime": return "Last Time";
+			case "lastHeight": return "Last Height";
+			default: return fieldName;
+		}
+	}
+
+	private static String getShowFieldNameZh(String fieldName) {
+		LinkedHashMap<String,String> map = new LinkedHashMap<>();
+
+        return switch (fieldName) {
+            case "id" -> "ID";
+            case "owner" -> "拥有者";
+            case "value" -> "金额";
+            case "issuer" -> "发行者";
+            case "birthIndex" -> "出生索引";
+            case "type" -> "类型";
+            case "cd" -> "币天";
+            case "lockScript" -> "锁定脚本";
+            case "birthTxId" -> "出生交易";
+            case "birthTxIndex" -> "出生交易索引";
+            case "birthBlockId" -> "出生区块";
+            case "birthTime" -> "出生时间";
+            case "birthHeight" -> "出生高度";
+            case "spendTime" -> "花费时间";
+            case "spendTxId" -> "花费交易";
+            case "spendHeight" -> "花费高度";
+            case "spendTxIndex" -> "花费交易索引";
+            case "spendBlockId" -> "花费区块";
+            case "spendIndex" -> "花费索引";
+            case "unlockScript" -> "解锁脚本";
+            case "sigHash" -> "签名哈希";
+            case "sequence" -> "序列号";
+            case "cdd" -> "币天销毁";
+            case "valid" -> "有效";
+            case "lastTime" -> "最后时间";
+            case "lastHeight" -> "最后高度";
+            default -> fieldName;
+        };
+	}
+
+
+	/**
+	 * Returns a LinkedHashMap with field names in their declaration order and their display names in multiple languages
+	 * @return LinkedHashMap<fieldName, Map<language, displayName>>
+	 */
+	public static LinkedHashMap<String, Map<String, String>> getFieldNameMap() {
+		LinkedHashMap<String, Map<String, String>> fieldMap = new LinkedHashMap<>();
+
+		// Add fields in their declaration order from source code (lines 31-61)
+		addFieldToMap(fieldMap, "id", "Cash ID", "钞票ID");
+		addFieldToMap(fieldMap, "owner", "Owner", "拥有者");
+		addFieldToMap(fieldMap, "value", "Value", "金额");
+		addFieldToMap(fieldMap, "issuer", "Issuer", "发行者");
+		addFieldToMap(fieldMap, "birthIndex", "Birth Index", "出生索引");
+		addFieldToMap(fieldMap, "type", "Type", "类型");
+		addFieldToMap(fieldMap, "cd", "Coin Days", "币天");
+		addFieldToMap(fieldMap, "lockScript", "Lock Script", "锁定脚本");
+		addFieldToMap(fieldMap, "birthTxId", "Birth Transaction", "出生交易");
+		addFieldToMap(fieldMap, "birthTxIndex", "Birth TX Index", "出生交易索引");
+		addFieldToMap(fieldMap, "birthBlockId", "Birth Block", "出生区块");
+		addFieldToMap(fieldMap, "birthTime", "Birth Time", "出生时间");
+		addFieldToMap(fieldMap, "birthHeight", "Birth Height", "出生高度");
+		addFieldToMap(fieldMap, "spendTime", "Spend Time", "花费时间");
+		addFieldToMap(fieldMap, "spendTxId", "Spend Transaction", "花费交易");
+		addFieldToMap(fieldMap, "spendHeight", "Spend Height", "花费高度");
+		addFieldToMap(fieldMap, "spendTxIndex", "Spend TX Index", "花费交易索引");
+		addFieldToMap(fieldMap, "spendBlockId", "Spend Block", "花费区块");
+		addFieldToMap(fieldMap, "spendIndex", "Spend Index", "花费索引");
+		addFieldToMap(fieldMap, "unlockScript", "Unlock Script", "解锁脚本");
+		addFieldToMap(fieldMap, "sigHash", "Signature Hash", "签名哈希");
+		addFieldToMap(fieldMap, "sequence", "Sequence", "序列号");
+		addFieldToMap(fieldMap, "cdd", "Coin Days Destroyed", "币天销毁");
+		addFieldToMap(fieldMap, "valid", "Valid", "有效");
+		addFieldToMap(fieldMap, "lastTime", "Last Time", "最后时间");
+		addFieldToMap(fieldMap, "lastHeight", "Last Height", "最后高度");
+
+		return fieldMap;
+	}
+
 }

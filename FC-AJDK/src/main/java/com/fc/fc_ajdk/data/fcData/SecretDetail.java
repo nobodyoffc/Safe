@@ -287,4 +287,58 @@ public class SecretDetail extends FcObject {
     public void setSaveTime(String saveTime) {
         this.saveTime = saveTime;
     }
+
+    public static String getShowFieldName(String fieldName, String language) {
+        switch (language.toLowerCase()) {
+            case "zh":
+            case "zh-cn":
+                return getShowFieldNameZh(fieldName);
+            case "en":
+            default:
+                return getShowFieldNameEn(fieldName);
+        }
+    }
+
+    private static String getShowFieldNameEn(String fieldName) {
+        switch (fieldName) {
+            case "id": return "Secret ID";
+            case "type": return "Type";
+            case "title": return "Title";
+            case "content": return "Content";
+            case "memo": return "Memo";
+            case "updateHeight": return "Update Height";
+            case "saveTime": return "Save Time";
+            case "contentCipher": return "Content Cipher";
+            default: return fieldName;
+        }
+    }
+
+    private static String getShowFieldNameZh(String fieldName) {
+        return switch (fieldName) {
+            case "id" -> "ID";
+            case "type" -> "类型";
+            case "title" -> "标题";
+            case "content" -> "内容";
+            case "memo" -> "备注";
+            case "updateHeight" -> "更新高度";
+            case "saveTime" -> "保存时间";
+            case "contentCipher" -> "内容密文";
+            default -> fieldName;
+        };
+    }
+
+    public static LinkedHashMap<String, Map<String, String>> getFieldNameMap() {
+        LinkedHashMap<String, Map<String, String>> fieldMap = new LinkedHashMap<>();
+
+        // Add SecretDetail fields (lines 32-38)
+        addFieldToMap(fieldMap, "type", "Type", "类型");
+        addFieldToMap(fieldMap, "title", "Title", "标题");
+        addFieldToMap(fieldMap, "content", "Content", "内容");
+        addFieldToMap(fieldMap, "memo", "Memo", "备注");
+        addFieldToMap(fieldMap, "updateHeight", "Update Height", "更新高度");
+        addFieldToMap(fieldMap, "saveTime", "Save Time", "保存时间");
+        addFieldToMap(fieldMap, "contentCipher", "Content Cipher", "内容密文");
+
+        return fieldMap;
+    }
 }
