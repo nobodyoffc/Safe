@@ -10,6 +10,7 @@ import java.math.BigInteger;
  ************************************************************************************************************************************************/
 
 
+@Deprecated
 public class EXPList
 {
   public static BigInteger[][] list     	= new BigInteger[256][2];       // Exponential Liste

@@ -33,4 +33,6 @@ public class FcUtils {
         return (time-genesisTime)/(60*1000);
     }
 
+
+
 }

@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">密库</string>
+    <string name="safe_v_by_no1_nrc7">密库 v2.2 By No1_NrC7</string>
+
     <string name="scan_notification">点击扫描按钮开始扫描二维码。</string>
     <string name="make">生成</string>
     <string name="clear">清除</string>
@@ -46,8 +48,8 @@
     <string name="menu_secrets">秘密</string>
     <string name="menu_convert">转换</string>
     <string name="menu_tools">工具</string>
-    <string name="menu_sign_tx">交易</string>
-    <string name="menu_multi_sign">多签</string>
+    <string name="menu_tx">交易</string>
+    <string name="menu_multisign">多签</string>
     <string name="menu_sign_words">签名</string>
     <string name="menu_verify">验签</string>
     <string name="menu_encrypt">加密</string>
@@ -61,7 +63,7 @@
     <string name="menu_totp">验证码</string>
 
     <string name="menu_test">测试</string>
-    <string name="home_slogan">用密码技术保护您的密钥、密码、秘密和隐私。</string>
+    <string name="home_slogan">用密码技术保护您的密钥、密码、秘密和隐私</string>
     <string name="failed_decode">无法解码，请检查文本。</string>
     <string name="hash_input_hint">输入需要哈希的文本</string>
     <string name="failed_hash">哈希失败</string>
@@ -183,7 +185,7 @@
     <string name="carving">刻字</string>
     <string name="m_n">m/n</string>
     <string name="need_signs">还需签名</string>
-    <string name="pay_to">付给</string>
+    <string name="add_payee">添加收款人</string>
     <string name="choose_multisign_id">选择多签身份</string>
     <string name="as_hex">先转为字节</string>
     <string name="import_multisign_tx">导入多签交易</string>
@@ -264,7 +266,7 @@
     <string name="show_detail">显示详情</string>
     <string name="shown_in">显示为：</string>
     <string name="safe">密库</string>
-    <string name="error_initializing_camera">初始化相机错误：</string>
+    <string name="retry_after_authorization">失败。请授权后重试</string>
     <string name="cannot_open_image">无法打开图片</string>
     <string name="cannot_decode_image">无法从图片解析二维码</string>
 
@@ -301,8 +303,8 @@
     <string name="paying">支付</string>
     <string name="convert">转换</string>
     <string name="start">开始</string>
-    <string name="multisign">多签</string>
-    <string name="multisign_detail">多签详情</string>
+    <string name="multisig">多签</string>
+    <string name="multisig_detail">多签详情</string>
     <string name="my_keys">我的密钥</string>
     <string name="my_secrets">我的秘密</string>
     <string name="sign_words">签署消息</string>
@@ -345,7 +347,6 @@
     <string name="detail">详情</string>
     <string name="menu_json_converter">JSON转换</string>
     <string name="input_json">输入JSON字符串</string>
-    <string name="safe_v_by_no1_nrc7">密库 v0.29 By No1_NrC7</string>
     <string name="failed_to_parse_multisign">解析多签失败</string>
     <string name="input_the_script_or_multisign_or_select_a_multisign_fid">输入脚本或多签JSON，或选择多签FID</string>
     <string name="failed_to_create_multisign_tx">创建多签交易失败</string>
@@ -398,17 +399,30 @@
     <string name="current_password">当前密码</string>
     <string name="to_hex">转Hex</string>
     <string name="base58_new">Base58新格式</string>
+    <string name="mnemonic">助记词</string>
     <string name="promote">提示词</string>
     <string name="time">时间</string>
     <string name="next">下一个</string>
     <string name="enter_label">输入标签</string>
+    <string name="label">标签</string>
+    <string name="all">全部</string>
+    <string name="sort_by_fid">按FID排序</string>
+    <string name="sort_by_time">按时间排序</string>
+    <string name="sort_by_label">按标签排序</string>
+    <string name="update">更新</string>
+    <string name="edit">编辑</string>
+    <string name="remove">移除</string>
+    <string name="on_chain_status">链上状态</string>
     <string name="please_wait">稍等…</string>
     <string name="set_as_default">设为默认</string>
     <string name="_default">默认</string>
     <string name="export">导出</string>
     <string name="failed_to_load_file">加载文件失败</string>
     <string name="selected_key_has_no_private_key_cipher">该密钥没有私钥</string>
-
+    <string name="sort_by_type">按类型排序</string>
+    <string name="sort_by_title">按标题排序</string>
+    <string name="type">类型</string>
+    <string name="title">标题</string>
     <!-- Additional strings for showToast messages -->
     <string name="selected_keys_have_no_public_keys">选中的密钥没有公钥</string>
     <string name="failed_to_create_multisign_id">创建多签ID失败</string>
@@ -484,16 +498,51 @@
     <string name="create_cash">创建钞票</string>
     <string name="birth_time">出生时间</string>
     <string name="birth_time_hint">输入日期和时间 (YYYY-MM-DD HH:MM:SS)</string>
+    <string name="birth_height">出生高度</string>
+    <string name="birth_height_hint">输入出生区块高度</string>
+    <string name="invalid_height_format">无效的区块高度</string>
     <string name="invalid_date_format_please_use_yyyy_mm_dd">无效的日期格式。请使用 YYYY-MM-DD HH:MM:SS</string>
     <string name="cash_created_successfully">钞票创建成功</string>
     <string name="all_cash_must_have_same_owner">所有选中的钞票必须属于同一个所有者FID</string>
+
+    <!-- Pending TX -->
+    <string name="cash_locked_by_pending_tx">所选钞票中有被待处理交易锁定的</string>
+    <string name="pending_tx">待处理交易</string>
+    <string name="pending_tx_list">待处理交易</string>
+    <string name="pending_tx_none">没有待处理交易</string>
+    <string name="pending_tx_status_pending">待处理</string>
+    <string name="pending_tx_status_confirmed">已确认</string>
+    <string name="pending_tx_status_canceled">已取消</string>
+    <string name="pending_tx_confirm_broadcast">确认已广播</string>
+    <string name="pending_tx_mark_canceled">标记为已取消</string>
+    <string name="pending_tx_confirm_broadcast_prompt">确认这笔交易已经广播并上链?</string>
+    <string name="pending_tx_cancel_prompt">将此交易标记为已取消?锁定的输入将被释放,待收款的输出将被删除。</string>
+    <string name="pending_tx_confirmed_done">已标记为确认</string>
+    <string name="pending_tx_canceled_done">已标记为取消</string>
+    <string name="pending_tx_partial_multisig">多签未完成签名</string>
+    <string name="pending_tx_created_at">创建于</string>
+    <string name="pending_tx_updated_at">更新于</string>
+    <string name="pending_tx_on_chain_id">链上交易 ID</string>
+    <string name="pending_tx_none_yet">(尚未生成)</string>
+    <string name="balance_available">可用</string>
+    <string name="balance_locked">锁定</string>
+    <string name="balance_incoming">待收</string>
 
     <string name="my_cash">我的钞票</string>
 
     <string name="update_cash_database">更新我的钞票</string>
     <string name="update_cash_database_message">是否要更新"我的钞票"？</string>
     <string name="please_input_phrase">请输入密语</string>
-    
+
+    <!-- Key derivation method chooser -->
+    <string name="choose_key_derivation">选择密钥派生方式</string>
+    <string name="choose_key_derivation_message">Argon2id 计算较慢且占用内存，能有效抵御对密语的暴力破解。SHA256 速度快但无法抵御暴力破解。</string>
+    <string name="kdf_argon2id_recommended">Argon2id（推荐）</string>
+    <string name="kdf_sha256">SHA256</string>
+    <string name="sha256_warning_title">不建议使用 SHA256</string>
+    <string name="sha256_warning_message">使用纯 SHA256 从密语派生私钥无法抵御暴力破解或字典攻击。如果密语熵值较低，私钥可能被轻易还原。除非需要兼容已有的 SHA256 派生密钥，否则请使用 Argon2id。是否仍然使用 SHA256？</string>
+    <string name="continue_anyway">仍然继续</string>
+
     <!-- CreateKeyByPhraseActivity strings -->
     <string name="failed_to_get_keyinfo_from_preview">无法从预览获取密钥信息</string>
     <string name="warning_failed_to_generate_avatar">警告：生成头像失败，但密钥仍会保存</string>
@@ -511,6 +560,7 @@
     <string name="keyinfo_list_is_empty">密钥列表为空</string>
     <string name="failed_to_save_totp_key_base32">保存失败！TOTP密钥必须是base32编码</string>
     <string name="symmetric_key_not_found_login_again">未找到对称密钥，请重新登录</string>
+    <string name="failed_to_encrypt">加密失败</string>
     <string name="keyinfo_list_is_null">密钥列表为空</string>
     <string name="private_key_cipher_is_empty">私钥密文为空</string>
     <string name="password_is_empty">密码为空</string>
@@ -553,4 +603,46 @@
     <string name="error_no_entity_data_available">错误：实体数据不可用</string>
     <string name="error_initializing_cash_activity">初始化钞票页面错误</string>
     <string name="change">更改</string>
+    <string name="key_not_found">没有找到私钥</string>
+    <string name="input_the_32_bytes_hex_symkey">输入32字节的Hex密钥:</string>
+    <string name="input_current_password">输入当前密码:</string>
+
+
+    <string name="app_messages">应用消息</string>
+    <string name="no_toast_messages">没有消息</string>
+    <string name="clear_all">清空</string>
+    <string name="update_secret">更新秘密</string>
+    <string name="label_updated">标签已更新</string>
+    <string name="app_password_can_not_be_shown_please_keep_it_carefully">应用密码无法显示，请妥善保管</string>
+    <string name="close">关闭</string>
+    <string name="generating_keys">正在生成密钥...</string>
+    <string name="json_icon">JSON Icon</string>
+    <string name="deleting">删除中...</string>
+    <string name="error_delete">删除错误</string>
+    <string name="please_create_your_keys">请创建你的密钥</string>
+    <string name="importing">导入中...</string>
+    <string name="saving">保存中...</string>
+
+    <string name="sort_by_owner">按所有者排序</string>
+    <string name="sort_by_value">按金额排序</string>
+    <string name="sort_by_cd">按币天排序</string>
+    <string name="please_import_or_create_cash">请导入或创建钞票</string>
+    <string name="error_deleting_cash">删除钞票错误</string>
+
+    <!-- Statistics Bar -->
+    <string name="loaded">已加载:</string>
+    <string name="total">总数:</string>
+    <string name="checked">已选:</string>
+
+    <string name="please_enter_a_password">请输入一个密码</string>
+    <string name="please_confirm_your_password">请确认您的密码</string>
+    <string name="password_must_be_at_least_d_characters_long">密码长度至少为 %d</string>
+    <string name="passwords_do_not_match">密码不一致</string>
+    <string name="lock_time">锁定时间</string>
+    <string name="input_lock_height_hint">解锁区块高度</string>
+    <string name="unlock_at_block">区块 %1$d 解锁</string>
+    <string name="invalid_lock_height">无效的锁定高度</string>
+    <string name="input_redeem_script_hint">赎回脚本（hex，可选）</string>
+    <string name="invalid_redeem_script">无效的赎回脚本</string>
+    <string name="multisig_not_found_for_cltv_output">未在本地找到多签 %1$s，无法创建带锁定的多签输出。</string>
 </resources>

@@ -7,12 +7,37 @@
 
     <include layout="@layout/common_toolbar" />
 
-    <FrameLayout
-        android:id="@+id/fragment_container"
+    <ScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1" />
+        android:layout_weight="1">
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/container_outline"
+            android:layout_margin="16dp"
+            android:padding="8dp">
+
+            <LinearLayout
+                android:id="@+id/key_list_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" />
+
+            <!-- Statistics Bar -->
+            <include
+                android:id="@+id/statistics_bar"
+                layout="@layout/statistics_bar" />
+
+        </LinearLayout>
+
+    </ScrollView>
+
+    <include
+        android:id="@+id/sort_control"
+        layout="@layout/key_sort_control" />
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

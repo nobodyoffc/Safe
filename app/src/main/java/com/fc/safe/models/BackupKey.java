@@ -1,6 +1,9 @@
 package com.fc.safe.models;
 
+import android.content.Context;
+
 import com.fc.fc_ajdk.data.fcData.FcObject;
+import com.fc.safe.R;
 
 public class BackupKey extends FcObject {
     private String password;
@@ -8,10 +11,8 @@ public class BackupKey extends FcObject {
     private String time;
     private String keyName;
     private String hint;
-    private String hintZh; // 中文提示
-    private String hintLang; // 提示语言代码
 
-    public static BackupKey makeBackupKey(BackupHeader backupHeader, String inputSymKeyStr, String randomPassword) {
+    public static BackupKey makeBackupKey(BackupHeader backupHeader, String inputSymKeyStr, String randomPassword, Context context) {
         BackupKey backupKey = new BackupKey();
         backupKey.setTime(backupHeader.getTime());
         backupKey.setKeyName(backupHeader.getKeyName());
@@ -21,9 +22,7 @@ public class BackupKey extends FcObject {
             backupKey.setSymkey(inputSymKeyStr);
 
         } else {
-            backupKey.setHint("App password can not be shown. Please keep it carefully.");
-            backupKey.setHintZh("应用密码无法显示，请妥善保管。");
-            backupKey.setHintLang("en"); // 默认英文
+            backupKey.setHint(context.getString(R.string.app_password_can_not_be_shown_please_keep_it_carefully));
         }
         return backupKey;
     }
@@ -67,31 +66,14 @@ public class BackupKey extends FcObject {
     public void setHint(String hint) {
         this.hint = hint;
     }
-
-    public String getHintZh() {
-        return hintZh;
-    }
-
-    public void setHintZh(String hintZh) {
-        this.hintZh = hintZh;
-    }
-
-    public String getHintLang() {
-        return hintLang;
-    }
-
-    public void setHintLang(String hintLang) {
-        this.hintLang = hintLang;
-    }
-
     /**
      * 根据当前语言获取提示文本
      * @param isChinese 是否为中文环境
      * @return 对应语言的提示文本
      */
     public String getLocalizedHint(boolean isChinese) {
-        if (isChinese && hintZh != null && !hintZh.isEmpty()) {
-            return hintZh;
+        if (isChinese && hint != null && !hint.isEmpty()) {
+            return hint;
         }
         return hint;
     }

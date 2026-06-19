@@ -10,7 +10,7 @@ import android.widget.LinearLayout;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 
-import com.fc.fc_ajdk.data.fcData.SecretDetail;
+import com.fc.fc_ajdk.data.feipData.Secret;
 import com.fc.safe.R;
 import com.fc.safe.home.BaseCryptoActivity;
 import com.fc.safe.db.SecretManager;
@@ -34,10 +34,10 @@ public class ImportTotpActivity extends BaseCryptoActivity {
     private Button secretClearButton;
     private Button secretImportButton;
     private String type;
-    private FcEntityImporter<SecretDetail> fcEntityImporter;
+    private FcEntityImporter<Secret> fcEntityImporter;
     private ActivityResultLauncher<Intent> filePickerLauncher;
     private ActivityResultLauncher<Intent> inputLauncher;
-    private List<SecretDetail> importedSecretList;
+    private List<Secret> importedSecretList;
     private String currentFilePath;
     private boolean isFileMode;
 
@@ -49,9 +49,9 @@ public class ImportTotpActivity extends BaseCryptoActivity {
     }
 
     private void initSecretImporter() {
-        fcEntityImporter = new FcEntityImporter<>(this, SecretDetail.class, new FcEntityImporter.OnImportListener<>() {
+        fcEntityImporter = new FcEntityImporter<>(this, Secret.class, new FcEntityImporter.OnImportListener<Secret>() {
             @Override
-            public void onImportSuccess(List<SecretDetail> result) {
+            public void onImportSuccess(List<Secret> result) {
                 SecretManager.saveAndFinish(ImportTotpActivity.this, result);
             }
 
@@ -62,11 +62,6 @@ public class ImportTotpActivity extends BaseCryptoActivity {
 
             @Override
             public void onPasswordRequired(Intent intent) {
-                inputLauncher.launch(intent);
-            }
-
-            @Override
-            public void onSymkeyRequired(Intent intent) {
                 inputLauncher.launch(intent);
             }
         });
@@ -156,9 +151,9 @@ public class ImportTotpActivity extends BaseCryptoActivity {
                     inputText = secretJsonInput.getText() != null ? secretJsonInput.getText().toString() : "";
                 }
 
-                List<SecretDetail> secretDetails = parseTotpInput(inputText);
-                if (secretDetails != null && !secretDetails.isEmpty()) {
-                    SecretManager.saveAndFinish(this, secretDetails);
+                List<Secret> secrets = parseTotpInput(inputText);
+                if (secrets != null && !secrets.isEmpty()) {
+                    SecretManager.saveAndFinish(this, secrets);
                 } else if (fcEntityImporter.getFinalTList() != null && !fcEntityImporter.getFinalTList().isEmpty()) {
                     // If we have items in finalTList, it means we're waiting for password input
                     // The FcEntityImporter will handle the password input and decryption
@@ -172,14 +167,14 @@ public class ImportTotpActivity extends BaseCryptoActivity {
         });
     }
 
-    private List<SecretDetail> parseTotpInput(String input) {
-        List<SecretDetail> secretDetails = new ArrayList<>();
+    private List<Secret> parseTotpInput(String input) {
+        List<Secret> secrets = new ArrayList<>();
         
         // Try parsing as JSON first
         try {
             JsonObject jsonObject = JsonParser.parseString(input).getAsJsonObject();
             if (jsonObject.has("secret") && jsonObject.has("label")) {
-                SecretDetail secretDetail = new SecretDetail();
+                Secret secretDetail = new Secret();
                 String label =jsonObject.get("label").getAsString();
                 if(label.contains(" - ")){
                     label = label.split(" - ")[1];
@@ -193,8 +188,8 @@ public class ImportTotpActivity extends BaseCryptoActivity {
                 if(secret==null || secret.isEmpty())return null;
                 secretDetail.setContent(secret);
                 secretDetail.setType("TOTP");
-                secretDetails.add(secretDetail);
-                return secretDetails;
+                secrets.add(secretDetail);
+                return secrets;
             }
         } catch (Exception e) {
             // Not a valid JSON, continue to try other formats
@@ -209,14 +204,17 @@ public class ImportTotpActivity extends BaseCryptoActivity {
                     String account = path.substring(1); // Remove "/totp/"
                     String secret = uri.getQueryParameter("secret");
                     String issuer = uri.getQueryParameter("issuer");
-                    String title = issuer+": "+account;
+                    String title;
+                    if(issuer==null || issuer.isEmpty())title = account;
+                    else title = issuer+": "+account;
+
                     if (secret != null) {
-                        SecretDetail secretDetail = new SecretDetail();
+                        Secret secretDetail = new Secret();
                         secretDetail.setTitle(title);
                         secretDetail.setContent(secret);
                         secretDetail.setType("TOTP");
-                        secretDetails.add(secretDetail);
-                        return secretDetails;
+                        secrets.add(secretDetail);
+                        return secrets;
                     }
                 }
             }
@@ -226,7 +224,7 @@ public class ImportTotpActivity extends BaseCryptoActivity {
 
         // Try FcEntityImporter as last resort
         try {
-            List<SecretDetail> imported = fcEntityImporter.importEntity(input);
+            List<Secret> imported = fcEntityImporter.importEntity(input);
             if (imported != null) {
                 imported.removeIf(secretDetail -> secretDetail.getContent() == null || secretDetail.getContent().isEmpty());
                 if (!imported.isEmpty()) {

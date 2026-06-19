@@ -1,17 +1,12 @@
 package com.fc.fc_ajdk.core.fch;
 
-import com.fc.fc_ajdk.clients.ApipClient;
-import com.fc.fc_ajdk.data.fchData.TxHasInfo;
 import com.fc.fc_ajdk.constants.Strings;
 import com.fc.fc_ajdk.data.fchData.Cash;
-import com.fc.fc_ajdk.data.fchData.Tx;
 import com.fc.fc_ajdk.utils.BytesUtils;
 import com.fc.fc_ajdk.core.crypto.KeyTools;
 
 import com.fc.fc_ajdk.utils.FchUtils;
 import com.fc.fc_ajdk.utils.Hex;
-import com.fc.fc_ajdk.utils.http.AuthType;
-import com.fc.fc_ajdk.utils.http.RequestMethod;
 
 
 import java.io.ByteArrayInputStream;
@@ -27,45 +22,7 @@ public class RawTxParser {
     public static final byte OP_DUP = (byte) 0x76;
     public static final byte OP_HASH160 = (byte) 0xa9;
     public static final byte OP_RETURN = (byte) 0x6a;
-    public static TxHasInfo parseMempoolTx(String txHex, String txid, ApipClient apipClient) throws Exception {
-        Map<String, Map<String, Cash>> cashMapMap = parseUnconfirmedTxHex(txHex, txid);
-        ArrayList<Cash> inCashList = makeInCashMap(cashMapMap.get(Strings.spendCashMapKey), cashMapMap.get(Strings.newCashMapKey), apipClient);
-        ArrayList<Cash> outCashList = new ArrayList<>(cashMapMap.get(Strings.newCashMapKey).values());
 
-        for (Cash cash : inCashList) cash.setSpendTxId(txid);
-        for (Cash cash : outCashList) cash.setBirthTxId(txid);
-
-        Tx tx = makeTx(txid, inCashList, outCashList);
-        TxHasInfo txInMempool = new TxHasInfo();
-        txInMempool.setTx(tx);
-        txInMempool.setInCashList(inCashList);
-        txInMempool.setOutCashList(outCashList);
-        return txInMempool;
-    }
-
-    private static Tx makeTx(String txid, ArrayList<Cash> inCashList, ArrayList<Cash> outCashList) {
-        Tx tx = new Tx();
-        tx.setId(txid);
-        tx.setInCount(inCashList.size());
-        long inValueT = 0;
-        for (Cash cash : inCashList) {
-            inValueT = inValueT + cash.getValue();
-        }
-        tx.setInValueT(inValueT);
-        tx.setOutCount(outCashList.size());
-        long outValueT = 0;
-        for (Cash cash : outCashList) {
-            outValueT = outValueT + cash.getValue();
-        }
-        tx.setOutValueT(outValueT);
-        tx.setFee(inValueT - outValueT);
-        return tx;
-    }
-
-    public static Map<String, Map<String, Cash>> parseUnconfirmedTxHex(String txHex, String txid) throws Exception {
-        byte[] txBytes = BytesUtils.hexToByteArray(txHex);
-        return parseRawTxBytes(txBytes, txid);
-    }
 
     public static Map<String, Map<String, Cash>> parseRawTxBytes(byte[] txBytes, String txid) throws Exception {
 
@@ -213,7 +170,7 @@ public class RawTxParser {
                     newCash.setValid(false);
                 }
                 case OP_HASH160 -> {
-                    newCash.setType("Multisign");
+                    newCash.setType("Multisig");
                     newCash.setLockScript(BytesUtils.bytesToHexStringBE(bScript));
                     byte[] hash160Bytes1 = Arrays.copyOfRange(bScript, 2, 22);
                     newCash.setOwner(KeyTools.hash160ToMultiAddr(hash160Bytes1));
@@ -408,7 +365,7 @@ public class RawTxParser {
                     newCash.setValid(false);
                 }
                 case OP_HASH160 -> {
-                    newCash.setType("Multisign");
+                    newCash.setType("Multisig");
                     newCash.setLockScript(BytesUtils.bytesToHexStringBE(bScript));
                     byte[] hash160Bytes1 = Arrays.copyOfRange(bScript, 2, 22);
                     newCash.setOwner(KeyTools.hash160ToMultiAddr(hash160Bytes1));
@@ -429,14 +386,6 @@ public class RawTxParser {
             rawNewCashMap.put(cashId, newCash);
         }
         return rawNewCashMap;
-    }
-
-    public static ArrayList<Cash> makeInCashMap(Map<String, Cash> rawInCashMap, Map<String, Cash> outCashMap,  ApipClient apipClient) throws Exception {
-        ArrayList<String> inIdList = new ArrayList<>(rawInCashMap.keySet());
-        if(apipClient==null)return null;
-        Map<String, Cash> inCashMap;
-        inCashMap = apipClient.cashByIds(RequestMethod.POST, AuthType.FC_SIGN_BODY, String.valueOf(inIdList));
-        return mergeInCash(inCashMap, rawInCashMap, outCashMap);
     }
 
     private static ArrayList<Cash> mergeInCash(Map<String, Cash> esCashMap, Map<String, Cash> rawCashMap, Map<String, Cash> outCashMap) {

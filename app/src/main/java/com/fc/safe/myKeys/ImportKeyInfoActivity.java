@@ -9,7 +9,6 @@ import android.os.Bundle;
 import android.provider.DocumentsContract;
 import android.widget.Button;
 import android.widget.LinearLayout;
-import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -22,6 +21,7 @@ import com.fc.safe.home.BaseCryptoActivity;
 import com.fc.safe.db.KeyInfoManager;
 import com.fc.safe.secret.FcEntityImporter;
 import com.fc.safe.utils.FileUtils;
+import com.fc.safe.utils.ToastUtils;
 import com.google.android.material.textfield.TextInputEditText;
 
 import java.util.List;
@@ -87,7 +87,7 @@ public class ImportKeyInfoActivity extends BaseCryptoActivity {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 // Permission granted
             } else {
-                Toast.makeText(this, getString(R.string.storage_permission_is_required_to_read_backup_files), Toast.LENGTH_LONG).show();
+                ToastUtils.showWarning(this, getString(R.string.storage_permission_is_required_to_read_backup_files));
             }
         }
     }
@@ -109,10 +109,6 @@ public class ImportKeyInfoActivity extends BaseCryptoActivity {
                 passwordInputLauncher.launch(intent);
             }
 
-            @Override
-            public void onSymkeyRequired(Intent intent) {
-                symKeyInputLauncher.launch(intent);
-            }
         });
         fcEntityImporter.setType(type);
     }
@@ -138,14 +134,6 @@ public class ImportKeyInfoActivity extends BaseCryptoActivity {
                         }
                     }
                 });
-
-//        // Use setupIoIconsView if available, else fallback to setupTextIcons
-//        try {
-//            setupIoIconsView(R.id.keyInfoJsonInput, R.id.scanIcon, false, false, true, true,
-//                    null, null, () -> startQrScan(QR_SCAN_JSON_REQUEST_CODE), this::openFilePicker);
-//        } catch (Exception e) {
-//            setupTextIcons(R.id.keyInfoJsonInput, R.id.scanIcon, QR_SCAN_JSON_REQUEST_CODE);
-//        }
 
         setupIoIconsView(R.id.keyInfoJsonInput, R.id.scanIcon, false, false, true, true,
                 null, null, () -> startQrScan(QR_SCAN_JSON_REQUEST_CODE), this::openFilePicker);
@@ -202,7 +190,7 @@ public class ImportKeyInfoActivity extends BaseCryptoActivity {
                     fcEntityImporter.importEntity(jsonText);
                 }
             } catch (Exception e) {
-                Toast.makeText(this, R.string.no_key_info_found, Toast.LENGTH_SHORT).show();
+                ToastUtils.showError(this, R.string.no_key_info_found);
             }
         });
     }

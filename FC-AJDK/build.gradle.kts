@@ -61,11 +61,14 @@ dependencies {
         exclude(group = "org.json", module = "json")
         exclude(group = "org.slf4j", module = "slf4j-api")
     }
+    // Note: BouncyCastle (bcprov-jdk15to18) comes transitively via freecashj and
+    // supplies Argon2BytesGenerator. Do not add bcprov-jdk18on explicitly — it
+    // clashes with bcprov-jdk15to18 as duplicate org.bouncycastle.* classes.
 
     // Networking
-    implementation("com.squareup.retrofit2:retrofit:2.9.0")
-    implementation("com.squareup.okhttp3:okhttp:4.12.0")
-    implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
+//    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+//    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+//    implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
 
     // Image Loading
     implementation("io.coil-kt:coil:2.5.0")

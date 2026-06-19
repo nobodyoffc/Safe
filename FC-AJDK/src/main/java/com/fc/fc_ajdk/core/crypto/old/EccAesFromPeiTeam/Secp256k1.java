@@ -18,6 +18,7 @@ import java.util.Arrays;
 
 
 
+@Deprecated
 public class Secp256k1
 { 
   final static BigInteger ModuloHalb  = new BigInteger("7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF7FFFFE17",16);

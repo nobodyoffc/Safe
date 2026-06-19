@@ -130,8 +130,23 @@ public class FchUtils {
         return varint;
     }
 
-    public static long cdd(long value, long birthTime, long spentTime) {
-        return Math.floorDiv(value * Math.floorDiv((spentTime - birthTime), (60 * 60 * 24)), 100000000);
+    /**
+     * CoinDay Destroyed, computed from block HEIGHT (not timestamps).
+     * In FCH block time is fixed at 1 minute, so height is a deterministic,
+     * manipulation-resistant clock. 1 day = {@link Constants#OneDayInterval} (1440) blocks.
+     *
+     * age_days = floor((spendHeight - birthHeight) / 1440)
+     * cd/cdd   = floor(value * age_days / 100_000_000)   // value in satoshi
+     *
+     * @param value       cash value in satoshi
+     * @param birthHeight block height where the cash was created
+     * @param spendHeight for an STXO: the block height where it was spent (immutable);
+     *                    for an UTXO: the current best block height
+     * @return the CD/CDD, or 0 when spendHeight <= birthHeight (no negative CD/CDD)
+     */
+    public static long cdd(long value, long birthHeight, long spendHeight) {
+        if (spendHeight <= birthHeight) return 0;
+        return Math.floorDiv(value * Math.floorDiv((spendHeight - birthHeight), Constants.OneDayInterval), 100000000);
     }
 
     public static void waitForChangeInDirectory(String directoryPathStr, AtomicBoolean running) {

@@ -11,6 +11,7 @@ import java.util.Random;
  ****************************************************************************************/
 
 
+@Deprecated
 public class Math_Modulo {
 
     final static BigInteger p = new BigInteger("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F", 16);    // Bitcoin Modulo: FFFFFFFF FFFFFFFF FFFFFFFF FFFFFFFF FFFFFFFF FFFFFFFF FFFFFFFE FFFFFC2F

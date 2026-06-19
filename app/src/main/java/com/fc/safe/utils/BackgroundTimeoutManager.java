@@ -3,37 +3,49 @@ package com.fc.safe.utils;
 import android.app.Activity;
 import android.content.Intent;
 import com.fc.safe.initiate.CheckPasswordActivity;
+import com.fc.safe.MainActivity;
 
 public class BackgroundTimeoutManager {
     private static final String TAG = "BackgroundTimeoutManager";
     private static final long BACKGROUND_TIMEOUT = 15000; // 15 seconds in milliseconds
-    
+
     private static long lastBackgroundTime = 0;
     private static boolean isInBackground = false;
-    
+
     public static void onAppBackground() {
         if (!isInBackground) {
             lastBackgroundTime = System.currentTimeMillis();
             isInBackground = true;
         }
     }
-    
+
     public static void onAppForeground(Activity activity) {
         if (isInBackground) {
             long currentTime = System.currentTimeMillis();
             long timeInBackground = currentTime - lastBackgroundTime;
-            
+
             if (timeInBackground >= BACKGROUND_TIMEOUT) {
                 launchPasswordCheck(activity);
             }
-            
+
             isInBackground = false;
         }
     }
-    
+
     private static void launchPasswordCheck(Activity activity) {
+        // Don't launch CheckPasswordActivity if we're already on it or MainActivity
+        if (activity instanceof CheckPasswordActivity || activity instanceof MainActivity) {
+            return;
+        }
+
         Intent intent = new Intent(activity, CheckPasswordActivity.class);
         intent.putExtra("from_background_timeout", true);
+        // Use FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_CLEAR_TASK to ensure:
+        // 1. Password verification is required before continuing
+        // 2. If user enters a different password, CheckPasswordActivity will handle
+        //    clearing the stack and starting fresh (see lines 291-295 in CheckPasswordActivity)
+        // 3. If user enters the same password, they return to the normal flow
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         activity.startActivity(intent);
     }
 } 

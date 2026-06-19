@@ -12,8 +12,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.Toast;
-
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
@@ -24,6 +22,7 @@ import com.fc.safe.R;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.List;
+import com.fc.safe.utils.ToastUtils;
 
 public class QRDisplayActivity extends AppCompatActivity {
 
@@ -72,9 +71,9 @@ public class QRDisplayActivity extends AppCompatActivity {
         }
 
         if (savedCount > 0) {
-            Toast.makeText(this, getString(R.string.qr_saved_count, savedCount), Toast.LENGTH_SHORT).show();
+            ToastUtils.showInfo(this, getString(R.string.qr_saved_count, savedCount));
         } else {
-            Toast.makeText(this, getString(R.string.error_saving_qr), Toast.LENGTH_SHORT).show();
+            ToastUtils.showError(this, getString(R.string.error_saving_qr));
         }
     }
     

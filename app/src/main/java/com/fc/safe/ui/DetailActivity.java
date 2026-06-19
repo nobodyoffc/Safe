@@ -12,6 +12,7 @@ import com.fc.fc_ajdk.utils.TimberLogger;
 import com.fc.safe.SafeApplication;
 import com.fc.safe.R;
 import com.fc.safe.utils.ToolbarUtils;
+import com.fc.safe.utils.ToastUtils;
 
 public class DetailActivity extends AppCompatActivity {
     public final static String TAG = "DetailActivity";

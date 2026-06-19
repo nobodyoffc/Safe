@@ -7,8 +7,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.app.AlertDialog;
-import android.widget.Toast;
-
 import androidx.activity.OnBackPressedCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -22,6 +20,7 @@ import com.fc.safe.ui.DetailFragment;
 import com.fc.safe.utils.TextIconsUtils;
 import com.google.android.material.textfield.TextInputEditText;
 import com.fc.safe.utils.ToolbarUtils;
+import com.fc.safe.utils.ToastUtils;
 
 public class CreateKeyByPubkeyActivity extends BaseCryptoActivity {
     private static final String TAG = "CreateKeyByPubkey";
@@ -162,7 +161,7 @@ public class CreateKeyByPubkeyActivity extends BaseCryptoActivity {
         }
 
         if(!KeyTools.isPubkey(pubkey)){
-            Toast.makeText(this, getString(R.string.invalid_public_key), Toast.LENGTH_SHORT).show();
+            ToastUtils.showError(this, getString(R.string.invalid_public_key));
             return;
         }
 
@@ -214,12 +213,12 @@ public class CreateKeyByPubkeyActivity extends BaseCryptoActivity {
         String label = labelInput.getText() != null ? labelInput.getText().toString() : "";
 
         if (pubkey.isEmpty()) {
-            Toast.makeText(this, getString(R.string.public_key_is_empty), Toast.LENGTH_SHORT).show();
+            ToastUtils.showWarning(this, getString(R.string.public_key_is_empty));
             return null;
         }
 
         if(!KeyTools.isPubkey(pubkey)){
-            Toast.makeText(this, getString(R.string.invalid_public_key), Toast.LENGTH_SHORT).show();
+            ToastUtils.showError(this, getString(R.string.invalid_public_key));
             return null;
         }
 

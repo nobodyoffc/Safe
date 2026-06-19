@@ -5,20 +5,20 @@
     <color name="text_color">#DDDDDD</color>
     <color name="hint">#AAAAAA</color>
     <color name="disabled">#666666</color>
-    <color name="stroke_color">#666666</color>
+    <color name="stroke_color">#444444</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="background_light">#2A2A2A</color>
     <color name="background_dark">#111111</color>
-    <color name="outline_color">#999999</color>
+    <color name="container_outline">#555555</color>
     <color name="colorAccent">#2196F3</color>
     <color name="colorPrimary">#1976D2</color>
     <color name="headerBackground">#646665</color>
     <color name="field_name">#DDDDAA</color>
     <color name="input_field_background">#2A2A2A</color>
     <color name="cash_card_background">#1A3A4A</color>
-    <color name="cash_card_border">#2E5A6A</color>
+    <color name="card_outline">#777777</color>
     <color name="cash_card_dark_background">#1A1A1A</color>
     <color name="dialog_background">#424242</color>
-    <color name="dialog_border">#2196F3</color>
+    <color name="dialog_border">#666666</color>
 </resources> 

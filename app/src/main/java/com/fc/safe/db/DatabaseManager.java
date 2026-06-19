@@ -3,12 +3,10 @@ package com.fc.safe.db;
 import android.content.Context;
 
 import com.fc.fc_ajdk.data.fcData.FcEntity;
-import com.fc.fc_ajdk.db.LocalDB;
-import com.fc.fc_ajdk.db.HawkDB;
 import com.fc.fc_ajdk.utils.TimberLogger;
 
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -70,17 +68,26 @@ public class DatabaseManager {
                     String newDbKey = makeDatabaseKey(dbName, passwordName);
                     LocalDB<? extends FcEntity> oldDb = entry.getValue();
 
-                    if (oldDb instanceof HawkDB) {
-                        HawkDB<?> oldHawkDB = (HawkDB<?>) oldDb;
-                        HawkDB<?> newHawkDB = new HawkDB<>(oldHawkDB.getSortType(), oldHawkDB.getSortField());
-                        newHawkDB.initialize(null, null, null, newDbKey);
+                    if (oldDb instanceof MMKVDB) {
+                        MMKVDB<?> oldMMKVDB = (MMKVDB<?>) oldDb;
+                        MMKVDB<?> newMMKVDB = new MMKVDB<>();
+
+                        // Set entity class for proper deserialization
+                        Class<? extends FcEntity> entityClass = databaseClasses.get(oldDbKey);
+                        if (entityClass != null) {
+                            @SuppressWarnings("unchecked")
+                            MMKVDB<FcEntity> typedDB = (MMKVDB<FcEntity>) newMMKVDB;
+                            typedDB.setEntityClass((Class<FcEntity>) entityClass);
+                        }
+
+                        newMMKVDB.initialize(null, null, null, newDbKey);
 
                         // Transfer all data
-                        transferHawkDBData(oldHawkDB, newHawkDB);
-                        
-                        oldHawkDB.clearDB();
-                        newDatabases.put(newDbKey, newHawkDB);
-                        newDatabaseClasses.put(newDbKey, databaseClasses.get(oldDbKey));
+                        transferMMKVDBData(oldMMKVDB, newMMKVDB);
+
+                        oldMMKVDB.clearDB();
+                        newDatabases.put(newDbKey, newMMKVDB);
+                        newDatabaseClasses.put(newDbKey, entityClass);
                     }
                 }
             }
@@ -98,74 +105,71 @@ public class DatabaseManager {
         }
     }
 
-    private void transferHawkDBData(HawkDB<?> oldHawkDB, HawkDB<?> newHawkDB) {
+    private void transferMMKVDBData(MMKVDB<?> oldMMKVDB, MMKVDB<?> newMMKVDB) {
         // Transfer main data
-        Map<String, ?> allData = oldHawkDB.getAll();
+        Map<String, ?> allData = oldMMKVDB.getAll();
         if (allData != null) {
             @SuppressWarnings("unchecked")
             Map<String, FcEntity> typedData = (Map<String, FcEntity>) allData;
-            ((HawkDB<FcEntity>) newHawkDB).putAll(typedData);
+            ((MMKVDB<FcEntity>) newMMKVDB).put(typedData);
         }
 
-        // Transfer ID maps
-        Map<String, Long> idIndexMap = oldHawkDB.getIdIndexMap();
-        if (idIndexMap != null) {
-            newHawkDB.saveIdIndexMap(idIndexMap);
-        }
-
-        Map<Long, String> indexIdMap = oldHawkDB.getIndexIdMap();
-        if (indexIdMap != null) {
-            newHawkDB.saveIndexIdMap(indexIdMap);
+        // Transfer ID list
+        List<String> idList = oldMMKVDB.getIdList();
+        if (idList != null && !idList.isEmpty()) {
+            // ID list is transferred automatically through putAll
+            // No need for separate save
         }
 
         // Transfer settings
-        Map<String, String> allSettings = oldHawkDB.getAllSettings();
+        Map<String, String> allSettings = oldMMKVDB.getAllSettings();
         if (allSettings != null) {
             for (Map.Entry<String, String> setting : allSettings.entrySet()) {
-                newHawkDB.putSetting(setting.getKey(), setting.getValue());
+                newMMKVDB.putSetting(setting.getKey(), setting.getValue());
             }
         }
 
         // Transfer state
-        Map<String, Object> allState = oldHawkDB.getStateMap();
+        Map<String, Object> allState = oldMMKVDB.getStateMap();
         if (allState != null) {
             for (Map.Entry<String, Object> state : allState.entrySet()) {
-                newHawkDB.putState(state.getKey(), state.getValue());
+                newMMKVDB.putState(state.getKey(), state.getValue());
             }
         }
 
         // Transfer meta
-        Map<String, Object> allMeta = oldHawkDB.getMetaMap();
+        Map<String, Object> allMeta = oldMMKVDB.getMetaMap();
         if (allMeta != null) {
             for (Map.Entry<String, Object> meta : allMeta.entrySet()) {
-                newHawkDB.putMeta(meta.getKey(), meta.getValue());
+                newMMKVDB.putMeta(meta.getKey(), meta.getValue());
             }
         }
 
         // Transfer maps
-        for (String mapName : oldHawkDB.getMapNames()) {
-            Class<?> mapType = oldHawkDB.getMapType(mapName);
+        for (String mapName : oldMMKVDB.getMapNames()) {
+            Class<?> mapType = oldMMKVDB.getMapType(mapName);
             if (mapType != null) {
-                newHawkDB.registerMapType(mapName, mapType);
-                Map<String, ?> mapData = oldHawkDB.getAllFromMap(mapName);
+                newMMKVDB.registerMapType(mapName, mapType);
+                Map<String, ?> mapData = oldMMKVDB.getAllFromMap(mapName);
                 if (mapData != null && !mapData.isEmpty()) {
                     if (Objects.equals(mapType.getName(), byte[].class.getName())) {
                         for (Map.Entry<String, ?> mapEntry : mapData.entrySet()) {
                             if (mapEntry.getValue() instanceof byte[]) {
-                                newHawkDB.putInMap(mapName, mapEntry.getKey(), mapEntry.getValue());
+                                newMMKVDB.putInMap(mapName, mapEntry.getKey(), mapEntry.getValue());
                             }
                         }
                     } else {
-                        newHawkDB.putAllInMap(mapName, mapData);
+                        newMMKVDB.putAllInMap(mapName, mapData);
                     }
                 }
             }
         }
     }
 
-    public <T extends FcEntity> LocalDB<T> createEntityDatabase(String dbName, String passwordName, Class<T> entityClass, LocalDB.SortType sortType, String sortField) {
+    public <T extends FcEntity> LocalDB<T> createEntityDatabase(String dbName, String passwordName, Class<T> entityClass) {
         TimberLogger.d("DatabaseManager", "Creating new database for " + dbName + " with password " + passwordName);
-        LocalDB<T> db = new HawkDB<>(sortType, sortField);
+        MMKVDB<T> db = new MMKVDB<>();
+        db.setEntityClass(entityClass);  // Set the entity class for proper deserialization
         String dbKey = makeDatabaseKey(dbName, passwordName);
         db.initialize(null, null, null, dbKey);
         databases.put(dbKey, db);
@@ -177,20 +181,18 @@ public class DatabaseManager {
      * Gets or creates an encrypted database for the specified parameters.
      *
      * @param entityClass The entity class for the database
-     * @param sortType
-     * @param sortField
      * @return The encrypted database
      */
-    public <T extends FcEntity> LocalDB<T> getEntityDatabase(Class<T> entityClass, LocalDB.SortType sortType, String sortField) {
+    public <T extends FcEntity> LocalDB<T> getEntityDatabase(Class<T> entityClass) {
         String dbKey = makeDatabaseKey(entityClass.getSimpleName(), currentPasswordName);
-        
+
         // Check if database already exists for this password
         if (databases.containsKey(dbKey)) {
             return (LocalDB<T>) databases.get(dbKey);
         }
-        
+
         // Create a new encrypted database for this password
-        return createEntityDatabase(entityClass.getSimpleName(), currentPasswordName, entityClass, sortType, sortField);
+        return createEntityDatabase(entityClass.getSimpleName(), currentPasswordName, entityClass);
     }
 
     public Class<? extends FcEntity> getDatabaseClass(String dbName) {

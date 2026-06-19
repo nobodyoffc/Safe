@@ -13,7 +13,6 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
-import android.os.Handler;
 import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -23,7 +22,6 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import androidx.activity.OnBackPressedCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -37,8 +35,6 @@ import androidx.camera.core.ExperimentalGetImage;
 import androidx.camera.core.ImageAnalysis;
 import androidx.camera.core.ImageProxy;
 import androidx.camera.core.Preview;
-import androidx.camera.core.resolutionselector.AspectRatioStrategy;
-import androidx.camera.core.resolutionselector.ResolutionSelector;
 import androidx.camera.lifecycle.ProcessCameraProvider;
 import androidx.camera.view.PreviewView;
 import androidx.core.app.ActivityCompat;
@@ -47,7 +43,9 @@ import androidx.viewpager2.widget.ViewPager2;
 
 import com.fc.fc_ajdk.utils.TimberLogger;
 import com.fc.safe.R;
+import com.fc.safe.SafeApplication;
 import com.fc.safe.utils.QRCodeGenerator;
+import com.fc.safe.utils.ToastUtils;
 import com.google.common.util.concurrent.ListenableFuture;
 import java.io.IOException;
 import java.io.InputStream;
@@ -86,6 +84,7 @@ public class QrCodeActivity extends AppCompatActivity {
     private ExecutorService cameraExecutor;
     private boolean isScanningEnabled = false;
     private boolean isCameraInitialized = false;
+    private volatile boolean isProcessingQRCode = false;
 
     private final ActivityResultLauncher<Intent> galleryLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
@@ -273,7 +272,7 @@ public class QrCodeActivity extends AppCompatActivity {
                 Timber.i("Camera initialized successfully");
             } catch (ExecutionException | InterruptedException e) {
                 Timber.e(e, "Error initializing camera: %s", e.getMessage());
-                showError(getString(R.string.error_initializing_camera) + e.getMessage());
+                showError(getString(R.string.retry_after_authorization) + e.getMessage());
                 isCameraInitialized = false;
             }
         }, ContextCompat.getMainExecutor(this));
@@ -282,7 +281,7 @@ public class QrCodeActivity extends AppCompatActivity {
     private void toggleScanning() {
         if (!isScanningEnabled) {
             if (!isCameraInitialized) {
-                showError(getString(R.string.error_initializing_camera));
+                showError(getString(R.string.retry_after_authorization));
                 return;
             }
             if (allPermissionsGranted()) {
@@ -334,7 +333,7 @@ public class QrCodeActivity extends AppCompatActivity {
 
     private void startScanning() {
         if (cameraProvider == null || !isCameraInitialized) {
-            showError(getString(R.string.error_initializing_camera));
+            showError(getString(R.string.retry_after_authorization));
             return;
         }
 
@@ -368,12 +367,12 @@ public class QrCodeActivity extends AppCompatActivity {
                 
             } catch (Exception e) {
                 TimberLogger.e("QR-SCAN", "Error starting camera: %s", e.getMessage());
-                showError(getString(R.string.error_initializing_camera) + e.getMessage());
+                showError(getString(R.string.retry_after_authorization) + e.getMessage());
                 isScanningEnabled = false;
             }
         } catch (Exception e) {
             TimberLogger.e("QR-SCAN", "Error configuring camera: %s", e.getMessage());
-            showError(getString(R.string.error_initializing_camera) + e.getMessage());
+            showError(getString(R.string.retry_after_authorization) + e.getMessage());
             isScanningEnabled = false;
         }
     }
@@ -383,6 +382,7 @@ public class QrCodeActivity extends AppCompatActivity {
             cameraProvider.unbindAll();
         }
         isScanningEnabled = false;
+        isProcessingQRCode = false;
         previewView.setVisibility(View.GONE);
         scanAreaOverlay.setVisibility(View.VISIBLE);
         scanNotification.setVisibility(View.VISIBLE);
@@ -391,6 +391,12 @@ public class QrCodeActivity extends AppCompatActivity {
     @OptIn(markerClass = ExperimentalGetImage.class)
     private void analyzeImage(ImageProxy imageProxy) {
         try {
+            // Skip if already processing a QR code
+            if (isProcessingQRCode) {
+                imageProxy.close();
+                return;
+            }
+
             if (imageProxy.getImage() == null) {
                 TimberLogger.e("QR-SCAN", "ImageProxy image is null");
                 imageProxy.close();
@@ -477,13 +483,15 @@ public class QrCodeActivity extends AppCompatActivity {
                 }
 
                 if (result != null && result.getText() != null) {
+                    // Set flag immediately to prevent duplicate scans
+                    isProcessingQRCode = true;
                     com.google.zxing.Result finalResult = result;
                     runOnUiThread(() -> {
                         String currentText = qrContentEditText.getText().toString();
                         String newText = currentText + finalResult.getText();
                         qrContentEditText.setText(newText);
                         stopScanning();
-                        Toast.makeText(QrCodeActivity.this, getText(R.string.done), Toast.LENGTH_SHORT).show();
+                        ToastUtils.makeText(QrCodeActivity.this, getText(R.string.done));
                     });
                 }
             } catch (com.google.zxing.NotFoundException e) {
@@ -680,9 +688,9 @@ public class QrCodeActivity extends AppCompatActivity {
         }
 
         if (savedCount > 0) {
-            Toast.makeText(this, getString(R.string.qr_saved_count, savedCount), Toast.LENGTH_SHORT).show();
+            ToastUtils.makeText(this, getString(R.string.qr_saved_count, savedCount));
         } else {
-            Toast.makeText(this, getString(R.string.error_saving_qr)+"[3]", Toast.LENGTH_SHORT).show();
+            ToastUtils.showError(this, getString(R.string.error_saving_qr)+"[3]");
         }
     }
 
@@ -692,6 +700,7 @@ public class QrCodeActivity extends AppCompatActivity {
             ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
             ClipData clip = ClipData.newPlainText("QR Content", content);
             clipboard.setPrimaryClip(clip);
+            Toast.makeText(this, getString(R.string.copied), SafeApplication.TOAST_LASTING).show();
         }
     }
 
@@ -704,13 +713,13 @@ public class QrCodeActivity extends AppCompatActivity {
         try {
             InputStream inputStream = getContentResolver().openInputStream(imageUri);
             if (inputStream == null) {
-                Toast.makeText(this, getString(R.string.cannot_open_image), Toast.LENGTH_SHORT).show();
+                ToastUtils.showError(this, getString(R.string.cannot_open_image));
                 return;
             }
 
             Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
             if (bitmap == null) {
-                Toast.makeText(this, getString(R.string.cannot_decode_image), Toast.LENGTH_SHORT).show();
+                ToastUtils.showError(this, getString(R.string.cannot_decode_image));
                 return;
             }
 
@@ -780,12 +789,12 @@ public class QrCodeActivity extends AppCompatActivity {
                     String newText = currentText + result.getText();
                     qrContentEditText.setText(newText);
                 } else {
-                    Toast.makeText(this, getString(R.string.cannot_open_image), Toast.LENGTH_SHORT).show();
+                    ToastUtils.showError(this, getString(R.string.cannot_open_image));
                 }
             } catch (com.google.zxing.NotFoundException e) {
-                Toast.makeText(this, getString(R.string.cannot_decode_image) ,Toast.LENGTH_SHORT).show();
+                ToastUtils.showError(this, getString(R.string.cannot_decode_image));
             } catch (Exception e) {
-                Toast.makeText(this, getString(R.string.error_scanning_qr_with_message, e.getMessage()), Toast.LENGTH_LONG).show();
+                ToastUtils.showError(this, getString(R.string.error_scanning_qr_with_message, e.getMessage()));
             } finally {
                 if (!rgbBitmap.isRecycled()) {
                     rgbBitmap.recycle();
@@ -793,9 +802,9 @@ public class QrCodeActivity extends AppCompatActivity {
             }
 
         } catch (IOException e) {
-            Toast.makeText(this, getString(R.string.error_reading_image_with_message, e.getMessage()), Toast.LENGTH_LONG).show();
+            ToastUtils.showError(this, getString(R.string.error_reading_image_with_message, e.getMessage()));
         } catch (Exception e) {
-            Toast.makeText(this, getString(R.string.unexpected_error_with_message, e.getMessage()), Toast.LENGTH_LONG).show();
+            ToastUtils.showError(this, getString(R.string.unexpected_error_with_message, e.getMessage()));
         }
     }
 
@@ -864,7 +873,7 @@ public class QrCodeActivity extends AppCompatActivity {
     // Add a helper method for showing error messages
     private void showError(String message) {
         try {
-            Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+            ToastUtils.showError(this, message);
             Timber.e(message);
         } catch (Exception e) {
             Timber.e(e, "Error showing error message: %s", e.getMessage());

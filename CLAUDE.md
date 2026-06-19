@@ -16,7 +16,7 @@ This is an Android cryptocurrency wallet application called "Safe" with a modula
 - `com.fc.safe.db.*`: Database managers and data persistence layer
 - `com.fc.safe.home.*`: Home screen and main navigation activities
 - `com.fc.safe.myKeys.*`: Key management activities (create, import, export keys)
-- `com.fc.safe.multisign.*`: Multi-signature transaction functionality
+- `com.fc.safe.multisig.*`: Multi-signature transaction functionality
 - `com.fc.safe.tx.*`: Transaction creation and signing
 - `com.fc.safe.secret.*`: Secret and TOTP management
 
@@ -79,10 +79,28 @@ This is an Android cryptocurrency wallet application called "Safe" with a modula
 
 ### Database Architecture
 The app uses a multi-database system managed by `DatabaseManager`:
+- **MMKVDB**: Primary database implementation using MMKV (Tencent's high-performance key-value storage)
+- **LocalDB Interface**: Abstract interface for all database operations
 - Different databases for different password contexts
-- LocalDB and HawkDB implementations for different storage needs
 - Automatic database switching when password context changes
 - Global FID (identifier) list management in `SafeApplication`
+- **Migration**: Automatic migration from legacy HawkDB to MMKVDB on first launch
+
+#### MMKV Benefits
+- 5-10x faster than SharedPreferences and Hawk
+- Memory-mapped file I/O for efficiency
+- Multi-process support built-in
+- Crash-safe with atomic operations
+- Actively maintained by Tencent (WeChat team)
+
+#### Database Files
+- `LocalDB.java`: Interface defining all database operations
+- `MMKVDB.java`: MMKV-based implementation (current)
+- `HawkDB.java`: Legacy Hawk-based implementation (kept for migration)
+- `DatabaseManager.java`: Central database lifecycle and password context management
+- `HawkToMMKVMigration.java`: Utility for migrating data from Hawk to MMKV
+
+See `HAWK_TO_MMKV_MIGRATION.md` for detailed migration information.
 
 ### Key Components
 - **MainActivity**: Entry point handling password verification flow

@@ -6,7 +6,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.view.inputmethod.InputMethodManager;
 import android.view.View;
-import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 
@@ -17,9 +16,11 @@ import com.fc.fc_ajdk.data.fcData.FcEntity;
 import com.fc.fc_ajdk.data.fcData.KeyInfo;
 import com.fc.fc_ajdk.utils.Hex;
 import com.fc.safe.R;
+import com.fc.safe.initiate.ConfigureManager;
 import com.fc.safe.ui.SingleInputActivity;
 import com.fc.safe.models.BackupHeader;
 import com.fc.safe.models.BackupKey;
+import com.fc.safe.utils.ToastUtils;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -35,7 +36,6 @@ public class FcEntityImporter<T extends FcEntity> {
     private EncryptType pendingEncryptType = null;
     private String type;
     private String password;
-    private String symkey;
     private List<T> finalTList;
     private List<CryptoDataByte> pendingCryptoDataByteList;
 
@@ -43,7 +43,6 @@ public class FcEntityImporter<T extends FcEntity> {
         void onImportSuccess(List<T> result);
         void onImportError(String error);
         void onPasswordRequired(Intent intent);
-        void onSymkeyRequired(Intent intent);
     }
 
     public FcEntityImporter(Context context, Class<T> typeClass, OnImportListener<T> listener) {
@@ -69,7 +68,7 @@ public class FcEntityImporter<T extends FcEntity> {
         try(InputStream is = new ByteArrayInputStream(jsonBytes)){
             return importEntity(is);
         } catch (Exception e) {
-            Toast.makeText(context, R.string.failed_to_parse_json, Toast.LENGTH_SHORT).show();
+            ToastUtils.showError(context, context.getString(R.string.failed_to_parse_json));
             return null;
         }
     }
@@ -90,8 +89,6 @@ public class FcEntityImporter<T extends FcEntity> {
                 backupKey = (BackupKey) object;
                 if(backupKey.getPassword()!=null)
                     password = backupKey.getPassword();
-                if(backupKey.getSymkey()!=null)
-                    symkey = backupKey.getSymkey();
             }else if(object instanceof BackupHeader){
                 backupHeader = (BackupHeader) object;
             }else if(object instanceof CryptoDataByte){
@@ -103,7 +100,7 @@ public class FcEntityImporter<T extends FcEntity> {
 
         if(backupKey!=null && backupHeader!=null){
             if(!backupKey.getKeyName().equals(backupHeader.getKeyName())){
-                Toast.makeText(context, R.string.keyname_is_inconsistent, Toast.LENGTH_SHORT).show();
+                ToastUtils.showError(context, context.getString(R.string.keyname_is_inconsistent));
                 return null;
             }
         }
@@ -120,30 +117,12 @@ public class FcEntityImporter<T extends FcEntity> {
                     }
                 }else{
                     Intent intent = new Intent(context, SingleInputActivity.class);
-                    intent.putExtra(SingleInputActivity.EXTRA_PROMOTE, "Input the password to decrypt the encrypted secret:");
+                    intent.putExtra(SingleInputActivity.EXTRA_PROMOTE, context.getString(R.string.input_the_password));
                     intent.putExtra(SingleInputActivity.EXTRA_INPUT_TYPE, "password");
                     pendingEncryptType = EncryptType.Password;
                     pendingCryptoDataByte = cryptoDataByte;
                     pendingCryptoDataByteList = new ArrayList<>(cryptoDataByteList.subList(cryptoDataByteList.indexOf(cryptoDataByte) + 1, cryptoDataByteList.size()));
                     listener.onPasswordRequired(intent);
-                    return new ArrayList<>();
-                }
-
-            }else if(cryptoDataByte.getType().equals(EncryptType.Symkey)){
-                if(symkey !=null) {
-                    Decryptor.decryptBySymkey(cryptoDataByte, symkey);
-                    if(cryptoDataByte.getCode()==0) {
-                        T t = T.fromJson(new String(cryptoDataByte.getData()), typeClass);
-                        finalTList.add(t);
-                    }
-                }else{
-                    Intent intent = new Intent(context, SingleInputActivity.class);
-                    intent.putExtra(SingleInputActivity.EXTRA_PROMOTE, "Input the password to decrypt the encrypted secret:");
-                    intent.putExtra(SingleInputActivity.EXTRA_INPUT_TYPE, "password");
-                    pendingEncryptType = EncryptType.Password;
-                    pendingCryptoDataByte = cryptoDataByte;
-                    pendingCryptoDataByteList = new ArrayList<>(cryptoDataByteList.subList(cryptoDataByteList.indexOf(cryptoDataByte) + 1, cryptoDataByteList.size()));
-                    listener.onSymkeyRequired(intent);
                     return new ArrayList<>();
                 }
             }
@@ -152,14 +131,22 @@ public class FcEntityImporter<T extends FcEntity> {
             if(t instanceof KeyInfo keyInfo){
                 if(keyInfo.getPrikeyCipher()!=null){
                     CryptoDataByte cryptoDataByte = CryptoDataByte.fromBase64(keyInfo.getPrikeyCipher());
+
+                    if (cryptoDataByte.getType().equals(EncryptType.Password) && password==null){
+                        Intent intent = new Intent(context, SingleInputActivity.class);
+                        intent.putExtra(SingleInputActivity.EXTRA_PROMOTE, getString(R.string.input_the_password));
+                        intent.putExtra(SingleInputActivity.EXTRA_INPUT_TYPE, "password");
+                        pendingEncryptType = EncryptType.Password;
+                        pendingCryptoDataByte = cryptoDataByte;
+                        listener.onPasswordRequired(intent);
+                        return new ArrayList<>();
+                    }
+
                     if(password!=null){
                         Decryptor.decryptByPassword(cryptoDataByte,password.toCharArray());
-                    }else if (symkey !=null){
-                        cryptoDataByte.setSymkey(Hex.fromHex(symkey));
-                        Decryptor.decryptBySymkey(cryptoDataByte);
-                    }
-                    if(cryptoDataByte.getCode()==0) {
-                        keyInfo.setPrikey(Hex.toHex(cryptoDataByte.getData()));
+                        if(cryptoDataByte.getCode()==0) {
+                            keyInfo.setPrikey(Hex.toHex(cryptoDataByte.getData()));
+                        }
                     }
                 }
             }
@@ -181,14 +168,14 @@ public class FcEntityImporter<T extends FcEntity> {
                 if (pendingEncryptType.equals(EncryptType.Password)) {
                     password = input;
                     Decryptor.decryptByPassword(pendingCryptoDataByte, input.toCharArray());
-                } else if (pendingEncryptType.equals(EncryptType.Symkey)) {
-                    symkey = input;
-                    Decryptor.decryptBySymkey(pendingCryptoDataByte, input);
                 }
 
                 if (pendingCryptoDataByte.getCode() == 0) {
-                    T t = T.fromJson(new String(pendingCryptoDataByte.getData()), typeClass);
-                    finalTList.add(t);
+                    try {
+                        String json = new String(pendingCryptoDataByte.getData());
+                        T t = T.fromJson(json, typeClass);
+                        finalTList.add(t);
+                    }catch (Exception ignore){}
                 }
 
                 if (pendingCryptoDataByteList != null) {
@@ -199,15 +186,26 @@ public class FcEntityImporter<T extends FcEntity> {
                                 T t = T.fromJson(new String(remainingCryptoDataByte.getData()), typeClass);
                                 finalTList.add(t);
                             }
-                        } else if (remainingCryptoDataByte.getType().equals(EncryptType.Symkey)) {
-                            Decryptor.decryptBySymkey(remainingCryptoDataByte, symkey);
-                            if (remainingCryptoDataByte.getCode() == 0) {
-                                T t = T.fromJson(new String(remainingCryptoDataByte.getData()), typeClass);
-                                finalTList.add(t);
+                        }
+                    }
+                }
+
+                // Continue processing KeyInfo items after getting password
+                for(T t:finalTList){
+                    if(t instanceof KeyInfo keyInfo){
+                        if(keyInfo.getPrikeyCipher()!=null){
+                            CryptoDataByte cryptoDataByte = CryptoDataByte.fromBase64(keyInfo.getPrikeyCipher());
+
+                            if(password!=null){
+                                Decryptor.decryptByPassword(cryptoDataByte,password.toCharArray());
+                                if(cryptoDataByte.getCode()==0) {
+                                    keyInfo.setPrikey(Hex.toHex(cryptoDataByte.getData()));
+                                }
                             }
                         }
                     }
                 }
+
                 listener.onImportSuccess(finalTList);
             } catch (Exception e) {
                 listener.onImportError("Invalid password or key");
@@ -217,6 +215,17 @@ public class FcEntityImporter<T extends FcEntity> {
                 pendingCryptoDataByteList = null;
             }
         }
+    }
+
+    private void getPasswordString(String promote) {
+        Intent intent = new Intent(context, SingleInputActivity.class);
+        intent.putExtra(SingleInputActivity.EXTRA_PROMOTE, promote);
+        intent.putExtra(SingleInputActivity.EXTRA_INPUT_TYPE, "password");
+        listener.onPasswordRequired(intent);
+    }
+
+    private String getString(int resId) {
+        return context.getString(resId);
     }
 
     public static void hideKeyboard(View view) {

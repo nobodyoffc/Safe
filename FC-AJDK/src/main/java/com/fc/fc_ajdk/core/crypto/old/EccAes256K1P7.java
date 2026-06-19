@@ -52,6 +52,7 @@ import static com.fc.fc_ajdk.data.fcData.AlgorithmId.FC_EccK1AesCbc256_No1_NrC7;
  * * By No1_NrC7 with the help of chatGPT
  */
 
+@Deprecated
 public class EccAes256K1P7 {
     static {
         Security.addProvider(new BouncyCastleProvider());

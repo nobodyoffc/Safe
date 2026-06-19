@@ -37,6 +37,17 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp" />
 
+    <!-- Optional redeem script (for spending P2SH / CLTV UTXOs). Leave blank for a normal P2PKH input. -->
+    <com.google.android.material.textfield.TextInputEditText
+        android:id="@+id/redeemScriptInput"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:hint="@string/input_redeem_script_hint"
+        android:inputType="textVisiblePassword|textMultiLine"
+        android:maxLines="3"
+        android:textSize="12sp" />
+
     <!-- Buttons -->
     <LinearLayout
         android:layout_width="match_parent"

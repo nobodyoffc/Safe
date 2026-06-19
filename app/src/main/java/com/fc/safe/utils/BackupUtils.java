@@ -4,7 +4,7 @@ import static com.fc.fc_ajdk.utils.JsonUtils.readOneJsonFromInputStream;
 
 import com.fc.fc_ajdk.core.crypto.CryptoDataByte;
 import com.fc.fc_ajdk.data.fcData.KeyInfo;
-import com.fc.fc_ajdk.data.fcData.SecretDetail;
+import com.fc.fc_ajdk.data.feipData.Secret;
 import com.fc.fc_ajdk.utils.JsonUtils;
 import com.fc.safe.models.BackupHeader;
 import com.fc.safe.models.BackupKey;
@@ -35,44 +35,99 @@ public class BackupUtils {
             throw new RuntimeException(e);
         }
     }
+//
+//    public static <T> List<Object> readBackup(InputStream is, Class<T> tClass) throws Exception {
+//        List<Object> objectList = new ArrayList<>();
+//        while(true) {
+//            byte[] jsonBytes = readOneJsonFromInputStream(is);
+//            if (jsonBytes == null) return objectList;
+//            String json = new String(jsonBytes, StandardCharsets.UTF_8);
+//
+//            CryptoDataByte cryptoDataByte = CryptoDataByte.fromJson(json);
+//            if ( cryptoDataByte.getCipher()!=null && cryptoDataByte.getIv()!=null) {
+//                objectList.add(cryptoDataByte);
+//                continue;
+//            }
+//
+//            BackupKey backupKey = BackupKey.fromJson (json, BackupKey.class);
+//            if (backupKey != null &&  (backupKey.getPassword()!=null || backupKey.getSymkey()!=null)){
+//                objectList.add(backupKey);
+//                continue;
+//            }
+//
+//            BackupHeader backupHeader = JsonUtils.fromJson(json, BackupHeader.class);
+//            if (backupHeader != null && backupHeader.getItems()!=null && backupHeader.getTime()!=null) {
+//                objectList.add(backupHeader);
+//                continue;
+//            }
+//
+//            T t = JsonUtils.fromJson(json, tClass);
+//            if (t != null) {
+//                if(t instanceof Secret secret){
+//                    if(secret.getContent()==null && secret.getContentCipher()==null && secret.getDetailCipher()==null)continue;
+//                }
+//
+//                if(t instanceof KeyInfo keyInfo){
+//                    if(keyInfo.getId()==null)continue;
+//                }
+//
+//                objectList.add(t);
+//            }
+//        }
+//    }
 
-    public static <T> List<Object> readBackup(InputStream is, Class<T> tClass) throws Exception {
+    public static <T> List<Object> readBackup(InputStream is, Class<T> tClass) {
         List<Object> objectList = new ArrayList<>();
         while(true) {
             byte[] jsonBytes = readOneJsonFromInputStream(is);
             if (jsonBytes == null) return objectList;
             String json = new String(jsonBytes, StandardCharsets.UTF_8);
 
-            CryptoDataByte cryptoDataByte = CryptoDataByte.fromJson(json);
-            if ( cryptoDataByte.getCipher()!=null && cryptoDataByte.getIv()!=null) {
-                objectList.add(cryptoDataByte);
-                continue;
-            }
-
-            BackupKey backupKey = BackupKey.fromJson (json, BackupKey.class);
-            if (backupKey != null &&  (backupKey.getPassword()!=null || backupKey.getSymkey()!=null)){
-                objectList.add(backupKey);
-                continue;
-            }
-
-            BackupHeader backupHeader = JsonUtils.fromJson(json, BackupHeader.class);
-            if (backupHeader != null && backupHeader.getItems()!=null && backupHeader.getTime()!=null) {
-                objectList.add(backupHeader);
-                continue;
-            }
-
-            T t = JsonUtils.fromJson(json, tClass);
-            if (t != null) {
-                if(t instanceof SecretDetail secretDetail){
-                    if(secretDetail.getContent()==null && secretDetail.getContentCipher()==null)continue;
+            try {
+                CryptoDataByte cryptoDataByte = CryptoDataByte.fromJson(json);
+                if (cryptoDataByte.getCipher() != null && cryptoDataByte.getIv() != null) {
+                    objectList.add(cryptoDataByte);
+                    continue;
                 }
-
-                if(t instanceof KeyInfo keyInfo){
-                    if(keyInfo.getId()==null)continue;
-                }
-
-                objectList.add(t);
+            }catch (Exception ignore){
+                continue;
             }
+
+            try {
+
+                BackupKey backupKey = BackupKey.fromJson (json, BackupKey.class);
+                if (backupKey != null &&  (backupKey.getPassword()!=null || backupKey.getSymkey()!=null)){
+                    objectList.add(backupKey);
+                    continue;
+                }
+            }catch (Exception ignore){
+                continue;
+            }
+
+            try {
+
+                BackupHeader backupHeader = JsonUtils.fromJson(json, BackupHeader.class);
+                if (backupHeader != null && backupHeader.getItems()!=null && backupHeader.getTime()!=null) {
+                    objectList.add(backupHeader);
+                    continue;
+                }
+            }catch (Exception ignore){
+                continue;
+            }
+            try {
+                T t = JsonUtils.fromJson(json, tClass);
+                if (t != null) {
+                    if(t instanceof Secret secret){
+                        if(secret.getContent()==null && secret.getContentCipher()==null)continue;
+                    }
+
+                    if(t instanceof KeyInfo keyInfo){
+                        if(keyInfo.getId()==null)continue;
+                    }
+
+                    objectList.add(t);
+                }
+            }catch (Exception ignore){}
         }
     }
 }

@@ -10,14 +10,12 @@ import android.view.Window;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
-
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import com.fc.fc_ajdk.data.fcData.KeyInfo;
 import com.fc.fc_ajdk.data.fcData.FcSubject;
-import com.fc.fc_ajdk.db.LocalDB;
+import com.fc.safe.db.LocalDB;
 import com.fc.fc_ajdk.feature.avatar.AvatarMaker;
 import com.fc.fc_ajdk.utils.TimberLogger;
 import com.fc.safe.R;
@@ -39,6 +37,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import android.graphics.Color;
+import com.fc.safe.utils.ToastUtils;
 
 public class TestActivity extends AppCompatActivity {
 
@@ -145,7 +144,7 @@ public class TestActivity extends AppCompatActivity {
     private void stopAvatarChecking() {
         if (avatarDialog != null && avatarDialog.isShowing()) {
             avatarDialog.dismiss();
-            Toast.makeText(this, getString(R.string.avatar_checking_stopped), Toast.LENGTH_SHORT).show();
+            ToastUtils.showInfo(this, getString(R.string.avatar_checking_stopped));
         }
     }
 
@@ -230,29 +229,29 @@ public class TestActivity extends AppCompatActivity {
 
             // Show data info
             String dataInfo = "Generated image from 32 bytes of data";
-            Toast.makeText(this, dataInfo, Toast.LENGTH_SHORT).show();
+            ToastUtils.showInfo(this, dataInfo);
             TimberLogger.i(TAG, dataInfo);
         } catch (IOException e) {
             String errorMsg = "Error generating image: " + e.getMessage();
-            Toast.makeText(this, errorMsg, Toast.LENGTH_SHORT).show();
+            ToastUtils.showError(this, errorMsg);
             TimberLogger.e(TAG, errorMsg, e);
         }
     }
 
     private void saveImage() {
         if (currentImageBytes == null) {
-            Toast.makeText(this, getString(R.string.no_image_to_save), Toast.LENGTH_SHORT).show();
+            ToastUtils.showWarning(this, getString(R.string.no_image_to_save));
             return;
         }
 
         try {
             // Here you would typically save the image to a file or database
             // For this test, we'll just show a success message
-            Toast.makeText(this, getString(R.string.image_saved_successfully), Toast.LENGTH_SHORT).show();
+            ToastUtils.showInfo(this, getString(R.string.image_saved_successfully));
             TimberLogger.i(TAG, "Image saved successfully");
         } catch (Exception e) {
             String errorMsg = "Error saving image: " + e.getMessage();
-            Toast.makeText(this, errorMsg, Toast.LENGTH_SHORT).show();
+            ToastUtils.showError(this, errorMsg);
             TimberLogger.e(TAG, errorMsg, e);
         }
     }
@@ -288,14 +287,14 @@ public class TestActivity extends AppCompatActivity {
                 }
                 String successMsg = "Successfully generated and saved " + successCount + " keys";
                 runOnUiThread(() -> {
-                    Toast.makeText(this, successMsg, Toast.LENGTH_SHORT).show();
+                    ToastUtils.showInfo(this, successMsg);
                     TimberLogger.i(TAG, successMsg);
                     dismissWaitingDialog();
                 });
             } catch (Exception e) {
                 String errorMsg = "Error generating keys: " + e.getMessage();
                 runOnUiThread(() -> {
-                    Toast.makeText(this, errorMsg, Toast.LENGTH_SHORT).show();
+                    ToastUtils.showError(this, errorMsg);
                     TimberLogger.e(TAG, errorMsg, e);
                     dismissWaitingDialog();
                 });
@@ -351,7 +350,7 @@ public class TestActivity extends AppCompatActivity {
             }
 
             String successMsg = "Processed " + successCount + " out of " + totalCount + " avatars";
-            Toast.makeText(this, successMsg, Toast.LENGTH_SHORT).show();
+            ToastUtils.showInfo(this, successMsg);
             TimberLogger.i(TAG, successMsg);
 
             // Show the first avatar if any were found
@@ -363,7 +362,7 @@ public class TestActivity extends AppCompatActivity {
             }
         } catch (Exception e) {
             String errorMsg = "Error checking avatars: " + e.getMessage();
-            Toast.makeText(this, errorMsg, Toast.LENGTH_SHORT).show();
+            ToastUtils.showError(this, errorMsg);
             TimberLogger.e(TAG, errorMsg, e);
         }
     }
@@ -376,11 +375,11 @@ public class TestActivity extends AppCompatActivity {
 //            // Save the icon to mipmap directories
 //            saveIconToMipmap(iconBitmap, false);
 //
-//            Toast.makeText(this, "App icon generated successfully", Toast.LENGTH_SHORT).show();
+//            ToastUtils.showInfo(this, "App icon generated successfully");
 //            TimberLogger.i(TAG, "App icon generated successfully");
 //        } catch (Exception e) {
 //            String errorMsg = "Error generating app icon: " + e.getMessage();
-//            Toast.makeText(this, errorMsg, Toast.LENGTH_SHORT).show();
+//            ToastUtils.showError(this, errorMsg);
 //            TimberLogger.e(TAG, errorMsg, e);
 //        }
 //    }
@@ -396,11 +395,11 @@ public class TestActivity extends AppCompatActivity {
 //            // Display the generated icon
 //            imageView.setImageBitmap(iconBitmap);
 //
-//            Toast.makeText(this, "Round app icon generated successfully", Toast.LENGTH_SHORT).show();
+//            ToastUtils.showInfo(this, "Round app icon generated successfully");
 //            TimberLogger.i(TAG, "Round app icon generated successfully");
 //        } catch (Exception e) {
 //            String errorMsg = "Error generating round app icon: " + e.getMessage();
-//            Toast.makeText(this, errorMsg, Toast.LENGTH_SHORT).show();
+//            ToastUtils.showError(this, errorMsg);
 //            TimberLogger.e(TAG, errorMsg, e);
 //        }
 //    }
@@ -452,7 +451,7 @@ public class TestActivity extends AppCompatActivity {
         if (requestCode == REQUEST_CODE_SINGLE_INPUT && resultCode == RESULT_OK && data != null) {
             String input = data.getStringExtra(SingleInputActivity.EXTRA_RESULT);
             if (input != null) {
-                Toast.makeText(this, getString(R.string.password_display, input), Toast.LENGTH_LONG).show();
+                ToastUtils.showInfo(this, getString(R.string.password_display, input));
             }
         }
     }
@@ -473,7 +472,7 @@ public class TestActivity extends AppCompatActivity {
                 default:
                     msg = "Unknown choice";
             }
-            Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
+            ToastUtils.showInfo(this, msg);
         });
         dialog.show();
     }
@@ -492,10 +491,10 @@ public class TestActivity extends AppCompatActivity {
             // Display the icon
             imageView.setImageBitmap(icon);
             
-            Toast.makeText(this, getString(R.string.square_icon_created_successfully), Toast.LENGTH_SHORT).show();
+            ToastUtils.showInfo(this, getString(R.string.square_icon_created_successfully));
         } catch (Exception e) {
             String errorMsg = "Error creating square icon: " + e.getMessage();
-            Toast.makeText(this, errorMsg, Toast.LENGTH_SHORT).show();
+            ToastUtils.showError(this, errorMsg);
             TimberLogger.e(TAG, errorMsg, e);
         }
     }
@@ -514,10 +513,10 @@ public class TestActivity extends AppCompatActivity {
             // Display the icon
             imageView.setImageBitmap(icon);
             
-            Toast.makeText(this, getString(R.string.round_icon_created_successfully), Toast.LENGTH_SHORT).show();
+            ToastUtils.showInfo(this, getString(R.string.round_icon_created_successfully));
         } catch (Exception e) {
             String errorMsg = "Error creating round icon: " + e.getMessage();
-            Toast.makeText(this, errorMsg, Toast.LENGTH_SHORT).show();
+            ToastUtils.showError(this, errorMsg);
             TimberLogger.e(TAG, errorMsg, e);
         }
     }
@@ -539,10 +538,10 @@ public class TestActivity extends AppCompatActivity {
             for (String filePath : savedPaths) {
                 message.append(filePath).append("\n");
             }
-            Toast.makeText(this, message.toString(), Toast.LENGTH_LONG).show();
+            ToastUtils.showInfo(this, message.toString());
         } catch (Exception e) {
             String errorMsg = "Error creating square icon files: " + e.getMessage();
-            Toast.makeText(this, errorMsg, Toast.LENGTH_SHORT).show();
+            ToastUtils.showError(this, errorMsg);
             TimberLogger.e(TAG, errorMsg, e);
         }
     }
@@ -564,10 +563,10 @@ public class TestActivity extends AppCompatActivity {
             for (String filePath : savedPaths) {
                 message.append(filePath).append("\n");
             }
-            Toast.makeText(this, message.toString(), Toast.LENGTH_LONG).show();
+            ToastUtils.showInfo(this, message.toString());
         } catch (Exception e) {
             String errorMsg = "Error creating round icon files: " + e.getMessage();
-            Toast.makeText(this, errorMsg, Toast.LENGTH_SHORT).show();
+            ToastUtils.showError(this, errorMsg);
             TimberLogger.e(TAG, errorMsg, e);
         }
     }

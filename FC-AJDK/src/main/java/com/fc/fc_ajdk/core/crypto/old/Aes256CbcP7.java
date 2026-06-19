@@ -1,7 +1,6 @@
 package com.fc.fc_ajdk.core.crypto.old;
 
 
-import com.fc.fc_ajdk.core.fch.Inputer;
 import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hasher;
 import com.google.common.hash.Hashing;
@@ -42,32 +41,9 @@ import java.util.Base64;
  * This "Salted__" string is a magic string used by OpenSSL to identify that the encrypted data was salted.<p>
  * * By No1_NrC7 with the help of chatGPT
  */
+@Deprecated
 public class Aes256CbcP7 {
-    public static void main(String[] args) throws Exception {
-//
-//        String plaintext = "hello world!";
-//        String keyHex = "50b67af1c9840d968d6591abcd400a8287443ab36569585fb14315312946d2c1"; // your-256-bit-key-in-hex. Remember to generate and use a secure random key in real applications
-//        System.out.println("symKey: " + keyHex);
-//        String ciphertextWithIvBase64 = encrypt(plaintext, keyHex.toCharArray());
-//        System.out.println("encrypted with Iv: " + ciphertextWithIvBase64);
-//        String textDecrypted = decrypt(ciphertextWithIvBase64, keyHex);
-//        System.out.println("decrypted text: " + textDecrypted);
-        testFile();
-    }
 
-    private static void testFile() throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IOException, NoSuchProviderException {
-        BufferedReader br =new BufferedReader(new InputStreamReader(System.in));
-        String sourcePath = Inputer.inputString(br,"Input source file path");
-        String destPath = Inputer.inputString(br,"Input destination file path");
-        byte[] key = BytesUtils.getRandomBytes(32);
-        byte[] iv = BytesUtils.getRandomBytes(16);
-        System.out.println("Key:"+Hex.toHexString(key));
-        System.out.println("Iv:"+Hex.toHexString(iv));
-        Affair affair = encryptFile(sourcePath, destPath, key);
-        JsonUtils.printJson(affair);
-        decryptFile(destPath,sourcePath+"_1",key,iv);
-        System.out.println(Hash.sha256x2(new File(destPath)));
-    }
 
     /**
      * @param plaintextUtf8 plaintext in UTF-8

@@ -11,17 +11,21 @@ import androidx.annotation.NonNull;
 import com.fc.fc_ajdk.constants.Constants;
 import com.fc.fc_ajdk.core.fch.RawTxInfo;
 import com.fc.fc_ajdk.data.fchData.Cash;
+import com.fc.fc_ajdk.data.fchData.P2SH;
+import com.fc.fc_ajdk.utils.Hex;
 import com.fc.fc_ajdk.utils.TimberLogger;
 import com.fc.safe.SafeApplication;
 import com.fc.safe.R;
 import com.fc.safe.utils.TextIconsUtils;
 import com.google.android.material.textfield.TextInputEditText;
+import com.fc.safe.utils.ToastUtils;
 
 public class AddTxInputDialog extends Dialog {
     private static final String TAG = "AddTxInputDialog";
     private TextInputEditText txIdInput;
     private TextInputEditText indexInput;
     private TextInputEditText amountInput;
+    private TextInputEditText redeemScriptInput;
     private Button clearButton;
     private Button cancelButton;
     private Button doneButton;
@@ -57,6 +61,7 @@ public class AddTxInputDialog extends Dialog {
         indexInput.setHint(R.string.index);
         amountInput = findViewById(R.id.amountInput).findViewById(R.id.textInput);
         amountInput.setHint(R.string.amount);
+        redeemScriptInput = findViewById(R.id.redeemScriptInput);
 
         TextIconsUtils.setupTextIcons(this, R.id.txIdInput, R.id.scanIcon, QR_SCAN_TX_ID_REQUEST_CODE);
         TextIconsUtils.setupTextWithoutIcons(this, R.id.indexInput, R.id.scanIcon);
@@ -70,6 +75,7 @@ public class AddTxInputDialog extends Dialog {
             txIdInput.setText("");
             indexInput.setText("");
             amountInput.setText("");
+            redeemScriptInput.setText("");
         });
 
         cancelButton.setOnClickListener(v -> dismiss());
@@ -96,6 +102,35 @@ public class AddTxInputDialog extends Dialog {
             }
 
             Cash cash = new Cash(txId, index, amount);
+
+            // Optional redeem script: if the user enters hex, parse it as P2SH and
+            // populate redeemScript, lockTime, and owner (FID derived from the script).
+            String redeemScriptHex = redeemScriptInput.getText() == null
+                    ? "" : redeemScriptInput.getText().toString().trim();
+            if (!redeemScriptHex.isEmpty()) {
+                if (!Hex.isHexString(redeemScriptHex)) {
+                    Toast.makeText(getContext(), R.string.invalid_redeem_script, SafeApplication.TOAST_LASTING).show();
+                    return;
+                }
+                try {
+                    P2SH p2sh = new P2SH(redeemScriptHex);
+                    cash.setRedeemScript(redeemScriptHex);
+                    if (p2sh.getLockTime() != null) {
+                        cash.setLockTime(p2sh.getLockTime());
+                    }
+                    if (p2sh.getFid() != null) {
+                        cash.setOwner(p2sh.getFid());
+                    }
+                    if (p2sh.getType() != null) {
+                        cash.setType(p2sh.getType().name());
+                    }
+                } catch (Exception e) {
+                    TimberLogger.e(TAG, "Invalid redeem script: " + e.getMessage());
+                    Toast.makeText(getContext(), R.string.invalid_redeem_script, SafeApplication.TOAST_LASTING).show();
+                    return;
+                }
+            }
+
             rawTxInfo.getInputs().add(cash);
 
             if (onDoneListener != null) {
@@ -133,6 +168,6 @@ public class AddTxInputDialog extends Dialog {
     }
 
     private void showToast(String message) {
-        Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
+        ToastUtils.showInfo(getContext(), message);
     }
 } 

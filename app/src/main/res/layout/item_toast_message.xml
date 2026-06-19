@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:padding="12dp"
+    android:layout_marginHorizontal="4dp"
+    android:layout_marginVertical="2dp"
+    android:background="@drawable/container_outline"
+    android:foreground="?android:attr/selectableItemBackground"
+    android:clickable="true"
+    android:focusable="true"
+    android:gravity="center_vertical">
+
+    <CheckBox
+        android:id="@+id/card_checkbox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:visibility="gone"
+        android:clickable="false"
+        android:focusable="false" />
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:id="@+id/level_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="INFO"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:paddingHorizontal="8dp"
+                android:paddingVertical="2dp"
+                android:layout_marginEnd="8dp" />
+
+            <TextView
+                android:id="@+id/timestamp_text"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="2024-01-01 12:00:00"
+                android:textSize="12sp"
+                android:textColor="?android:attr/textColorSecondary"
+                android:gravity="end" />
+
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/message_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Toast message content"
+            android:textSize="14sp"
+            android:textColor="?android:attr/textColorPrimary"
+            android:layout_marginTop="8dp"
+            android:lineSpacingMultiplier="1.2" />
+
+    </LinearLayout>
+
+</LinearLayout>

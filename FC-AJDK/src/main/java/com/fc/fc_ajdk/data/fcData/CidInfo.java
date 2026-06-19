@@ -8,13 +8,11 @@ import static com.fc.fc_ajdk.constants.FieldNames.SAVE_TIME;
 import static com.fc.fc_ajdk.constants.FieldNames.WATCH_ONLY;
 import static com.fc.fc_ajdk.constants.Values.ASC;
 import static com.fc.fc_ajdk.constants.Values.DESC;
-import static com.fc.fc_ajdk.ui.Shower.DEFAULT_PAGE_SIZE;
 
 import com.fc.fc_ajdk.core.crypto.Decryptor;
 import com.fc.fc_ajdk.core.crypto.Encryptor;
 import com.fc.fc_ajdk.core.crypto.KeyTools;
 import com.fc.fc_ajdk.data.fchData.Cid;
-import com.fc.fc_ajdk.ui.Shower;
 import com.fc.fc_ajdk.utils.Hex;
 
 import java.io.BufferedReader;
@@ -111,10 +109,6 @@ public class CidInfo extends Cid {
         makeAddresses();
     }
 
-
-    public static List<CidInfo> showList(List<CidInfo> keyInfoList, BufferedReader br) {
-        return Shower.showOrChooseListInPages("FID Info", keyInfoList, DEFAULT_PAGE_SIZE, null, true, CidInfo.class, br);
-    }
 
     public void makeAddresses() {
         btcAddr = KeyTools.pubkeyToBtcAddr(pubkey);

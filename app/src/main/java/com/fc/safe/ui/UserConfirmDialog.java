@@ -2,6 +2,8 @@ package com.fc.safe.ui;
 
 import android.app.Dialog;
 import android.content.Context;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.view.View;
 import android.view.Window;
 import android.widget.Button;
@@ -27,6 +29,9 @@ public class UserConfirmDialog extends Dialog {
         super(context);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.dialog_user_confirm);
+        if (getWindow() != null) {
+            getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        }
         setCancelable(false);
 
         TextView promptTextView = findViewById(R.id.promptTextView);

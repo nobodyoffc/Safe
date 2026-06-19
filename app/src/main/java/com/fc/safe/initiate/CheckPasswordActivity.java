@@ -6,8 +6,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
-import android.widget.Toast;
-
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
@@ -21,9 +19,11 @@ import com.fc.safe.db.DatabaseManager;
 import com.fc.safe.db.KeyInfoManager;
 import com.fc.safe.db.MultisignManager;
 import com.fc.safe.db.SecretManager;
+import com.fc.safe.db.ToastManager;
 import com.fc.safe.qr.QrCodeActivity;
 import com.google.android.material.textfield.TextInputLayout;
 import com.fc.safe.utils.ToolbarUtils;
+import com.fc.safe.utils.ToastUtils;
 
 
 public class CheckPasswordActivity extends AppCompatActivity {
@@ -72,7 +72,7 @@ public class CheckPasswordActivity extends AppCompatActivity {
                             finish();
                         } else {
                             TimberLogger.e(TAG, "Configure object not found in ConfigureManager");
-                            Toast.makeText(this, getString(R.string.error_configuration_not_found), Toast.LENGTH_SHORT).show();
+                            ToastUtils.showError(this, getString(R.string.error_configuration_not_found));
                         }
                     }
                 }
@@ -112,22 +112,25 @@ public class CheckPasswordActivity extends AppCompatActivity {
 
         // If launched from background timeout, show a message
         if (getIntent().getBooleanExtra("from_background_timeout", false)) {
-            Toast.makeText(this, R.string.please_verify_your_password , Toast.LENGTH_SHORT).show();
+            ToastUtils.showInfo(this, this.getString(R.string.please_verify_your_password));
         }
         
         // Setup keyboard hiding for better UX
         setupKeyboardHiding();
     }
     
+    @android.annotation.SuppressLint("ClickableViewAccessibility")
     private void setupKeyboardHiding() {
         View rootView = findViewById(android.R.id.content);
         if (rootView != null) {
             rootView.setOnTouchListener((v, event) -> {
+                // Not handling clicks, just detecting touch to hide keyboard
+                // Returning false allows normal click handling to proceed
                 if (event.getAction() == android.view.MotionEvent.ACTION_DOWN) {
                     // Check if the touch is on a button or input field
                     View touchedView = v;
                     boolean shouldHideKeyboard = true;
-                    
+
                     // Check if touching a button, input field, or their containers
                     while (touchedView != null) {
                         if (touchedView instanceof android.widget.Button ||
@@ -137,9 +140,16 @@ public class CheckPasswordActivity extends AppCompatActivity {
                             shouldHideKeyboard = false;
                             break;
                         }
-                        touchedView = (View) touchedView.getParent();
+                        // Safely get parent - check if it's a View before casting
+                        android.view.ViewParent parent = touchedView.getParent();
+                        if (parent instanceof View) {
+                            touchedView = (View) parent;
+                        } else {
+                            // Reached root or non-View parent, stop traversal
+                            break;
+                        }
                     }
-                    
+
                     if (shouldHideKeyboard) {
                         hideKeyboard();
                     }
@@ -217,7 +227,7 @@ public class CheckPasswordActivity extends AppCompatActivity {
         String enteredPassword = passwordInput.getText().toString();
         
         if (enteredPassword.isEmpty()) {
-            Toast.makeText(this, getString(R.string.please_enter_password), Toast.LENGTH_SHORT).show();
+            ToastUtils.showInfo(this, getString(R.string.please_enter_password));
             return;
         }
         
@@ -253,14 +263,28 @@ public class CheckPasswordActivity extends AppCompatActivity {
                         // Check if password context has changed
                         String currentPasswordName = dbManager.getCurrentPasswordName();
                         boolean passwordContextChanged = currentPasswordName != null && !currentPasswordName.equals(passwordName);
-                        
+
+                        // If password changed, reset all singleton managers before reinitializing
+                        if (passwordContextChanged) {
+                            TimberLogger.d(TAG, "Password context changed - resetting all managers");
+                            KeyInfoManager.reset();
+                            SecretManager.reset();
+                            MultisignManager.reset();
+                            ToastManager.reset();
+                        }
+
                         // Set the new password name, which will trigger database cleanup if needed
                         dbManager.setCurrentPasswordName(passwordName);
-                        
+
                         // Reinitialize all managers with the new password
-                        KeyInfoManager.getInstance(CheckPasswordActivity.this).initialize(CheckPasswordActivity.this);
-                        SecretManager.getInstance(CheckPasswordActivity.this).initialize(CheckPasswordActivity.this);
-                        MultisignManager.getInstance(CheckPasswordActivity.this).initialize(CheckPasswordActivity.this);
+                        KeyInfoManager.getInstance(CheckPasswordActivity.this);
+                        SecretManager.getInstance(CheckPasswordActivity.this);
+                        MultisignManager.getInstance(CheckPasswordActivity.this);
+
+                        // Initialize ToastManager with new password context
+                        if (passwordContextChanged) {
+                            ToastManager.getInstance(CheckPasswordActivity.this);
+                        }
                         
                         // Store the Configure object in ConfigureManager for sharing across activities
                         ConfigureManager.getInstance().setConfigure(configure);
@@ -268,8 +292,10 @@ public class CheckPasswordActivity extends AppCompatActivity {
                         // Return to main thread to finish activity
                         runOnUiThread(() -> {
                             showLoading(false);
-                            
-                            // If password context changed, clear all activities and go to HomeActivity
+
+                            // Only clear the stack and go to HomeActivity if the password changed.
+                            // If the same password is re-entered (e.g. after background timeout),
+                            // just finish so the former pages are resumed.
                             if (passwordContextChanged) {
                                 Intent homeIntent = new Intent(CheckPasswordActivity.this, com.fc.safe.home.HomeActivity.class);
                                 homeIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -284,14 +310,14 @@ public class CheckPasswordActivity extends AppCompatActivity {
                 } else {
                     runOnUiThread(() -> {
                         showLoading(false);
-                        Toast.makeText(CheckPasswordActivity.this, getString(R.string.incorrect_password), Toast.LENGTH_SHORT).show();
+                        ToastUtils.showError(CheckPasswordActivity.this, getString(R.string.incorrect_password));
                     });
                 }
             } catch (Exception e) {
                 TimberLogger.e(TAG, "Error during password verification: " + e.getMessage());
                 runOnUiThread(() -> {
                     showLoading(false);
-                    Toast.makeText(CheckPasswordActivity.this, getString(R.string.error_verifying_password), Toast.LENGTH_SHORT).show();
+                    ToastUtils.showError(CheckPasswordActivity.this, getString(R.string.error_verifying_password));
                 });
             }
         }).start();
@@ -300,7 +326,8 @@ public class CheckPasswordActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         // if (isTaskRoot()) {
-            finishAffinity();
+        super.onBackPressed();
+        finishAffinity();
         // } else {
         //     finish();
         // }

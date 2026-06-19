@@ -40,6 +40,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import com.fc.safe.utils.ToastUtils;
 
 public class DetailFragment extends Fragment {
     public final static String TAG = "DetailFragment";
@@ -445,7 +446,7 @@ public class DetailFragment extends Fragment {
                                 com.fc.safe.utils.ResultDialog.showDecryptDialogForCipher(requireContext(), finalDisplayValue, null);
                             }
                         } catch (Exception e) {
-                            Toast.makeText(requireContext(), getString(R.string.failed_to_decrypt) + e.getMessage(), Toast.LENGTH_LONG).show();
+                            ToastUtils.showError(requireContext(), getString(R.string.failed_to_decrypt) + e.getMessage());
                         }
                     });
                     // Add decryptIcon after valueView

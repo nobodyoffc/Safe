@@ -3,16 +3,25 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@color/main_background">
+    >
 
     <include layout="@layout/common_toolbar" />
 
-    <!-- Fragment container -->
-    <FrameLayout
-        android:id="@+id/fragment_container"
+    <!-- Key list container -->
+    <ScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1" />
+        android:layout_weight="1">
+
+        <LinearLayout
+            android:id="@+id/key_list_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/container_outline"
+            android:layout_margin="16dp"
+            android:padding="8dp" />
+    </ScrollView>
 
     <!-- Button container -->
     <LinearLayout

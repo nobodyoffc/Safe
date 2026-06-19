@@ -16,10 +16,7 @@ import com.fc.safe.R;
 import com.fc.safe.utils.TextIconsUtils;
 import com.google.android.material.textfield.TextInputEditText;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
+import com.fc.safe.utils.ToastUtils;
 
 public class CreateCashDialog extends Dialog {
     private static final String TAG = "CreateCashDialog";
@@ -27,7 +24,7 @@ public class CreateCashDialog extends Dialog {
     private TextInputEditText indexInput;
     private TextInputEditText amountInput;
     private TextInputEditText ownerInput;
-    private TextInputEditText birthTimeInput;
+    private TextInputEditText birthHeightInput;
     private Button clearButton;
     private Button cancelButton;
     private Button doneButton;
@@ -64,8 +61,8 @@ public class CreateCashDialog extends Dialog {
         amountInput.setHint(R.string.amount);
         ownerInput = findViewById(R.id.ownerInput).findViewById(R.id.textInput);
         ownerInput.setHint(R.string.owner);
-        birthTimeInput = findViewById(R.id.birthTimeInput).findViewById(R.id.textInput);
-        birthTimeInput.setHint(R.string.birth_time_hint);
+        birthHeightInput = findViewById(R.id.birthTimeInput).findViewById(R.id.textInput);
+        birthHeightInput.setHint(R.string.birth_height_hint);
 
         TextIconsUtils.setupTextIcons(this, R.id.txIdInput, R.id.scanIcon, QR_SCAN_TX_ID_REQUEST_CODE);
         TextIconsUtils.setupTextWithoutIcons(this, R.id.indexInput, R.id.scanIcon);
@@ -82,28 +79,28 @@ public class CreateCashDialog extends Dialog {
             indexInput.setText("");
             amountInput.setText("");
             ownerInput.setText("");
-            birthTimeInput.setText("");
+            birthHeightInput.setText("");
         });
 
         cancelButton.setOnClickListener(v -> dismiss());
 
         doneButton.setOnClickListener(v -> {
-            if(txIdInput.getText() == null || indexInput.getText() == null || 
-               amountInput.getText() == null || ownerInput.getText() == null || 
-               birthTimeInput.getText() == null){
+            if(txIdInput.getText() == null || indexInput.getText() == null ||
+               amountInput.getText() == null || ownerInput.getText() == null ||
+               birthHeightInput.getText() == null){
                 Toast.makeText(getContext(), R.string.please_input_all_fields, SafeApplication.TOAST_LASTING).show();
                 return;
             }
-            if(txIdInput.getText().toString().isEmpty() || indexInput.getText().toString().isEmpty() || 
-               amountInput.getText().toString().isEmpty() || ownerInput.getText().toString().isEmpty() || 
-               birthTimeInput.getText().toString().isEmpty()){
+            if(txIdInput.getText().toString().isEmpty() || indexInput.getText().toString().isEmpty() ||
+               amountInput.getText().toString().isEmpty() || ownerInput.getText().toString().isEmpty() ||
+               birthHeightInput.getText().toString().isEmpty()){
                 Toast.makeText(getContext(), R.string.please_input_all_fields, SafeApplication.TOAST_LASTING).show();
                 return;
             }
             
             String txId = txIdInput.getText().toString();
             String owner = ownerInput.getText().toString();
-            String birthTimeStr = birthTimeInput.getText().toString();
+            String birthHeightStr = birthHeightInput.getText().toString();
             
             int index;
             double amount;
@@ -128,20 +125,21 @@ public class CreateCashDialog extends Dialog {
                 return;
             }
 
-            // Convert date string to timestamp
-            Long birthTime = convertDateToTimestamp(birthTimeStr);
-            if (birthTime == null) {
-                Toast.makeText(getContext(), R.string.invalid_date_format_please_use_yyyy_mm_dd, SafeApplication.TOAST_LASTING).show();
+            // Parse the birth block height (CD/CDD are computed from block height, not time)
+            long birthHeight;
+            try {
+                birthHeight = Long.parseLong(birthHeightStr);
+            } catch (NumberFormatException e) {
+                Toast.makeText(getContext(), R.string.invalid_height_format, SafeApplication.TOAST_LASTING).show();
                 return;
             }
 
             Cash cash = new Cash(txId, index, amount);
             cash.setOwner(owner);
-            cash.setBirthTime(birthTime);
+            cash.setBirthHeight(birthHeight);
             cash.setValid(true);
-
-            // If birthTime is not null, calculate CD
-            cash.makeCd();
+            // CD is height-based; with no chain tip available offline it is left unset (shown as 0)
+            // until a cd computed against a real best height is supplied.
 
             try {
                 if (onDoneListener != null) {
@@ -185,27 +183,6 @@ public class CreateCashDialog extends Dialog {
     }
 
     private void showToast(String message) {
-        Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
+        ToastUtils.showInfo(getContext(), message);
     }
-
-    /**
-     * Convert date string in YYYY-MM-DD HH:MM:SS format to 10-digit timestamp
-     * @param dateStr Date string in YYYY-MM-DD HH:MM:SS format
-     * @return 10-digit timestamp or null if parsing fails
-     */
-    private Long convertDateToTimestamp(String dateStr) {
-        try {
-            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
-            // Use system default timezone for consistent behavior
-            dateFormat.setTimeZone(java.util.TimeZone.getDefault());
-            Date date = dateFormat.parse(dateStr);
-            if (date != null) {
-                // Convert to 10-digit timestamp (seconds since epoch)
-                return date.getTime() / 1000;
-            }
-        } catch (ParseException e) {
-            TimberLogger.e(TAG, "Error parsing date: %s", e.getMessage());
-        }
-        return null;
-    }
-} 
+}

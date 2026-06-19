@@ -3,7 +3,6 @@ package com.fc.fc_ajdk.utils;
 import com.fc.fc_ajdk.core.crypto.Hash;
 
 import com.fc.fc_ajdk.data.feipData.Service;
-import com.fc.fc_ajdk.handlers.DiskHandler;
 import org.jetbrains.annotations.NotNull;
 
 
@@ -92,27 +91,6 @@ public class FileUtils {
         }
     }
 
-    public static String writeBytesToDisk(byte[] bytes, String storageDir) {
-        if(storageDir==null)storageDir=System.getProperty("user.home");
-        String did = Hex.toHex(Hash.sha256x2(bytes));
-        String subDir = DiskHandler.getSubPathForDisk(did);
-        String path = storageDir+subDir;
-
-        File file = new File(path,did);
-        if(!file.exists()) {
-            try {
-                boolean done = createFileWithDirectories(path+"/"+did);
-                if(!done)return null;
-                try (OutputStream outputStream = new FileOutputStream(file)) {
-                    outputStream.write(bytes);
-                    return did;
-                }
-            } catch (IOException e) {
-                return null;
-            }
-        }else if(Boolean.TRUE.equals(DiskHandler.checkFileOfDisk(path, did)))return did;
-        else return null;
-    }
 
     public static boolean createFileWithDirectories(String filePathString) {
         Path path = Paths.get(filePathString);

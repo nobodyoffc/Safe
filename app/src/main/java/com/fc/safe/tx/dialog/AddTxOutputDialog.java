@@ -12,21 +12,25 @@ import androidx.annotation.NonNull;
 import com.fc.fc_ajdk.constants.Constants;
 import com.fc.fc_ajdk.core.crypto.KeyTools;
 import com.fc.fc_ajdk.core.fch.RawTxInfo;
-import com.fc.fc_ajdk.data.fchData.SendTo;
+import com.fc.fc_ajdk.data.fchData.Cash;
+import com.fc.fc_ajdk.data.fchData.Multisig;
 import com.fc.fc_ajdk.utils.FchUtils;
 import com.fc.fc_ajdk.utils.TimberLogger;
 import com.fc.safe.SafeApplication;
 import com.fc.safe.R;
+import com.fc.safe.db.MultisignManager;
 import com.fc.safe.utils.TextIconsUtils;
 import com.google.android.material.textfield.TextInputEditText;
 
 import java.text.DecimalFormat;
 import java.util.Locale;
+import com.fc.safe.utils.ToastUtils;
 
 public class AddTxOutputDialog extends Dialog {
     private static final String TAG = "AddTxOutputDialog";
     private TextInputEditText fidInput;
     private TextInputEditText amountInput;
+    private TextInputEditText lockHeightInput;
     private TextView maxText;
     private Button clearButton;
     private Button cancelButton;
@@ -39,7 +43,7 @@ public class AddTxOutputDialog extends Dialog {
     private static final int QR_SCAN_AMOUNT_REQUEST_CODE = 1004;
 
     public interface OnDoneListener {
-        void onDone(SendTo sendTo);
+        void onDone(Cash sendTo);
     }
 
     public AddTxOutputDialog(@NonNull Context context, RawTxInfo rawTxInfo, long rest) {
@@ -62,6 +66,7 @@ public class AddTxOutputDialog extends Dialog {
         fidInput.setHint(R.string.fid);
         amountInput = findViewById(R.id.amountInput).findViewById(R.id.textInput);
         amountInput.setHint(R.string.amount);
+        lockHeightInput = findViewById(R.id.lockHeightInput);
         maxText = findViewById(R.id.maxText);
 
         // Set up MaxText
@@ -83,6 +88,7 @@ public class AddTxOutputDialog extends Dialog {
         clearButton.setOnClickListener(v -> {
             fidInput.setText("");
             amountInput.setText("");
+            lockHeightInput.setText("");
         });
 
         cancelButton.setOnClickListener(v -> dismiss());
@@ -116,7 +122,32 @@ public class AddTxOutputDialog extends Dialog {
                 return;
             }
 
-            SendTo sendTo = new SendTo(fid, amount);
+            Long lockTime = parseLockHeight();
+            if (lockTime != null && lockTime < 0) {
+                Toast.makeText(getContext(), R.string.invalid_lock_height, SafeApplication.TOAST_LASTING).show();
+                return;
+            }
+            Cash sendTo;
+            if (lockTime != null && lockTime > 0) {
+                // CLTV output. For multisig targets ("3..." FID) we need the multisig's
+                // pubkeys/m/n to build the combined CLTV+multisig redeemScript.
+                if (fid.startsWith("3")) {
+                    Multisig target = MultisignManager.getInstance(getContext()).getMultisignById(fid);
+                    if (target == null) {
+                        Toast.makeText(getContext(),
+                                getContext().getString(R.string.multisig_not_found_for_cltv_output, fid),
+                                SafeApplication.TOAST_LASTING).show();
+                        return;
+                    }
+                    sendTo = new Cash(fid, amount, lockTime, target);
+                } else {
+                    sendTo = new Cash(fid, amount, lockTime);
+                }
+            } else {
+                // No lockTime: plain P2PKH (or plain P2SH if fid is "3..."; TxHandler handles both
+                // via Address.fromBase58 on the output side).
+                sendTo = new Cash(fid, amount);
+            }
             rawTxInfo.getOutputs().add(sendTo);
 
             if (onDoneListener != null) {
@@ -155,7 +186,18 @@ public class AddTxOutputDialog extends Dialog {
     }
 
     private void showToast(String message) {
-        Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
+        ToastUtils.showInfo(getContext(), message);
+    }
+
+    private Long parseLockHeight() {
+        if (lockHeightInput == null || lockHeightInput.getText() == null) return null;
+        String text = lockHeightInput.getText().toString().trim();
+        if (text.isEmpty()) return null;
+        try {
+            return Long.parseLong(text);
+        } catch (NumberFormatException e) {
+            return -1L;
+        }
     }
 
     public void setOnDoneListener(OnDoneListener listener) {

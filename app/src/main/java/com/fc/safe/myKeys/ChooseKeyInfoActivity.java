@@ -2,6 +2,7 @@ package com.fc.safe.myKeys;
 
 import android.content.Context;
 import android.content.Intent;
+import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.Toast;
@@ -12,20 +13,23 @@ import com.fc.safe.SafeApplication;
 import com.fc.safe.R;
 import com.fc.safe.db.KeyInfoManager;
 import com.fc.safe.home.BaseCryptoActivity;
-import com.fc.safe.ui.FcEntityListFragment;
+import com.fc.safe.utils.KeyCardContainer;
+import com.fc.safe.utils.ChooseMode;
 
 import java.util.ArrayList;
 import java.util.List;
+import com.fc.safe.utils.ToastUtils;
 
 public class ChooseKeyInfoActivity extends BaseCryptoActivity {
     private static final String TAG = "ChooseKeyInfoActivity";
     private static final String EXTRA_KEY_INFO_LIST = "extra_key_info_list";
     public static final String EXTRA_SELECTED_KEY_IDS = "extra_selected_key_ids";
-    private static final String EXTRA_IS_SINGLE_CHOICE = "extra_is_single_choice";
-    
-    private FcEntityListFragment<KeyInfo> entityListFragment;
+    private static final String EXTRA_CHOOSE_MODE = "extra_choose_mode";
 
-    private Boolean isSingleChoice;
+    private KeyCardContainer keyCardContainer;
+    private LinearLayout keyListContainer;
+
+    private ChooseMode chooseMode;
 
     private Button cancelButton;
     private Button doneButton;
@@ -33,17 +37,16 @@ public class ChooseKeyInfoActivity extends BaseCryptoActivity {
 
     /**
      * Creates an intent to start the ChooseKeyInfoActivity
-     * 
+     *
      * @param context The context
      * @param keyInfoList The list of KeyInfo objects to display
-     * @param isSingleChoice Whether only one item can be selected (null for no selection)
+     * @param chooseMode The mode to use for choosing keys
      * @return An intent to start the activity
      */
-    public static Intent newIntent(Context context, List<KeyInfo> keyInfoList, Boolean isSingleChoice) {
+    public static Intent newIntent(Context context, List<KeyInfo> keyInfoList, ChooseMode chooseMode) {
         Intent intent = new Intent(context, ChooseKeyInfoActivity.class);
         intent.putExtra(EXTRA_KEY_INFO_LIST, new ArrayList<>(keyInfoList));
-        intent.putExtra(EXTRA_IS_SINGLE_CHOICE, isSingleChoice != null ? isSingleChoice : false);
-        intent.putExtra("has_single_choice", isSingleChoice != null);
+        intent.putExtra(EXTRA_CHOOSE_MODE, chooseMode != null ? chooseMode : ChooseMode.CHOOSE_ONE_RETURN);
         return intent;
     }
     
@@ -89,64 +92,103 @@ public class ChooseKeyInfoActivity extends BaseCryptoActivity {
         if (keyInfoList == null) {
             keyInfoList = keyInfoManager.getAllKeyInfoList();
         }
-        
-        // Get isSingleChoice from intent
-        boolean hasSingleChoice = getIntent().getBooleanExtra("has_single_choice", false);
-        if (hasSingleChoice) {
-            isSingleChoice = getIntent().getBooleanExtra(EXTRA_IS_SINGLE_CHOICE, true);
-        } else {
-            isSingleChoice = null;
+
+        // Get chooseMode from intent
+        chooseMode = (ChooseMode) getIntent().getSerializableExtra(EXTRA_CHOOSE_MODE);
+        if (chooseMode == null) {
+            chooseMode = ChooseMode.CHOOSE_ONE_RETURN;
         }
-        
-        // Create fragment with KeyInfo objects
-        entityListFragment = FcEntityListFragment.newInstance(keyInfoList, KeyInfo.class, isSingleChoice);
-        
-        // Add fragment to container
-        getSupportFragmentManager()
-                .beginTransaction()
-                .replace(R.id.fragment_container, entityListFragment)
-                .commit();
-        
+
+        // Initialize the key list container
+        keyListContainer = findViewById(R.id.key_list_container);
+
+        // Create KeyCardContainer with the specified mode
+        keyCardContainer = new KeyCardContainer(this, keyListContainer, chooseMode);
+
+        // Set up card click callback for CHOOSE_ONE_RETURN mode
+        if (chooseMode == ChooseMode.CHOOSE_ONE_RETURN) {
+            keyCardContainer.setOnCardClickListener(this::returnSelectedKey);
+        }
+
+        // Add all keys to the container
+        for (KeyInfo keyInfo : keyInfoList) {
+            keyCardContainer.addKeyCard(keyInfo);
+        }
+
         // Initialize buttons
         buttonContainer = findViewById(R.id.button_container);
         cancelButton = findViewById(R.id.cancel_button);
         doneButton = findViewById(R.id.done_button);
     }
 
+    /**
+     * Return the selected key and finish the activity
+     */
+    private void returnSelectedKey(KeyInfo keyInfo) {
+        List<String> selectedIds = new ArrayList<>();
+        selectedIds.add(keyInfo.getId());
+
+        Intent resultIntent = new Intent();
+        resultIntent.putStringArrayListExtra(EXTRA_SELECTED_KEY_IDS, new ArrayList<>(selectedIds));
+        TimberLogger.d(TAG, "Returning selected key ID: " + keyInfo.getId());
+        setResult(RESULT_OK, resultIntent);
+        finish();
+    }
+
+    /**
+     * Return the selected keys and finish the activity
+     */
+    private void returnSelectedKeys() {
+        List<KeyInfo> selectedKeys = keyCardContainer.getSelectedKeys();
+
+        if (selectedKeys.isEmpty()) {
+            ToastUtils.makeText(this, R.string.no_keys_selected);
+            return;
+        }
+
+        List<String> selectedIds = new ArrayList<>();
+        for (KeyInfo keyInfo : selectedKeys) {
+            selectedIds.add(keyInfo.getId());
+        }
+
+        Intent resultIntent = new Intent();
+        resultIntent.putStringArrayListExtra(EXTRA_SELECTED_KEY_IDS, new ArrayList<>(selectedIds));
+        TimberLogger.d(TAG, "Returning " + selectedIds.size() + " selected key(s)");
+        setResult(RESULT_OK, resultIntent);
+        finish();
+    }
+
     @Override
     protected void setupButtons() {
-        // Set click listeners
-        cancelButton.setOnClickListener(v -> {
-            TimberLogger.d(TAG, "Cancel button clicked");
-            setResult(RESULT_CANCELED);
-            finish();
-        });
-        
-        doneButton.setOnClickListener(v -> {
-            TimberLogger.d(TAG, "Done button clicked");
-            List<KeyInfo> selectedObjects = entityListFragment.getSelectedObjects();
-            TimberLogger.d(TAG, "Selected objects count: " + (selectedObjects != null ? selectedObjects.size() : 0));
-            
-            if (selectedObjects.isEmpty()) {
-                TimberLogger.d(TAG, "No objects selected");
-                Toast.makeText(this, getString(R.string.no_key_selected), SafeApplication.TOAST_LASTING).show();
-                return;
-            }
-            
-            // Return the list of selected key IDs
-            List<String> selectedIds = new ArrayList<>();
-            for (KeyInfo keyInfo : selectedObjects) {
-                TimberLogger.d(TAG, "Selected key ID: " + keyInfo.getId());
-                TimberLogger.d(TAG, "Selected key public key: " + keyInfo.getPubkey());
-                selectedIds.add(keyInfo.getId());
-            }
-            
-            Intent resultIntent = new Intent();
-            resultIntent.putStringArrayListExtra(EXTRA_SELECTED_KEY_IDS, new ArrayList<>(selectedIds));
-            TimberLogger.d(TAG, "Setting result with " + selectedIds.size() + " selected IDs");
-            setResult(RESULT_OK, resultIntent);
-            finish();
-        });
+        switch (chooseMode) {
+            case CHOOSE_ONE_RETURN:
+                // Hide buttons for CHOOSE_ONE_RETURN mode as clicking on a card will return immediately
+                buttonContainer.setVisibility(View.GONE);
+                break;
+
+            case CHOOSE_ONE:
+            case CHOOSE_MULTI:
+            case CHOOSE_MULTI_WITHOUT_EDIT:
+                // Show buttons and set up click listeners
+                buttonContainer.setVisibility(View.VISIBLE);
+
+                cancelButton.setOnClickListener(v -> {
+                    setResult(RESULT_CANCELED);
+                    finish();
+                });
+
+                doneButton.setOnClickListener(v -> returnSelectedKeys());
+                break;
+
+            case WITHOUT_CHOOSE:
+                // Hide buttons and disable selection
+                buttonContainer.setVisibility(View.GONE);
+                break;
+
+            default:
+                buttonContainer.setVisibility(View.GONE);
+                break;
+        }
     }
 
     @Override

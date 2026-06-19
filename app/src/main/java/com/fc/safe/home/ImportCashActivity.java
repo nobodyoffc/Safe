@@ -10,8 +10,6 @@ import android.os.Bundle;
 import android.provider.DocumentsContract;
 import android.widget.Button;
 import android.widget.LinearLayout;
-import android.widget.Toast;
-
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.core.app.ActivityCompat;
@@ -22,11 +20,13 @@ import com.fc.safe.R;
 import com.fc.safe.home.BaseCryptoActivity;
 import com.fc.safe.db.CashManager;
 import com.fc.safe.utils.FileUtils;
+import com.fc.safe.ui.WaitingDialog;
 import com.google.android.material.textfield.TextInputEditText;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.List;
+import com.fc.safe.utils.ToastUtils;
 
 public class ImportCashActivity extends BaseCryptoActivity {
     private static final String TAG = "ImportCashActivity";
@@ -45,6 +45,7 @@ public class ImportCashActivity extends BaseCryptoActivity {
     private List<Cash> importedCashList;
     private String currentFilePath;
     private boolean isFileMode;
+    private WaitingDialog waitingDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,7 +73,7 @@ public class ImportCashActivity extends BaseCryptoActivity {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 // Permission granted
             } else {
-                Toast.makeText(this, getString(R.string.storage_permission_is_required_to_read_backup_files), Toast.LENGTH_LONG).show();
+                ToastUtils.showWarning(this, getString(R.string.storage_permission_is_required_to_read_backup_files));
             }
         }
     }
@@ -81,11 +82,20 @@ public class ImportCashActivity extends BaseCryptoActivity {
         fcCashImporter = new FcCashImporter(this, new FcCashImporter.OnImportListener() {
             @Override
             public void onImportSuccess(List<Cash> result) {
+                // Update waiting dialog message - keep it visible during database save
+                if (waitingDialog != null && waitingDialog.isShowing()) {
+                    waitingDialog.setHint(getString(R.string.saving));
+                }
+                // saveAndFinish will perform database operations in background
+                // WaitingDialog will be automatically dismissed when activity finishes
                 CashManager.saveAndFinish(ImportCashActivity.this, result);
             }
 
             @Override
             public void onImportError(String error) {
+                if (waitingDialog != null && waitingDialog.isShowing()) {
+                    waitingDialog.dismiss();
+                }
                 showToast(getString(R.string.operation_failed_with_message, error));
             }
         });
@@ -162,9 +172,18 @@ public class ImportCashActivity extends BaseCryptoActivity {
 
         cashImportButton.setOnClickListener(v -> {
             try {
+                // Show waiting dialog
+                if (waitingDialog == null) {
+                    waitingDialog = new WaitingDialog(this, getString(R.string.importing));
+                }
+                waitingDialog.show();
+
                 if (isFileMode && currentFilePath != null) {
                     File file = new File(currentFilePath);
                     if (!file.exists()) {
+                        if (waitingDialog != null && waitingDialog.isShowing()) {
+                            waitingDialog.dismiss();
+                        }
                         showToast(getString(R.string.file_not_found));
                         return;
                     }
@@ -176,6 +195,9 @@ public class ImportCashActivity extends BaseCryptoActivity {
                     fcCashImporter.importEntity(jsonText);
                 }
             } catch (Exception e) {
+                if (waitingDialog != null && waitingDialog.isShowing()) {
+                    waitingDialog.dismiss();
+                }
                 showToast(getString(R.string.no_cash_found));
             }
         });

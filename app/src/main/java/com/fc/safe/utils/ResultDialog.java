@@ -9,11 +9,10 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
-import android.widget.Toast;
-
 import com.fc.safe.R;
 import com.fc.fc_ajdk.utils.Hex;
 import com.fc.fc_ajdk.core.crypto.KeyTools;
+import com.fc.safe.utils.ToastUtils;
 
 public class ResultDialog {
     public interface ResultDialogListener {
@@ -50,7 +49,7 @@ public class ResultDialog {
             ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
             ClipData clip = ClipData.newPlainText("result_message", value);
             clipboard.setPrimaryClip(clip);
-            Toast.makeText(context, context.getString(R.string.copied), Toast.LENGTH_SHORT).show();
+            ToastUtils.showInfo(context, context.getString(R.string.copied));
             if (listener != null) listener.onCopy(value);
             dialog.dismiss();
         });
@@ -81,7 +80,7 @@ public class ResultDialog {
             com.fc.fc_ajdk.core.crypto.CryptoDataByte cryptoDataByte = null;
             byte[] symkey = com.fc.safe.initiate.ConfigureManager.getInstance().getSymkey();
             if (symkey == null) {
-                Toast.makeText(context, context.getString(R.string.no_symmetric_key_found), Toast.LENGTH_SHORT).show();
+                ToastUtils.showWarning(context, context.getString(R.string.no_symmetric_key_found));
                 return;
             }
             if (com.fc.fc_ajdk.utils.JsonUtils.isJson(cipherText)) {
@@ -90,17 +89,17 @@ public class ResultDialog {
                 byte[] bundle = android.util.Base64.decode(cipherText, android.util.Base64.DEFAULT);
                 cryptoDataByte = com.fc.fc_ajdk.core.crypto.CryptoDataByte.fromBundle(bundle);
             } else {
-                Toast.makeText(context, context.getString(R.string.not_valid_cipher_format), Toast.LENGTH_SHORT).show();
+                ToastUtils.showInfo(context, context.getString(R.string.not_valid_cipher_format));
                 return;
             }
             com.fc.fc_ajdk.core.crypto.Decryptor.decryptBySymkey(cryptoDataByte, com.fc.fc_ajdk.utils.Hex.toHex(symkey));
             if (cryptoDataByte.getCode() != null && cryptoDataByte.getCode() != 0) {
-                Toast.makeText(context, context.getString(R.string.decrypt_failed, cryptoDataByte.getMessage()), Toast.LENGTH_SHORT).show();
+                ToastUtils.showError(context, context.getString(R.string.decrypt_failed, cryptoDataByte.getMessage()));
                 return;
             }
             show(context, context.getString(R.string.result), cryptoDataByte.getData(), listener);
         } catch (Exception e) {
-            Toast.makeText(context, context.getString(R.string.decrypt_error, e.getMessage()), Toast.LENGTH_SHORT).show();
+            ToastUtils.showError(context, context.getString(R.string.decrypt_error, e.getMessage()));
         }
     }
 
@@ -112,7 +111,7 @@ public class ResultDialog {
             com.fc.fc_ajdk.core.crypto.CryptoDataByte cryptoDataByte = null;
             byte[] symkey = com.fc.safe.initiate.ConfigureManager.getInstance().getSymkey();
             if (symkey == null) {
-                Toast.makeText(context, context.getString(R.string.no_symmetric_key_found), Toast.LENGTH_SHORT).show();
+                ToastUtils.showWarning(context, context.getString(R.string.no_symmetric_key_found));
                 return;
             }
             if (com.fc.fc_ajdk.utils.JsonUtils.isJson(cipherText)) {
@@ -121,12 +120,12 @@ public class ResultDialog {
                 byte[] bundle = android.util.Base64.decode(cipherText, android.util.Base64.DEFAULT);
                 cryptoDataByte = com.fc.fc_ajdk.core.crypto.CryptoDataByte.fromBundle(bundle);
             } else {
-                Toast.makeText(context, context.getString(R.string.not_valid_cipher_format), Toast.LENGTH_SHORT).show();
+                ToastUtils.showInfo(context, context.getString(R.string.not_valid_cipher_format));
                 return;
             }
             com.fc.fc_ajdk.core.crypto.Decryptor.decryptBySymkey(cryptoDataByte, com.fc.fc_ajdk.utils.Hex.toHex(symkey));
             if (cryptoDataByte.getCode() != null && cryptoDataByte.getCode() != 0) {
-                Toast.makeText(context, context.getString(R.string.decrypt_failed, cryptoDataByte.getMessage()), Toast.LENGTH_SHORT).show();
+                ToastUtils.showError(context, context.getString(R.string.decrypt_failed, cryptoDataByte.getMessage()));
                 return;
             }
             
@@ -163,7 +162,7 @@ public class ResultDialog {
                 ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
                 ClipData clip = ClipData.newPlainText("result_message", value);
                 clipboard.setPrimaryClip(clip);
-                Toast.makeText(context, context.getString(R.string.copied), Toast.LENGTH_SHORT).show();
+                ToastUtils.showInfo(context, context.getString(R.string.copied));
                 if (listener != null) listener.onCopy(value);
                 dialog.dismiss();
             });
@@ -185,7 +184,7 @@ public class ResultDialog {
 
             dialog.show();
         } catch (Exception e) {
-            Toast.makeText(context, context.getString(R.string.decrypt_error, e.getMessage()), Toast.LENGTH_SHORT).show();
+            ToastUtils.showError(context, context.getString(R.string.decrypt_error, e.getMessage()));
         }
     }
 } 

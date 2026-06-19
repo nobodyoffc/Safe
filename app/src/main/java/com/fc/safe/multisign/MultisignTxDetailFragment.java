@@ -12,14 +12,15 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.fc.fc_ajdk.core.fch.RawTxInfo;
+import com.fc.fc_ajdk.data.fchData.Cash;
+import com.fc.fc_ajdk.data.fchData.Multisig;
 import com.fc.fc_ajdk.data.fchData.MultisignTxDetail;
-import com.fc.fc_ajdk.data.fchData.Multisign;
-import com.fc.fc_ajdk.data.fchData.SendTo;
 import com.fc.fc_ajdk.data.fcData.KeyInfo;
 import com.fc.safe.R;
 import com.fc.safe.tx.view.CashAmountCard;
 import com.fc.safe.tx.view.TxOutputCard;
-import com.fc.safe.utils.KeyCardManager;
+import com.fc.safe.utils.KeyCardContainer;
+import com.fc.safe.utils.ChooseMode;
 
 import java.util.Map;
 
@@ -70,9 +71,9 @@ public class MultisignTxDetailFragment extends Fragment {
             return;
         }
         MultisignKeyCardManager keyCardManager = new MultisignKeyCardManager(getContext(), senderContainer, false);
-        Multisign multisign = new Multisign();
-        multisign.setId(multisignTxDetail.getSender());
-        keyCardManager.addSenderKeyCard(multisign);
+        Multisig multisig = new Multisig();
+        multisig.setId(multisignTxDetail.getSender());
+        keyCardManager.addSenderKeyCard(multisig);
     }
 
     private void setupCash() {
@@ -91,7 +92,7 @@ public class MultisignTxDetailFragment extends Fragment {
         if (multisignTxDetail.getSendToList() == null || multisignTxDetail.getSendToList().isEmpty()) {
             return;
         }
-        for (SendTo sendTo: multisignTxDetail.getSendToList()) {
+        for (Cash sendTo: multisignTxDetail.getSendToList()) {
             TxOutputCard card = new TxOutputCard(getContext());
             card.setSendTo(sendTo, getContext());
             sendToContainer.addView(card);
@@ -122,7 +123,7 @@ public class MultisignTxDetailFragment extends Fragment {
         if (multisignTxDetail.getSignedFidList() == null || multisignTxDetail.getSignedFidList().isEmpty()) {
             return;
         }
-        KeyCardManager keyCardManager = new KeyCardManager(getContext(), signedFidContainer, null);
+        KeyCardContainer keyCardManager = new KeyCardContainer(getContext(), signedFidContainer, ChooseMode.WITHOUT_CHOOSE);
         for (String fid : multisignTxDetail.getSignedFidList()) {
             KeyInfo keyInfo = new KeyInfo(null, fid);
             keyCardManager.addKeyCard(keyInfo);
@@ -133,7 +134,7 @@ public class MultisignTxDetailFragment extends Fragment {
         if (multisignTxDetail.getUnSignedFidList() == null || multisignTxDetail.getUnSignedFidList().isEmpty()) {
             return;
         }
-        KeyCardManager keyCardManager = new KeyCardManager(getContext(), unsignedFidContainer, null);
+        KeyCardContainer keyCardManager = new KeyCardContainer(getContext(), unsignedFidContainer, ChooseMode.WITHOUT_CHOOSE);
         for (String fid : multisignTxDetail.getUnSignedFidList()) {
             KeyInfo keyInfo = new KeyInfo(null, fid);
             keyCardManager.addKeyCard(keyInfo);

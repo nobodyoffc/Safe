@@ -10,7 +10,7 @@ import android.widget.RadioGroup;
 import com.fc.fc_ajdk.core.crypto.Decryptor;
 import com.fc.fc_ajdk.core.crypto.KeyTools;
 import com.fc.fc_ajdk.data.fcData.KeyInfo;
-import com.fc.fc_ajdk.db.LocalDB;
+import com.fc.safe.db.LocalDB;
 import com.fc.fc_ajdk.utils.Hex;
 import com.fc.fc_ajdk.utils.JsonUtils;
 import com.fc.fc_ajdk.utils.StringUtils;
@@ -20,6 +20,7 @@ import com.fc.safe.db.KeyInfoManager;
 import com.fc.safe.home.BaseCryptoActivity;
 import com.fc.safe.initiate.ConfigureManager;
 import com.fc.safe.myKeys.ChooseKeyInfoActivity;
+import com.fc.safe.utils.ChooseMode;
 import com.fc.safe.utils.QRCodeGenerator;
 
 import java.util.List;
@@ -74,7 +75,7 @@ public class PrikeyConverterActivity extends BaseCryptoActivity {
         formatOptions.check(R.id.optionBase58Compressed);
     
         setupIoIconsView(R.id.keyView, R.id.peopleAndScanIcons, false, true, true, false,
-                null, v -> showChooseKeyInfoDialog(true), () -> startQrScan(QR_SCAN_REQUEST_CODE), null);
+                null, v -> showChooseKeyInfoDialog(ChooseMode.CHOOSE_ONE_RETURN), () -> startQrScan(QR_SCAN_REQUEST_CODE), null);
             
         setupIoIconsView(R.id.resultView, R.id.makeQrIcon, true, false, false, false,
                 () -> {
@@ -116,7 +117,7 @@ public class PrikeyConverterActivity extends BaseCryptoActivity {
             return;
         }
 
-        Intent intent = ChooseKeyInfoActivity.newIntent(this, keyInfoList,true);
+        Intent intent = ChooseKeyInfoActivity.newIntent(this, keyInfoList,ChooseMode.CHOOSE_ONE_RETURN);
         chooseKeyLauncher.launch(intent);
     }
 
@@ -125,8 +126,8 @@ public class PrikeyConverterActivity extends BaseCryptoActivity {
         resultTextView.setText("");
         copyButton.setEnabled(false);
 
-        String key = keyEditText.isEnabled() ? 
-            keyEditText.getText().toString() : 
+        String key = keyEditText.isEnabled() ?
+            keyEditText.getText().toString().trim() :
             (String) keyEditText.getTag();
 
         if (TextUtils.isEmpty(key)) {
@@ -137,9 +138,26 @@ public class PrikeyConverterActivity extends BaseCryptoActivity {
         try {
             byte[] prikeyBytes = null;
 
-            if(JsonUtils.isJson(key)){
-                prikeyBytes  = Decryptor.decryptPrikey(key, ConfigureManager.getInstance().getSymkey());
-            }else prikeyBytes = KeyTools.getPrikey32(key);
+            // Check if input is a mnemonic phrase (12 or 24 words)
+            String[] words = key.split("\\s+");
+            if (words.length == 12 || words.length == 24) {
+                try {
+                    prikeyBytes = KeyTools.mnemonicToBytes(key);
+                } catch (Exception e) {
+                    // Not a valid mnemonic, continue with other formats
+                    TimberLogger.d(TAG, "Not a valid mnemonic, trying other formats");
+                }
+            }
+
+            // If not a mnemonic or mnemonic parsing failed, try other formats
+            if (prikeyBytes == null) {
+                if(JsonUtils.isJson(key)){
+                    prikeyBytes = Decryptor.decryptPrikey(key, ConfigureManager.getInstance().getSymkey());
+                } else {
+                    prikeyBytes = KeyTools.getPrikey32(key);
+                }
+            }
+
             if (prikeyBytes == null) {
                 showToast(getString(R.string.invalid_private_key_format));
                 return;
@@ -147,13 +165,15 @@ public class PrikeyConverterActivity extends BaseCryptoActivity {
 
             String result;
             int selectedId = formatOptions.getCheckedRadioButtonId();
-            
+
             if (selectedId == R.id.optionHex) {
                 result = Hex.toHex(prikeyBytes);
             } else if (selectedId == R.id.optionBase58Compressed) {
                 result = KeyTools.prikey32To38WifCompressed(Hex.toHex(prikeyBytes));
             } else if (selectedId == R.id.optionBase58) {
                 result = KeyTools.prikey32To37(Hex.toHex(prikeyBytes));
+            } else if (selectedId == R.id.optionMnemonic) {
+                result = KeyTools.bytesToMnemonic(prikeyBytes);
             } else {
                 showToast(getString(R.string.please_select_a_conversion_format));
                 return;
@@ -161,7 +181,7 @@ public class PrikeyConverterActivity extends BaseCryptoActivity {
 
             updateResultText(result);
             copyButton.setEnabled(true);
-            
+
         } catch (Exception e) {
             TimberLogger.e(TAG, "Error converting: " + e.getMessage());
             showToast(getString(R.string.error_converting, e.getMessage()));

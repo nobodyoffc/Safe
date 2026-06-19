@@ -15,11 +15,13 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.cardview.widget.CardView;
 
-import com.fc.fc_ajdk.data.fchData.SendTo;
+import com.fc.fc_ajdk.data.fchData.Cash;
 import com.fc.fc_ajdk.feature.avatar.AvatarMaker;
 import com.fc.fc_ajdk.utils.NumberUtils;
 import com.fc.fc_ajdk.utils.StringUtils;
@@ -28,13 +30,14 @@ import com.fc.safe.R;
 import com.fc.safe.utils.IdUtils;
 
 import java.io.IOException;
+import com.fc.safe.utils.ToastUtils;
 
 public class TxOutputCard extends CardView {
     private ImageView avatarImage;
     private EditText fidText;
     private EditText amountText;
     private ImageButton deleteButton;
-    private SendTo sendTo;
+    private Cash sendTo;
     private OnDeleteListener onDeleteListener;
     private OnValueChangeListener onValueChangeListener;
     private boolean withDelete;
@@ -74,7 +77,7 @@ public class TxOutputCard extends CardView {
         // Setup copy functionality for FID
         fidText.setOnClickListener(v -> {
             if (sendTo != null) {
-                copyToClipboard(context, getContext().getString(R.string.fid), sendTo.getFid());
+                copyToClipboard(context, getContext().getString(R.string.fid), sendTo.getOwner());
             }
         });
 
@@ -144,7 +147,7 @@ public class TxOutputCard extends CardView {
         // Setup click listener for avatar to show big image
         avatarImage.setOnClickListener(v -> {
             if (sendTo != null) {
-                IdUtils.showAvatarDialog(context, sendTo.getFid());
+                IdUtils.showAvatarDialog(context, sendTo.getOwner());
             }
         });
 
@@ -156,12 +159,12 @@ public class TxOutputCard extends CardView {
                 builder.setItems(options, (dialog, which) -> {
                     switch (which) {
                         case 0: // Add to FID list
-                            SafeApplication.addFid(sendTo.getFid());
-                            Toast.makeText(context, context.getString(R.string.add_to_fid_list), Toast.LENGTH_SHORT).show();
+                            SafeApplication.addFid(sendTo.getOwner());
+                            ToastUtils.showInfo(context, context.getString(R.string.add_to_fid_list));
                             break;
                         case 1: // Clear FID list
                             SafeApplication.clearFidList();
-                            Toast.makeText(context, context.getString(R.string.fid_list_cleared), Toast.LENGTH_SHORT).show();
+                            ToastUtils.showInfo(context, context.getString(R.string.fid_list_cleared));
                             break;
                     }
                 });
@@ -231,14 +234,14 @@ public class TxOutputCard extends CardView {
         ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
         ClipData clip = ClipData.newPlainText(label, text);
         clipboard.setPrimaryClip(clip);
-        Toast.makeText(context, R.string.copied, Toast.LENGTH_SHORT).show();
+        ToastUtils.showInfo(context, context.getString(R.string.copied));
     }
 
-    public void setSendTo(SendTo sendTo, Context context, boolean withDelete) {
+    public void setSendTo(Cash sendTo, Context context, boolean withDelete) {
         setSendTo(sendTo, context, withDelete, true);
     }
 
-    public void setSendTo(SendTo sendTo, Context context, boolean withDelete, boolean editable) {
+    public void setSendTo(Cash sendTo, Context context, boolean withDelete, boolean editable) {
         this.sendTo = sendTo;
         this.withDelete = withDelete;
         this.editable = editable;
@@ -246,16 +249,18 @@ public class TxOutputCard extends CardView {
         int width;
         if(withDelete) width= 21;
         else width = 27;
-        fidText.setText(StringUtils.omitMiddle(sendTo.getFid(), width));
+        fidText.setText(StringUtils.omitMiddle(sendTo.getOwner(), width));
         amountText.setText(NumberUtils.formatAmount(sendTo.getAmount()) + " " + getContext().getString(R.string.currency_fch));
         deleteButton.setVisibility(withDelete ? View.VISIBLE : View.GONE);
-        
+
         fidText.setEnabled(editable);
         amountText.setEnabled(editable);
-        
+
+        renderLockTime(sendTo.getLockTime());
+
         // Load avatar
         try {
-            byte[] avatarBytes = AvatarMaker.makeAvatar(sendTo.getFid(),context);
+            byte[] avatarBytes = AvatarMaker.makeAvatar(sendTo.getOwner(),context);
             Bitmap avatar = BitmapFactory.decodeByteArray(avatarBytes, 0, avatarBytes.length);
             avatarImage.setImageBitmap(avatar);
         } catch (IOException e) {
@@ -263,11 +268,23 @@ public class TxOutputCard extends CardView {
         }
     }
 
-    public void setSendTo(SendTo sendTo, Context context) {
+    private void renderLockTime(Long lockTime) {
+        LinearLayout container = findViewById(R.id.lockTimeContainer);
+        if (container == null) return;
+        if (lockTime == null || lockTime <= 0) {
+            container.setVisibility(View.GONE);
+            return;
+        }
+        TextView text = findViewById(R.id.lockTimeText);
+        text.setText(getContext().getString(R.string.unlock_at_block, lockTime));
+        container.setVisibility(View.VISIBLE);
+    }
+
+    public void setSendTo(Cash sendTo, Context context) {
         setSendTo(sendTo, context, false);
     }
 
-    public SendTo getSendTo() {
+    public Cash getSendTo() {
         return sendTo;
     }
 

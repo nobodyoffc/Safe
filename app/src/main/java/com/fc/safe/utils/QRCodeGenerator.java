@@ -11,8 +11,6 @@ import android.os.Environment;
 import android.provider.MediaStore;
 import android.view.View;
 import android.widget.TextView;
-import android.widget.Toast;
-
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.fc.safe.R;
@@ -32,6 +30,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import com.fc.safe.utils.ToastUtils;
 
 /**
  * Utility class for generating and displaying QR codes.
@@ -53,7 +52,7 @@ public class QRCodeGenerator {
         if (!qrBitmaps.isEmpty()) {
             showQRDialog(context, qrBitmaps);
         } else {
-            Toast.makeText(context, context.getString(R.string.error_creating_qr), Toast.LENGTH_SHORT).show();
+            ToastUtils.showError(context, context.getString(R.string.error_creating_qr));
         }
     }
     
@@ -264,9 +263,9 @@ public class QRCodeGenerator {
         }
 
         if (savedCount > 0) {
-            Toast.makeText(context, context.getString(R.string.qr_saved_count, savedCount), Toast.LENGTH_SHORT).show();
+            ToastUtils.showInfo(context, context.getString(R.string.qr_saved_count, savedCount));
         } else {
-            Toast.makeText(context, context.getString(R.string.error_saving_qr), Toast.LENGTH_SHORT).show();
+            ToastUtils.showError(context, context.getString(R.string.error_saving_qr));
         }
     }
 

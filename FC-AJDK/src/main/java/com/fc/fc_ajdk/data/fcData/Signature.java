@@ -91,11 +91,15 @@ public class Signature extends FcObject{
 
     public static boolean isGoodSha256Sign(byte[] bytes, String sign, byte[] symkey) {
         if (sign == null || bytes == null) return false;
-        byte[] signBytes = BytesUtils.bytesMerger(bytes, symkey);
-        byte[] hash = Hash.sha256x2(signBytes);
-        String doubleSha256Hash = Hex.toHex(hash);
-
-        return (sign.equals(doubleSha256Hash));
+        // Try HMAC-SHA256 first
+        byte[] hmacHash = Hash.hmacSha256(bytes, symkey);
+        String hmacHex = Hex.toHex(hmacHash);
+        if (sign.equals(hmacHex)) return true;
+        // Fall back to legacy SHA256x2(msg||key)
+        byte[] legacyBytes = BytesUtils.bytesMerger(bytes, symkey);
+        byte[] legacyHash = Hash.sha256x2(legacyBytes);
+        String legacyHex = Hex.toHex(legacyHash);
+        return sign.equals(legacyHex);
     }
 
     public void strToBytes() {
@@ -180,7 +184,6 @@ public class Signature extends FcObject{
             return outputStream.toByteArray();
         } catch (IOException e) {
             // Handle potential IO exceptions (shouldn't happen with ByteArrayOutputStream)
-            e.printStackTrace();
             return null;
         }
     }
@@ -249,15 +252,13 @@ public class Signature extends FcObject{
         if(msg==null || symkey==null)return null;
         byte[] replyJsonBytes = msg.getBytes();
         byte[] keyBytes = Hex.fromHex(symkey);
-        byte[] bytes = BytesUtils.bytesMerger(replyJsonBytes,keyBytes);
-        byte[] signBytes = Hash.sha256x2(bytes);
+        byte[] signBytes = Hash.hmacSha256(replyJsonBytes, keyBytes);
         return Hex.toHex(signBytes);
     }
 
     public static byte[] symSign(byte[] msg, byte[] symkey) {
         if(msg==null || symkey==null)return null;
-        byte[] bytes = BytesUtils.bytesMerger(msg, symkey);
-        return Hash.sha256x2(bytes);
+        return Hash.hmacSha256(msg, symkey);
     }
     public byte[] sign(byte[] msgBytes,byte[] key,AlgorithmId alg){
         Signature signature1 = sign(new String(msgBytes),key,alg);
@@ -330,7 +331,6 @@ public class Signature extends FcObject{
                 signature.makeSignature();
             }
         } catch (Exception e) {
-            e.printStackTrace();
             return null;
         }
         return signature;
@@ -397,9 +397,13 @@ public class Signature extends FcObject{
 
     public static boolean verifySha256SymSign(byte[] msgBytes,byte[] key, String sign){
         if(sign==null)return false;
-        byte[] signBytes = BytesUtils.bytesMerger(msgBytes, key);
-        String doubleSha256Hash = Hex.toHex(Hash.sha256x2(signBytes));
-        return sign.equals(doubleSha256Hash);
+        // Try HMAC-SHA256 first
+        String hmacHex = Hex.toHex(Hash.hmacSha256(msgBytes, key));
+        if (sign.equals(hmacHex)) return true;
+        // Fall back to legacy SHA256x2(msg||key)
+        byte[] legacyBytes = BytesUtils.bytesMerger(msgBytes, key);
+        String legacyHex = Hex.toHex(Hash.sha256x2(legacyBytes));
+        return sign.equals(legacyHex);
     }
 
     public String toJson() {

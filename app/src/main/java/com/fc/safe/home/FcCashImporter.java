@@ -4,8 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.view.inputmethod.InputMethodManager;
 import android.view.View;
-import android.widget.Toast;
-
 import androidx.annotation.Nullable;
 
 import com.fc.fc_ajdk.data.fchData.Cash;
@@ -18,6 +16,7 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import com.fc.safe.utils.ToastUtils;
 
 public class FcCashImporter {
     private final Context context;
@@ -52,7 +51,7 @@ public class FcCashImporter {
         try(InputStream is = new ByteArrayInputStream(jsonBytes)){
             return importEntity(is);
         } catch (Exception e) {
-            Toast.makeText(context, R.string.failed_to_parse_json, Toast.LENGTH_SHORT).show();
+            ToastUtils.showError(context, context.getString(R.string.failed_to_parse_json));
             return null;
         }
     }
@@ -71,11 +70,9 @@ public class FcCashImporter {
                 cash.makeId();
             }
             
-            // If birthTime is not null, calculate CD
-            if (cash.getBirthTime() != null) {
-                cash.makeCd();
-            }
-            
+            // CD/CDD are height-based and computed upstream; trust the cd in the imported JSON.
+            // The offline wallet has no chain tip to recompute against.
+
             // Set valid to true for all imported cash
             cash.setValid(true);
         }

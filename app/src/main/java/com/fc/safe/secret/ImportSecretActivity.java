@@ -10,18 +10,18 @@ import android.os.Bundle;
 import android.provider.DocumentsContract;
 import android.widget.Button;
 import android.widget.LinearLayout;
-import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
-import com.fc.fc_ajdk.data.fcData.SecretDetail;
+import com.fc.fc_ajdk.data.feipData.Secret;
 import com.fc.safe.R;
 import com.fc.safe.home.BaseCryptoActivity;
 import com.fc.safe.db.SecretManager;
 import com.fc.safe.utils.FileUtils;
+import com.fc.safe.utils.ToastUtils;
 import com.google.android.material.textfield.TextInputEditText;
 
 import java.io.File;
@@ -39,10 +39,10 @@ public class ImportSecretActivity extends BaseCryptoActivity {
     private Button secretClearButton;
     private Button secretImportButton;
     private String type;
-    private FcEntityImporter<SecretDetail> fcEntityImporter;
+    private FcEntityImporter<Secret> fcEntityImporter;
     private ActivityResultLauncher<Intent> filePickerLauncher;
     private ActivityResultLauncher<Intent> inputLauncher;
-    private List<SecretDetail> importedSecretList;
+    private List<Secret> importedSecretList;
     private String currentFilePath;
     private boolean isFileMode;
 
@@ -72,15 +72,15 @@ public class ImportSecretActivity extends BaseCryptoActivity {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 // Permission granted
             } else {
-                Toast.makeText(this, getString(R.string.storage_permission_is_required_to_read_backup_files), Toast.LENGTH_LONG).show();
+                ToastUtils.showWarning(this, getString(R.string.storage_permission_is_required_to_read_backup_files));
             }
         }
     }
 
     private void initSecretImporter() {
-        fcEntityImporter = new FcEntityImporter<>(this, SecretDetail.class, new FcEntityImporter.OnImportListener<>() {
+        fcEntityImporter = new FcEntityImporter<>(this, Secret.class, new FcEntityImporter.OnImportListener<Secret>() {
             @Override
-            public void onImportSuccess(List<SecretDetail> result) {
+            public void onImportSuccess(List<Secret> result) {
                 SecretManager.saveAndFinish(ImportSecretActivity.this, result);
             }
 
@@ -91,11 +91,6 @@ public class ImportSecretActivity extends BaseCryptoActivity {
 
             @Override
             public void onPasswordRequired(Intent intent) {
-                inputLauncher.launch(intent);
-            }
-
-            @Override
-            public void onSymkeyRequired(Intent intent) {
                 inputLauncher.launch(intent);
             }
         });

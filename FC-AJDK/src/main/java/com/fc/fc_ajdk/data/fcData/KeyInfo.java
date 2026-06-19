@@ -1,6 +1,5 @@
 package com.fc.fc_ajdk.data.fcData;
 
-import com.fc.fc_ajdk.ui.Shower;
 import com.fc.fc_ajdk.core.crypto.Decryptor;
 import com.fc.fc_ajdk.core.crypto.Encryptor;
 import com.fc.fc_ajdk.core.crypto.KeyTools;
@@ -23,7 +22,6 @@ import static com.fc.fc_ajdk.constants.FieldNames.PRI_KEY;
 import static com.fc.fc_ajdk.constants.FieldNames.WATCH_ONLY;
 import static com.fc.fc_ajdk.constants.Values.ASC;
 import static com.fc.fc_ajdk.constants.Values.DESC;
-import static com.fc.fc_ajdk.ui.Shower.DEFAULT_PAGE_SIZE;
 
 public class KeyInfo extends Cid {
     public final static String TAG = "KeyInfo";
@@ -224,9 +222,7 @@ public class KeyInfo extends Cid {
         keyInfo.makeAddrsFromId(fid);
         return keyInfo;
     }
-    public static List<KeyInfo> showList(List<KeyInfo> keyInfoList, BufferedReader br) {
-        return Shower.showOrChooseListInPages("FID Info", keyInfoList, DEFAULT_PAGE_SIZE, null, true, KeyInfo.class, br);
-    }
+
 
     public void makeAddresses() {
         btcAddr = KeyTools.pubkeyToBtcAddr(pubkey);

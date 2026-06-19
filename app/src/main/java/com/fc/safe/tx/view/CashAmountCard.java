@@ -6,12 +6,11 @@ import android.content.ClipboardManager;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.widget.TextView;
-import android.widget.Toast;
-
 import androidx.cardview.widget.CardView;
 
 import com.fc.fc_ajdk.utils.StringUtils;
 import com.fc.safe.R;
+import com.fc.safe.utils.ToastUtils;
 
 public class CashAmountCard extends CardView {
     private TextView cashIdText;
@@ -58,7 +57,7 @@ public class CashAmountCard extends CardView {
         ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
         ClipData clip = ClipData.newPlainText(label, text);
         clipboard.setPrimaryClip(clip);
-        Toast.makeText(context, R.string.copied, Toast.LENGTH_SHORT).show();
+        ToastUtils.showInfo(context, context.getString(R.string.copied));
     }
 
     public void setCashId(String cashId) {

@@ -28,10 +28,9 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.fc.fc_ajdk.core.crypto.KeyTools;
 import com.fc.fc_ajdk.core.fch.RawTxInfo;
-import com.fc.fc_ajdk.core.fch.TxCreator;
+import com.fc.fc_ajdk.core.fch.TxHandler;
 import com.fc.fc_ajdk.data.fcData.KeyInfo;
 import com.fc.fc_ajdk.data.fchData.Cash;
-import com.fc.fc_ajdk.data.fchData.SendTo;
 import com.fc.fc_ajdk.utils.FchUtils;
 import com.fc.fc_ajdk.utils.Hex;
 import com.fc.fc_ajdk.utils.TimberLogger;
@@ -53,6 +52,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.text.DecimalFormat;
+import com.fc.safe.utils.ToastUtils;
 
 public class CreateTxActivity extends BaseCryptoActivity {
     private static final String TAG = "CreateTxActivity";
@@ -287,7 +287,7 @@ public class CreateTxActivity extends BaseCryptoActivity {
             AddOutputFromFidListDialog dialog = new AddOutputFromFidListDialog(this, rawTxInfo, rest);
             currentDialog = dialog;
             dialog.setOnDoneListener(sendToList -> {
-                for (SendTo sendTo : sendToList) {
+                for (Cash sendTo : sendToList) {
                     TxOutputCard card = new TxOutputCard(this);
                     card.setSendTo(sendTo, this, true);
                     card.setOnDeleteListener(this::removeOutputCard);
@@ -355,6 +355,12 @@ public class CreateTxActivity extends BaseCryptoActivity {
 
             if(rawTxInfo ==null){
                 Toast.makeText(this, R.string.no_tx_to_sign, SafeApplication.TOAST_LASTING).show();
+                return;
+            }
+
+            KeyInfo sender = rawTxInfo.getSenderInfo();
+            if (sender == null || sender.getPrikeyCipher() == null || sender.getPrikeyCipher().isEmpty()) {
+                Toast.makeText(this, R.string.failed_to_get_private_key, SafeApplication.TOAST_LASTING).show();
                 return;
             }
 
@@ -514,15 +520,15 @@ public class CreateTxActivity extends BaseCryptoActivity {
                 totalInput += cash.getValue();
             }
 
-            for(SendTo sendTo : rawTxInfo.getOutputs()){
+            for(Cash sendTo : rawTxInfo.getOutputs()){
                 totalOutput += FchUtils.coinToSatoshi(sendTo.getAmount());
             }
 
-            int opReturnBytesLen = rawTxInfo.getOpReturn() == null ? 0 : rawTxInfo.getOpReturn().getBytes().length;
-            int inputNum = rawTxInfo.getInputs().size();
-            int outputNum = rawTxInfo.getOutputs().size();
-
-            fee = TxCreator.calcFee(inputNum, outputNum, opReturnBytesLen, TxCreator.DEFAULT_FEE_RATE, false, null);
+            if (rawTxInfo.getFeeRate() == null || rawTxInfo.getFeeRate() == 0) {
+                rawTxInfo.setFeeRate(TxHandler.DEFAULT_FEE_RATE);
+            }
+            TxHandler.FeeResult feeResult = TxHandler.calcFee(rawTxInfo);
+            fee = feeResult != null && feeResult.fee() != null ? feeResult.fee() : 0;
             rest = totalInput - totalOutput - fee;
         }
     }
@@ -621,7 +627,7 @@ public class CreateTxActivity extends BaseCryptoActivity {
 
         // Add output cards
         if (rawTxInfo.getOutputs() != null) {
-            for (SendTo sendTo : rawTxInfo.getOutputs()) {
+            for (Cash sendTo : rawTxInfo.getOutputs()) {
                 TxOutputCard card = new TxOutputCard(this);
                 card.setSendTo(sendTo, this, true);
                 card.setOnDeleteListener(this::removeOutputCard);
@@ -824,7 +830,7 @@ public class CreateTxActivity extends BaseCryptoActivity {
         ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
         ClipData clip = ClipData.newPlainText(label, text);
         clipboard.setPrimaryClip(clip);
-        Toast.makeText(this, R.string.copied, Toast.LENGTH_SHORT).show();
+        ToastUtils.showInfo(this, this.getString(R.string.copied));
     }
 
     @Override

@@ -13,8 +13,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
-
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.ContextCompat;
@@ -22,7 +20,7 @@ import androidx.core.content.ContextCompat;
 import com.fc.fc_ajdk.core.crypto.Hash;
 import com.fc.fc_ajdk.core.crypto.KeyTools;
 import com.fc.fc_ajdk.data.fcData.KeyInfo;
-import com.fc.fc_ajdk.db.LocalDB;
+import com.fc.safe.db.LocalDB;
 import com.fc.fc_ajdk.feature.avatar.AvatarMaker;
 import com.fc.fc_ajdk.utils.DateUtils;
 import com.fc.fc_ajdk.utils.TimberLogger;
@@ -317,7 +315,7 @@ public class IdUtils {
             avatarBytes = AvatarMaker.createAvatar(id, context);
         } catch (Exception e) {
             TimberLogger.e(TAG, "Failed to create avatar: %s", e.getMessage());
-            Toast.makeText(context, R.string.failed_to_create_avatar, Toast.LENGTH_LONG).show();
+            ToastUtils.showError(context, context.getString(R.string.failed_to_create_avatar));
         }
         setAvatarImage(avatarView, avatarBytes);
 
@@ -333,7 +331,7 @@ public class IdUtils {
 
     private static void saveAvatarToGallery(Context context, String id, byte[] avatarBytes) {
         if (avatarBytes == null) {
-            Toast.makeText(context, context.getString(R.string.no_avatar_to_save), Toast.LENGTH_LONG).show();
+            ToastUtils.showWarning(context, context.getString(R.string.no_avatar_to_save));
             return;
         }
 
@@ -355,10 +353,10 @@ public class IdUtils {
             mediaScanIntent.setData(contentUri);
             context.sendBroadcast(mediaScanIntent);
 
-            Toast.makeText(context, context.getString(R.string.avatar_saved_to_gallery), Toast.LENGTH_LONG).show();
+            ToastUtils.showInfo(context, context.getString(R.string.avatar_saved_to_gallery));
         } catch (Exception e) {
             TimberLogger.e(TAG, "Failed to save avatar: %s", e.getMessage());
-            Toast.makeText(context, context.getString(R.string.failed_to_save_avatar), Toast.LENGTH_LONG).show();
+            ToastUtils.showError(context, context.getString(R.string.failed_to_save_avatar));
         }
     }
 }

@@ -7,6 +7,7 @@ import com.fc.safe.db.DatabaseManager;
 import com.fc.fc_ajdk.utils.TimberLogger;
 import com.fc.fc_ajdk.feature.avatar.AvatarMaker;
 import com.orhanobut.hawk.Hawk;
+import com.tencent.mmkv.MMKV;
 import com.fc.safe.utils.BackgroundTimeoutManager;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,14 +15,18 @@ import java.util.List;
 public class SafeApplication extends Application {
     public static final int TOAST_LASTING = Toast.LENGTH_SHORT;
     private static final List<String> fidList = new ArrayList<>();
-    
+
     @Override
     public void onCreate() {
         super.onCreate();
         // Initialize TimberLogger at the application level
         TimberLogger.init("SafeApp");
-        
-        // Initialize Hawk at the application level
+
+        // Initialize MMKV at the application level (replaces Hawk)
+        String rootDir = MMKV.initialize(this);
+        TimberLogger.d("SafeApp", "MMKV initialized with root: " + rootDir);
+
+        // Keep Hawk initialized temporarily for migration purposes
         Hawk.init(this).build();
         
         // Initialize AvatarMaker early to avoid performance issues during avatar generation

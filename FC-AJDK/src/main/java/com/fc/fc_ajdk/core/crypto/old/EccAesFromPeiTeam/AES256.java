@@ -7,6 +7,7 @@ import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.security.*;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+@Deprecated
 public class AES256 {
 
     private static String iv = "0123456789ABCDEF";

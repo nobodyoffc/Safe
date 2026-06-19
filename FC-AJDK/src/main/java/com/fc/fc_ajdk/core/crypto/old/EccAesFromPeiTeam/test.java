@@ -4,6 +4,7 @@ package com.fc.fc_ajdk.core.crypto.old.EccAesFromPeiTeam;
 //import org.junit.Test;
 import com.fc.fc_ajdk.utils.TimberLogger;
 
+@Deprecated
 public class test {
 
     //测试数字信封的加密模块

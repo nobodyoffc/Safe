@@ -3,12 +3,11 @@ package com.fc.safe.utils;
 import android.app.Activity;
 import android.app.Dialog;
 import android.view.View;
-import android.widget.Toast;
-
 import com.fc.fc_ajdk.utils.TimberLogger;
 import com.fc.safe.ui.IoIconsView;
 import com.fc.safe.home.BaseCryptoActivity;
 import com.fc.safe.R;
+import com.fc.safe.utils.ToastUtils;
 
 public class TextIconsUtils {
     private static final String TAG = "TextIconsUtils";
@@ -114,7 +113,7 @@ public class TextIconsUtils {
                 ((BaseCryptoActivity) activity).startQrScan(requestCode);
             } else {
                 TimberLogger.e(TAG, "Owner activity is not a BaseCryptoActivity");
-                Toast.makeText(activity, R.string.qr_scanning_not_supported, Toast.LENGTH_SHORT).show();
+                ToastUtils.showInfo(activity, activity.getString(R.string.qr_scanning_not_supported));
             }
         } else {
             TimberLogger.e(TAG, "Dialog has no owner activity");
@@ -128,7 +127,7 @@ public class TextIconsUtils {
             ((BaseCryptoActivity) activity).startQrScan(requestCode);
         } else {
             TimberLogger.e(TAG, "Activity is not a BaseCryptoActivity");
-            Toast.makeText(activity, R.string.qr_scanning_not_supported, Toast.LENGTH_SHORT).show();
+            ToastUtils.showInfo(activity, activity.getString(R.string.qr_scanning_not_supported));
         }
     }
 } 

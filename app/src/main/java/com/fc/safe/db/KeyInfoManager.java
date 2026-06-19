@@ -1,16 +1,12 @@
 package com.fc.safe.db;
 
-import static com.fc.fc_ajdk.constants.FieldNames.SAVE_TIME;
 import static com.fc.safe.utils.IdUtils.AVATAR_MAP;
 
 import android.app.Activity;
 import android.content.Context;
-import android.widget.Toast;
-
 import com.fc.fc_ajdk.core.crypto.Encryptor;
 import com.fc.fc_ajdk.core.crypto.KeyTools;
 import com.fc.fc_ajdk.data.fcData.KeyInfo;
-import com.fc.fc_ajdk.db.LocalDB;
 import com.fc.fc_ajdk.feature.avatar.AvatarMaker;
 import com.fc.fc_ajdk.utils.DateUtils;
 import com.fc.fc_ajdk.utils.TimberLogger;
@@ -23,6 +19,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import com.fc.safe.utils.ToastUtils;
 
 /**
  * A singleton class to manage and share the KeyInfo database across activities.
@@ -52,6 +49,21 @@ public class KeyInfoManager {
         return instance;
     }
 
+    public static synchronized void reset() {
+        if (instance != null) {
+            if (instance.keyInfoDB != null) {
+                try {
+                    instance.keyInfoDB.close();
+                } catch (Exception e) {
+                    TimberLogger.e(TAG, "Error closing database on reset: " + e.getMessage());
+                }
+                instance.keyInfoDB = null;
+            }
+            instance = null;
+            TimberLogger.d(TAG, "KeyInfoManager instance reset");
+        }
+    }
+
     public void saveAvatar( String fid,byte[] avatarBytes) {
         keyInfoDB.putInMap(AVATAR_MAP, fid,avatarBytes);
     }
@@ -71,7 +83,10 @@ public class KeyInfoManager {
                 TimberLogger.e(TAG, "Error closing existing database: " + e.getMessage());
             }
         }
-        keyInfoDB = dbManager.getEntityDatabase(KeyInfo.class, LocalDB.SortType.BIRTH_ORDER, SAVE_TIME);
+        keyInfoDB = dbManager.getEntityDatabase(KeyInfo.class);
+
+        // Initialize AVATAR_MAP to avoid blocking when first avatar is saved
+        keyInfoDB.createMap(AVATAR_MAP, byte[].class);
     }
 
     /**
@@ -162,7 +177,7 @@ public class KeyInfoManager {
             keyInfoMap.put(keyInfo.getId(), keyInfo);
             count++;
         }
-        keyInfoDB.putAll(keyInfoMap);
+        keyInfoDB.put(keyInfoMap);
         TimberLogger.i(TAG, "%s keyInfos added.", count);
     }
 
@@ -199,17 +214,17 @@ public class KeyInfoManager {
      * @param descending Whether to sort in descending order
      * @return A list of KeyInfo objects for the requested page
      */
-    public List<KeyInfo> getPaginatedKeyInfos(int pageSize, Long lastIndex, boolean descending) {
+    public List<KeyInfo> getPaginatedKeyInfos(long pageSize, Long lastIndex, boolean descending) {
         return keyInfoDB.getList(pageSize, null, lastIndex, true, null, null, false, descending);
     }
 
     /**
-     * Gets the index of a KeyInfo object by its ID.
-     * 
+     * Gets the index (0-based position) of a KeyInfo object by its ID.
+     *
      * @param id The ID of the KeyInfo object
-     * @return The index of the KeyInfo object
+     * @return The index of the KeyInfo object, or -1 if not found
      */
-    public Long getIndexById(String id) {
+    public long getIndexById(String id) {
         return keyInfoDB.getIndexById(id);
     }
 
@@ -244,7 +259,7 @@ public class KeyInfoManager {
     private static void processKeyInfoSequentially(Activity activity, KeyInfoManager keyInfoManager, List<KeyInfo> keyInfoList, byte[] symkey, int index, int savedCount) {
         if (index >= keyInfoList.size()) {
             keyInfoManager.commit();
-            Toast.makeText(activity, activity.getString(R.string.secrets_saved_successfully, savedCount), Toast.LENGTH_SHORT).show();
+            ToastUtils.showInfo(activity, activity.getString(R.string.secrets_saved_successfully, savedCount));
             activity.setResult(Activity.RESULT_OK);
             activity.finish();
             return;
@@ -273,7 +288,7 @@ public class KeyInfoManager {
                     processKeyInfoSequentially(activity, keyInfoManager, keyInfoList, symkey, index + 1, savedCount);
                 } else if (choice == UserConfirmDialog.Choice.STOP) {
                     keyInfoManager.commit();
-                    Toast.makeText(activity, activity.getString(R.string.secrets_saved_successfully, savedCount), Toast.LENGTH_SHORT).show();
+                    ToastUtils.showInfo(activity, activity.getString(R.string.secrets_saved_successfully, savedCount));
                     activity.setResult(Activity.RESULT_OK);
                     activity.finish();
                 }

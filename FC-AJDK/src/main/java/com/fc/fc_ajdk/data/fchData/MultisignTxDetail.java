@@ -16,7 +16,7 @@ import java.util.Set;
 public class MultisignTxDetail extends FcObject {
     private String sender;
     private Map<String,String> cashIdAmountMap;
-    private List<SendTo> sendToList;
+    private List<Cash> sendToList;
     private String opReturn;
     private String mOfN;
     private List<String> signedFidList;
@@ -27,21 +27,36 @@ public class MultisignTxDetail extends FcObject {
     public static MultisignTxDetail fromMultiSigData(RawTxInfo rawTxInfo, Context context){
         MultisignTxDetail multisignTxDetail = new MultisignTxDetail();
 
-        Multisign multisign = rawTxInfo.getMultisign();
-        if(multisign ==null){
-            Toast.makeText(context,"Multisign can't be null.",Toast.LENGTH_LONG).show();
+        Multisig multisig = rawTxInfo.getMultisign();
+        if(multisig ==null){
+            Toast.makeText(context,"Multisig can't be null.",Toast.LENGTH_LONG).show();
             return null;
         }
-        if(multisign.getId()==null){
-            Toast.makeText(context,"The FID of Multisign can't be null.",Toast.LENGTH_LONG).show();
+        if(multisig.getId()==null){
+            Toast.makeText(context,"The FID of Multisig can't be null.",Toast.LENGTH_LONG).show();
             return null;
         }
-        multisignTxDetail.setSender(multisign.getId());
-        multisignTxDetail.setCashIdAmountMap(new HashMap<>());
+        multisignTxDetail.setSender(multisig.getId());
+
+        // Populate cashIdAmountMap from inputs
+        Map<String, String> cashIdAmountMap = new HashMap<>();
+        if (rawTxInfo.getInputs() != null && !rawTxInfo.getInputs().isEmpty()) {
+            for (Cash cash : rawTxInfo.getInputs()) {
+                String cashId = cash.getId();
+                if (cashId == null || cashId.isEmpty()) {
+                    cashId = cash.makeId();
+                }
+                // Convert satoshi to FCH for display
+                double amountInFch = com.fc.fc_ajdk.utils.FchUtils.satoshiToCoin(cash.getValue());
+                String amount = String.valueOf(amountInFch);
+                cashIdAmountMap.put(cashId, amount);
+            }
+        }
+        multisignTxDetail.setCashIdAmountMap(cashIdAmountMap);
 
         multisignTxDetail.setSendToList(rawTxInfo.getOutputs());
         multisignTxDetail.setOpReturn(rawTxInfo.getOpReturn());
-        multisignTxDetail.setmOfN(multisign.getM() + "/"+ multisign.getN());
+        multisignTxDetail.setmOfN(multisig.getM() + "/"+ multisig.getN());
         multisignTxDetail.setUnSignedFidList(new ArrayList<>(rawTxInfo.getMultisign().getFids()));
 
         Map<String, List<String>> fidSigMap = rawTxInfo.getFidSigMap();
@@ -51,9 +66,9 @@ public class MultisignTxDetail extends FcObject {
             multisignTxDetail.getUnSignedFidList().removeAll(multisignTxDetail.getSignedFidList());
         }
 
-        int restSignNum = multisign.getM();
+        int restSignNum = multisig.getM();
         if(fidSigMap!=null && !fidSigMap.isEmpty())
-            for(String fid: multisign.getFids()){
+            for(String fid: multisig.getFids()){
                 if(fidSigMap.get(fid)!=null)restSignNum--;
                 if(restSignNum==0)break;
             }
@@ -80,11 +95,11 @@ public class MultisignTxDetail extends FcObject {
         this.cashIdAmountMap = cashIdAmountMap;
     }
 
-    public List<SendTo> getSendToList() {
+    public List<Cash> getSendToList() {
         return sendToList;
     }
 
-    public void setSendToList(List<SendTo> sendToList) {
+    public void setSendToList(List<Cash> sendToList) {
         this.sendToList = sendToList;
     }
 

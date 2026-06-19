@@ -6,7 +6,6 @@ import java.util.stream.Collectors;
 
 import com.google.gson.Gson;
 
-import com.fc.fc_ajdk.ui.Shower;
 import com.fc.fc_ajdk.core.crypto.Hash;
 import com.fc.fc_ajdk.data.fcData.FcObject;
 import com.fc.fc_ajdk.utils.BytesUtils;
@@ -34,7 +33,7 @@ public class Cash extends FcObject {
 
 	//from utxo
 	private Integer birthIndex;		//index of cash. Order in cashs of the tx when created.
-	private String type;	//type of the script. P2PKH,Multisign,OP_RETURN,Unknown,MultiSig
+	private String type;	//type of the script. P2PKH,Multisig,OP_RETURN,Unknown,MultiSig
 	private Long cd;		//CoinDays
 
 	private String lockScript;	//LockScript
@@ -59,6 +58,14 @@ public class Cash extends FcObject {
 	private Long lastTime;
 	private Long lastHeight;
 
+	// P2SH fields
+	private String redeemScript;	// For P2SH outputs (multisig, CLTV, etc.) - hex format
+	private Long lockTime;			// For CLTV outputs - Unix timestamp or block height
+
+	// Local pending-TX reference. When non-null, this cash is locked (input) or not-yet-confirmed (output)
+	// by a locally pending TX. Cleared on CONFIRMED/CANCELED.
+	private String pendingId;
+
 	public Cash() {
 		// default constructor
 	}
@@ -70,6 +77,111 @@ public class Cash extends FcObject {
 		this.value = FchUtils.coinToSatoshi(amount);
 	}
 
+	public Cash(String owner, double amount) {
+		super();
+		this.owner = owner;
+		setAmount(amount);
+	}
+
+	public Cash(String fid, Double amount, Long lockTime) {
+		super();
+		this.owner = fid;
+		setAmount(amount);
+		this.lockTime = lockTime;
+		if (lockTime != null && lockTime > 0 && fid != null) {
+			P2SH p2sh = new P2SH(fid, lockTime);
+			this.redeemScript = p2sh.getRedeemScript();
+			this.type = CashType.P2SH_CLTV.name();
+		}
+	}
+
+	public Cash(String fid, Double amount, Long lockTime, Multisig multisig) {
+		super();
+		setAmount(amount);
+		addMultisigCltvInfo(fid, lockTime, multisig);
+	}
+
+	public void addMultisigCltvInfo(String owner, Long lockTime, Multisig ownerMultisig) {
+		this.owner = owner;
+		if (lockTime != null && lockTime > 0 && ownerMultisig != null) {
+			P2SH p2sh = new P2SH(ownerMultisig.getPubKeys(), ownerMultisig.getM(), ownerMultisig.getN(), lockTime);
+			this.redeemScript = p2sh.getRedeemScript();
+			this.lockTime = lockTime;
+			this.type = CashType.P2SH_MULTISIG_CLTV.name();
+		} else if (lockTime != null && lockTime > 0) {
+			P2SH p2sh = new P2SH(owner, lockTime);
+			this.redeemScript = p2sh.getRedeemScript();
+			this.lockTime = lockTime;
+			this.type = CashType.P2SH_CLTV.name();
+		} else if (ownerMultisig != null) {
+			this.redeemScript = ownerMultisig.getRedeemScript();
+			this.type = CashType.P2SH_MULTISIG.name();
+		}
+	}
+	/**
+	 * Enum representing different types of transaction outputs (Cash types)
+	 */
+	public enum CashType {
+		P2PKH("P2PKH"),              // Pay-to-Public-Key-Hash (standard address)
+		P2PK("P2PK"),                // Pay-to-Public-Key (legacy format)
+		P2SH("P2SH"),                // Pay-to-Script-Hash (generic)
+		P2SH_MULTISIG("P2SH-Multisig"),           // P2SH Multisig without time lock
+		P2SH_CLTV("P2SH-CLTV"),                   // P2SH with CheckLockTimeVerify (time-locked single-sig)
+		P2SH_MULTISIG_CLTV("P2SH-Multisig-CLTV"), // P2SH Multisig with CheckLockTimeVerify
+		OP_RETURN("OP_RETURN"),      // Data storage output (unspeakable)
+		UNKNOWN("Unknown");           // Unrecognized script type
+
+		private final String value;
+
+		CashType(String value) {
+			this.value = value;
+		}
+
+		public String getValue() {
+			return value;
+		}
+
+		/**
+		 * Get CashType from string value
+		 * @param value String representation of the cash type
+		 * @return Corresponding CashType enum, or UNKNOWN if not found
+		 */
+		public static CashType fromString(String value) {
+			if (value == null || value.isEmpty()) {
+				return UNKNOWN;
+			}
+
+			// Normalize the string for comparison
+			String normalized = value.trim().toUpperCase().replace("-", "_").replace(" ", "_");
+
+			// Try direct enum match first
+			try {
+				return CashType.valueOf(normalized);
+			} catch (IllegalArgumentException e) {
+				// Handle legacy string formats
+				switch (normalized) {
+					case "MULTISIGN":
+					case "MULTISIG":
+						return P2SH_MULTISIG;
+					case "P2SH_MULTISIGN":
+						return P2SH_MULTISIG;
+					case "LOCKTIME":
+					case "CLTV":
+						return P2SH_CLTV;
+					case "MULTISIGNWITHLOCKTIME":
+					case "MULTISIGWITHLOCKTIME":
+						return P2SH_MULTISIG_CLTV;
+					default:
+						return UNKNOWN;
+				}
+			}
+		}
+
+		@Override
+		public String toString() {
+			return value;
+		}
+	}
 
 	public static LinkedHashMap<String,Integer>getFieldWidthMap(){
 		LinkedHashMap<String,Integer> map = new LinkedHashMap<>();
@@ -225,7 +337,8 @@ public class Cash extends FcObject {
 		if(cashList==null||cashList.isEmpty())return 0;
 		long sum = 0;
 		for(Cash cash :cashList){
-			if(cash.makeCd()==null)continue;
+			// Trust the cd carried in each cash (computed upstream against the real best height);
+			// the offline wallet has no chain tip to recompute against.
 			if(cash.getCd()!=null)sum+=cash.getCd();
 		}
 		return sum;
@@ -235,20 +348,7 @@ public class Cash extends FcObject {
 		cashList.removeIf(cash -> COINBASE.equals(cash.getIssuer()) && bestHeight != 0 && (bestHeight - cash.getBirthHeight()) < OneDayInterval * 10);
 	}
 
-    public static List<Cash> showOrChooseCashList(List<Cash> cashList, String title, String myFid, boolean choose, BufferedReader br) {
-		return Shower.showOrChooseList(
-				title,
-				cashList,
-				myFid, choose,  // choose
-				Cash.class, br
-		);
-    }
 
-
-	public static List<Cash> showAndChooseCashListInPages(List<Cash> cashList, String title, String myFid, boolean choose,java.io.BufferedReader br) {
-        if(cashList==null || cashList.isEmpty())return null;
-		return Shower.showOrChooseListInPages(title,cashList,Shower.DEFAULT_PAGE_SIZE, myFid, choose,Cash.class,br);
-    }
 
     public String getBirthBlockId() {
 		return birthBlockId;
@@ -378,9 +478,16 @@ public class Cash extends FcObject {
 	public Long getCd() {
 		return cd;
 	}
-	public Long makeCd(){
-		if(value==null || birthTime==null)return null;
-		this.cd = FchUtils.cdd(getValue(),getBirthTime(),System.currentTimeMillis()/1000);
+	/**
+	 * CoinDays of this UTXO at the given best block height (height-based, see {@link FchUtils#cdd}).
+	 * This cold wallet has no live chain tip, so callers must supply the current best height.
+	 * Where no best height is available offline, do NOT call this; trust the {@code cd} that was
+	 * computed upstream by the watch-only wallet and carried in the imported JSON.
+	 * @param bestHeight current best block height of the chain
+	 */
+	public Long makeCd(long bestHeight){
+		if(value==null || birthHeight==null)return null;
+		this.cd = FchUtils.cdd(getValue(),getBirthHeight(),bestHeight);
 		return this.cd;
 	}
 	public void setCd(Long cd) {
@@ -529,4 +636,56 @@ public class Cash extends FcObject {
 		return fieldMap;
 	}
 
+	public Boolean getValid() {
+		return valid;
+	}
+
+	public Double getAmount() {
+		return value == null ? null : FchUtils.satoshiToCoin(value);
+	}
+
+	public void setAmount(Double amount) {
+		this.value = amount == null ? null : FchUtils.coinToSatoshi(amount);
+	}
+
+	public String getRedeemScript() {
+		return redeemScript;
+	}
+
+	public void setRedeemScript(String redeemScript) {
+		if (redeemScript == null || redeemScript.isEmpty()) {
+			this.redeemScript = redeemScript;
+			return;
+		}
+		if (redeemScript.matches("^[0-9a-fA-F]+$")) {
+			this.redeemScript = redeemScript;
+		} else {
+			try {
+				String preprocessed = redeemScript.replaceAll("PUSHDATA\\(\\d+\\)\\[([0-9a-fA-F]+)\\]", "$1");
+				this.redeemScript = P2SH.scriptAsmToHex(preprocessed);
+			} catch (Exception e) {
+				this.redeemScript = redeemScript;
+			}
+		}
+	}
+
+	public Long getLockTime() {
+		return lockTime;
+	}
+
+	public void setLockTime(Long lockTime) {
+		this.lockTime = lockTime;
+	}
+
+	public String getPendingId() {
+		return pendingId;
+	}
+
+	public void setPendingId(String pendingId) {
+		this.pendingId = pendingId;
+	}
+
+	public boolean isLockedByPending() {
+		return pendingId != null;
+	}
 }

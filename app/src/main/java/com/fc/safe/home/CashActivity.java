@@ -3,27 +3,29 @@ package com.fc.safe.home;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.app.Dialog;
 
-import com.fc.fc_ajdk.constants.Constants;
 import com.fc.fc_ajdk.data.fchData.Cash;
-import com.fc.fc_ajdk.db.LocalDB;
+import com.fc.safe.db.LocalDB;
 import com.fc.fc_ajdk.utils.FchUtils;
 import com.fc.fc_ajdk.utils.TimberLogger;
 import com.fc.safe.SafeApplication;
 import com.fc.safe.R;
-import com.fc.safe.ui.FcEntityListFragment;
 import com.fc.safe.ui.PopupMenuHelper;
 import com.fc.safe.ui.WaitingDialog;
 import com.fc.safe.db.CashManager;
 import com.fc.safe.tx.dialog.CreateCashDialog;
-import com.fc.safe.home.CreateTxActivity;
 import com.fc.safe.multisign.CreateMultisignTxActivity;
+import com.fc.safe.utils.CashCardContainer;
+import com.fc.safe.utils.ToastUtils;
+import com.fc.safe.utils.ChooseMode;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,8 +37,8 @@ public class CashActivity extends BaseCryptoActivity {
     
     public static final String EXTRA_SELECT_MODE = "select_mode";
     public static final String EXTRA_SELECTED_CASH = "selected_cash";
-    
-    private FcEntityListFragment<Cash> entityListFragment;
+
+    private CashCardContainer cashCardContainer;
     protected CashManager cashManager;
 
     private Button deleteButton;
@@ -44,11 +46,31 @@ public class CashActivity extends BaseCryptoActivity {
     private Button sendButton;
     private Button importButton;
     private PopupMenuHelper popupMenuHelper;
-    
+
     // Summary card UI elements
     private TextView selectedCashCountTextView;
     private TextView selectedCashAmountTextView;
     private TextView selectedCashCdTextView;
+
+    // Statistics bar UI elements
+    private View statisticsBar;
+    private TextView statsLoadedCountTextView;
+    private TextView statsTotalCountTextView;
+    private TextView statsCheckedCountTextView;
+
+    // Sort controls
+    private CheckBox checkboxAll;
+    private ImageView sortOwnerIcon;
+    private ImageView sortValueIcon;
+    private ImageView sortCdIcon;
+    private LinearLayout sortOwnerContainer;
+    private LinearLayout sortValueContainer;
+    private LinearLayout sortCdContainer;
+
+    private enum SortState { NONE, ASC, DESC }
+    private SortState ownerSortState = SortState.NONE;
+    private SortState valueSortState = SortState.NONE;
+    private SortState cdSortState = SortState.NONE;
     
     private final List<Cash> cashList = new ArrayList<>();
     private Long lastIndex = null;
@@ -58,6 +80,7 @@ public class CashActivity extends BaseCryptoActivity {
 
     private WaitingDialog waitingDialog;
     private Dialog currentDialog;
+    private TextView emptyStateTextView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -114,14 +137,42 @@ public class CashActivity extends BaseCryptoActivity {
         createNewButton = findViewById(R.id.create_button);
         sendButton = findViewById(R.id.send_button);
         importButton = findViewById(R.id.import_button);
-        
+
         // Initialize summary card UI elements
         selectedCashCountTextView = findViewById(R.id.selectedCashCount);
         selectedCashAmountTextView = findViewById(R.id.selectedCashAmount);
         selectedCashCdTextView = findViewById(R.id.selectedCashCd);
-        
+
+        // Initialize statistics bar UI elements
+        statisticsBar = findViewById(R.id.statistics_bar);
+        statsLoadedCountTextView = findViewById(R.id.stats_loaded_count);
+        statsTotalCountTextView = findViewById(R.id.stats_total_count);
+        statsCheckedCountTextView = findViewById(R.id.stats_checked_count);
+
+        // Initialize sort controls
+        checkboxAll = findViewById(R.id.checkbox_all);
+        sortOwnerIcon = findViewById(R.id.sort_owner_icon);
+        sortValueIcon = findViewById(R.id.sort_value_icon);
+        sortCdIcon = findViewById(R.id.sort_cd_icon);
+        sortOwnerContainer = findViewById(R.id.sort_owner_container);
+        sortValueContainer = findViewById(R.id.sort_value_container);
+        sortCdContainer = findViewById(R.id.sort_cd_container);
+
+        // Initialize empty state text
+        emptyStateTextView = findViewById(R.id.empty_state_text);
+
+        // Initialize CashCardContainer
+        LinearLayout cashListContainer = findViewById(R.id.cash_list_container);
+        cashCardContainer = new CashCardContainer(this, cashListContainer, ChooseMode.CHOOSE_MULTI);
+
+        // Set up sort controls
+        setupSortControls();
+
         // Initialize summary card with zeros
         updateSummaryCard();
+
+        // Initialize statistics bar with zeros
+        updateStatisticsBar();
     }
 
     @Override
@@ -164,7 +215,7 @@ public class CashActivity extends BaseCryptoActivity {
                 lastIndex = cashManager.getIndexById(cashList.get(cashList.size() - 1).getId());
 
                 // Check if there's more data to load
-                hasMoreData = lastIndex > 1;
+                hasMoreData = lastIndex != null && lastIndex > 1;
             } else {
                 // No data available
                 hasMoreData = false;
@@ -181,34 +232,39 @@ public class CashActivity extends BaseCryptoActivity {
 
     private void updateButtonStates() {
         boolean hasCash = !(cashList==null || cashList.isEmpty());
-        
+
         deleteButton.setEnabled(hasCash);
         deleteButton.setAlpha(hasCash ? 1.0f : 0.5f);
         sendButton.setEnabled(hasCash);
         sendButton.setAlpha(hasCash ? 1.0f : 0.5f);
         importButton.setEnabled(true); // Import button is always enabled
         importButton.setAlpha(1.0f);
+
+        // Update statistics bar
+        updateStatisticsBar();
     }
 
     private void loadListFragment() {
-        // Create fragment with the initial Cash objects
-        entityListFragment = FcEntityListFragment.newInstance(cashList, Cash.class, false);
-        
-        // Add fragment to container
-        getSupportFragmentManager()
-                .beginTransaction()
-                .replace(R.id.fragment_container, entityListFragment)
-                .commit();
+        // Clear existing cards
+        cashCardContainer.clearAll();
 
-        // Set up selection change listener for the fragment
-        entityListFragment.setOnSelectionChangeListener(() -> {
-            updateButtonStates();
-            updateSummaryCard(); // Update summary when selection changes
-        });
+        // Check if cash list is empty
+        if (cashList == null || cashList.isEmpty()) {
+            showEmptyState();
+        } else {
+            hideEmptyState();
+            // Add all cash cards
+            for (Cash cash : cashList) {
+                cashCardContainer.addCashCard(cash);
+            }
+        }
 
-        // Update button states after fragment is loaded
+        // Apply default sorting if needed
+        applySorting();
+
+        // Update button states after list is loaded
         updateButtonStates();
-        // Update summary card after fragment is loaded
+        // Update summary card after list is loaded
         updateSummaryCard();
     }
 
@@ -216,61 +272,34 @@ public class CashActivity extends BaseCryptoActivity {
      * Sets up the scroll listener to detect when the user reaches the end of the list
      */
     private void setupScrollListener() {
-        // Get the ScrollView from the fragment
-        View fragmentView = entityListFragment.getView();
-        if (fragmentView != null) {
-            // Find the ScrollView in the fragment's view hierarchy
-            View scrollView = findScrollView(fragmentView);
-            if (scrollView != null) {
-                // Add scroll listener
-                scrollView.setOnScrollChangeListener((v, scrollX, scrollY, oldScrollX, oldScrollY) -> {
-                    boolean atBottom = isAtBottom(scrollView);
-                    boolean scrollingUp = scrollY < oldScrollY;
-                    
-                    // Check if we've reached the bottom of the scroll view and user is scrolling up
-                    if (atBottom && scrollingUp && !isLoadingMore && hasMoreData) {
-                        TimberLogger.i(TAG, "Loading more data - reached bottom while scrolling up");
-                        loadMoreData();
-                    }
-                });
-            }
-        }
-    }
-    
-    /**
-     * Recursively finds a ScrollView in the view hierarchy
-     */
-    private View findScrollView(View view) {
-        if (view instanceof ScrollView) {
-            return view;
-        }
-        
-        if (view instanceof ViewGroup viewGroup) {
-            for (int i = 0; i < viewGroup.getChildCount(); i++) {
-                View child = viewGroup.getChildAt(i);
-                View result = findScrollView(child);
-                if (result != null) {
-                    return result;
+        // Get the ScrollView from the layout
+        ScrollView scrollView = findViewById(android.R.id.content).findViewById(R.id.cash_list_container).getParent() instanceof ScrollView ?
+                (ScrollView) findViewById(R.id.cash_list_container).getParent() : null;
+
+        if (scrollView != null) {
+            scrollView.setOnScrollChangeListener((v, scrollX, scrollY, oldScrollX, oldScrollY) -> {
+                boolean atBottom = isAtBottom(scrollView);
+                boolean scrollingUp = scrollY < oldScrollY;
+
+                // Check if we've reached the bottom of the scroll view and user is scrolling up
+                if (atBottom && scrollingUp && !isLoadingMore && hasMoreData) {
+                    TimberLogger.i(TAG, "Loading more data - reached bottom while scrolling up");
+                    loadMoreData();
                 }
-            }
+            });
         }
-        
-        return null;
     }
     
     /**
      * Checks if the scroll view is at the bottom
      */
-    private boolean isAtBottom(View scrollView) {
-        if (scrollView instanceof ScrollView sv) {
-            int scrollY = sv.getScrollY();
-            int height = sv.getHeight();
-            int viewHeight = sv.getChildAt(0).getHeight();
-            
-            // If we're within 100 pixels of the bottom, consider it at the bottom
-            return (viewHeight - scrollY - height) <= 100;
-        }
-        return false;
+    private boolean isAtBottom(ScrollView scrollView) {
+        int scrollY = scrollView.getScrollY();
+        int height = scrollView.getHeight();
+        int viewHeight = scrollView.getChildAt(0).getHeight();
+
+        // If we're within 100 pixels of the bottom, consider it at the bottom
+        return (viewHeight - scrollY - height) <= 100;
     }
     
     /**
@@ -299,25 +328,31 @@ public class CashActivity extends BaseCryptoActivity {
                         lastIndex = cashManager.getIndexById(moreCash.get(moreCash.size() - 1).getId());
                         
                         // Check if there's more data to load
-                        hasMoreData = lastIndex > 1;
+                        hasMoreData = lastIndex != null && lastIndex > 1;
                         
                         // Add the new items to the list
                         cashList.addAll(moreCash);
-                        
-                        // Update the fragment's list
-                        entityListFragment.updateList(cashList);
+
+                        // Add the new cards to the card manager
+                        for (Cash cash : moreCash) {
+                            cashCardContainer.addCashCard(cash);
+                        }
+
+                        // Apply current sorting
+                        applySorting();
+
                         updateButtonStates();
                         updateSummaryCard();
 
-                        Toast.makeText(this, getString(R.string.cash_loaded, moreCash.size()), Toast.LENGTH_SHORT).show();
+                        ToastUtils.showInfo(this, getString(R.string.cash_loaded, moreCash.size()));
                         
                         if (!hasMoreData) {
-                            Toast.makeText(this, R.string.no_more_cash, Toast.LENGTH_LONG).show();
+                            ToastUtils.showWarning(this, this.getString(R.string.no_more_cash));
                         }
                     } else {
                         // No more data to load
                         hasMoreData = false;
-                        Toast.makeText(this, getString(R.string.no_more_cash), Toast.LENGTH_LONG).show();
+                        ToastUtils.showWarning(this, getString(R.string.no_more_cash));
                     }
                     
                     isLoadingMore = false;
@@ -328,7 +363,7 @@ public class CashActivity extends BaseCryptoActivity {
                 runOnUiThread(() -> {
                     isLoadingMore = false;
                     dismissWaitingDialog();
-                    Toast.makeText(this, getString(R.string.error_loading_more_cash) + e.getMessage(), Toast.LENGTH_LONG).show();
+                    ToastUtils.showError(this, getString(R.string.error_loading_more_cash) + e.getMessage());
                 });
             }
         }).start();
@@ -338,29 +373,58 @@ public class CashActivity extends BaseCryptoActivity {
     protected void setupButtons() {
         // Set click listeners
         deleteButton.setOnClickListener(v -> {
-            List<Cash> chosenObjects = entityListFragment.getSelectedObjects();
+            List<Cash> chosenObjects = cashCardContainer.getSelectedCashes();
             if (chosenObjects.isEmpty()) {
                 Toast.makeText(this, R.string.no_items_selected, SafeApplication.TOAST_LASTING).show();
                 return;
             }
-            // Implement delete functionality
-            cashManager.removeCashes(chosenObjects);
-            
-            // Commit changes to disk
-            cashManager.commit();
-            
-            // Remove deleted items from the current list
-            cashList.removeAll(chosenObjects);
-            
-            // Update the fragment's list directly
-            entityListFragment.updateList(cashList);
-            
-            // Update button states
-            updateButtonStates();
-            updateSummaryCard();
-            
-            // Show confirmation message
-            Toast.makeText(this, R.string.deleted , SafeApplication.TOAST_LASTING).show();
+
+            // Don't delete cashes that are referenced by a pending TX — it would orphan the record.
+            for (Cash cash : chosenObjects) {
+                if (cash.isLockedByPending()) {
+                    Toast.makeText(this, R.string.cash_locked_by_pending_tx, SafeApplication.TOAST_LASTING).show();
+                    return;
+                }
+            }
+
+            // Show waiting dialog
+            showWaitingDialog(getString(R.string.deleting));
+
+            // Perform delete operation on background thread
+            new Thread(() -> {
+                try {
+                    // Implement delete functionality
+                    cashManager.removeCashes(chosenObjects);
+
+                    // Commit changes to disk
+                    cashManager.commit();
+
+                    // Update UI on main thread
+                    runOnUiThread(() -> {
+                        // Remove deleted items from the current list
+                        cashList.removeAll(chosenObjects);
+
+                        // Remove from card manager
+                        cashCardContainer.removeSelectedCashes();
+
+                        // Update button states
+                        updateButtonStates();
+                        updateSummaryCard();
+
+                        // Dismiss waiting dialog
+                        dismissWaitingDialog();
+
+                        // Show confirmation message
+                        Toast.makeText(this, R.string.deleted, SafeApplication.TOAST_LASTING).show();
+                    });
+                } catch (Exception e) {
+                    TimberLogger.e(TAG, "Error deleting cash: %s", e.getMessage());
+                    runOnUiThread(() -> {
+                        dismissWaitingDialog();
+                        ToastUtils.showError(this, getString(R.string.error_deleting_cash) + ": " + e.getMessage());
+                    });
+                }
+            }).start();
         });
 
         createNewButton.setOnClickListener(v -> {
@@ -374,12 +438,10 @@ public class CashActivity extends BaseCryptoActivity {
                 
                 // Add to the current list
                 cashList.add(0, cash); // Add to the beginning of the list
-                
-                // Update the fragment's list
-                if (entityListFragment != null) {
-                    entityListFragment.updateList(cashList);
-                }
-                
+
+                // Reload the list to show the new cash
+                loadListFragment();
+
                 // Update button states
                 updateButtonStates();
                 updateSummaryCard();
@@ -397,10 +459,23 @@ public class CashActivity extends BaseCryptoActivity {
         });
 
         sendButton.setOnClickListener(v -> {
-            List<Cash> chosenObjects = entityListFragment.getSelectedObjects();
+            List<Cash> chosenObjects = cashCardContainer.getSelectedCashes();
             if (chosenObjects.isEmpty()) {
                 Toast.makeText(this, R.string.no_items_selected , SafeApplication.TOAST_LASTING).show();
                 return;
+            }
+
+            // Reject any cash that's locked by a pending TX (or still pending-incoming).
+            for (Cash cash : chosenObjects) {
+                if (cash.isLockedByPending()) {
+                    Toast.makeText(this, R.string.cash_locked_by_pending_tx, SafeApplication.TOAST_LASTING).show();
+                    return;
+                }
+                // Pending-incoming cashes are valid=false — also skip.
+                if (cash.isValid() == null || !cash.isValid()) {
+                    Toast.makeText(this, R.string.cash_locked_by_pending_tx, SafeApplication.TOAST_LASTING).show();
+                    return;
+                }
             }
 
             // Check if we're in selection mode
@@ -445,9 +520,9 @@ public class CashActivity extends BaseCryptoActivity {
             // Convert to JSON string
             String rawTxInfoJson = rawTxInfo.toJsonWithSenderInfo();
             
-            // Check if sender FID starts with '3' (multisign address)
+            // Check if sender FID starts with '3' (multisig address)
             if (ownerFid != null && ownerFid.startsWith("3")) {
-                // Start CreateMultisignTxActivity for multisign transaction
+                // Start CreateMultisignTxActivity for multisig transaction
                 Intent intent = new Intent(CashActivity.this, CreateMultisignTxActivity.class);
                 intent.putExtra(CreateMultisignTxActivity.EXTRA_TX_INFO_JSON, rawTxInfoJson);
                 startActivityForResult(intent, REQUEST_CREATE_TX);
@@ -464,6 +539,15 @@ public class CashActivity extends BaseCryptoActivity {
             Intent intent = new Intent(CashActivity.this, ImportCashActivity.class);
             startActivityForResult(intent, 2001);
         });
+
+        // Set up selection change listener for the card manager
+        if (cashCardContainer != null) {
+            cashCardContainer.setOnCashListChangedListener(updatedCashList -> {
+                updateButtonStates();
+                updateSummaryCard();
+                updateStatisticsBar();
+            });
+        }
     }
     
     private void refreshList() {
@@ -492,53 +576,44 @@ public class CashActivity extends BaseCryptoActivity {
             getIntent().removeExtra("fromCreateCash");
         }
         
-        // Wait for fragment view to be ready before setting up scroll listener
-        if (entityListFragment != null && entityListFragment.getView() != null) {
-            setupScrollListener();
-        } else {
-            // Try again after a short delay to ensure fragment view is ready
-            new android.os.Handler().postDelayed(() -> {
-                if (entityListFragment != null && entityListFragment.getView() != null) {
-                    setupScrollListener();
-                }
-            }, 100);
-        }
+        // Set up scroll listener
+        new android.os.Handler().postDelayed(this::setupScrollListener, 100);
     }
 
     /**
      * Updates the summary card with totals from selected cash list
      */
     private void updateSummaryCard() {
-        List<Cash> selectedCashList = entityListFragment != null ? entityListFragment.getSelectedObjects() : new ArrayList<>();
-        
+        List<Cash> selectedCashList = cashCardContainer != null ? cashCardContainer.getSelectedCashes() : new ArrayList<>();
+
         // Calculate totals
         int cashCount = selectedCashList.size();
         long totalValue = 0;  // in satoshi
         long totalCd = 0;
-        
+
         for (Cash cash : selectedCashList) {
             // Sum values
             if (cash.getValue() != null) {
                 totalValue += cash.getValue();
             }
-            
+
             // Sum CD (Coin Days)
             if (cash.getCd() != null) {
                 totalCd += cash.getCd();
             }
         }
-        
+
         // Update UI elements
         if (selectedCashCountTextView != null) {
             selectedCashCountTextView.setText(String.valueOf(cashCount));
         }
-        
+
         if (selectedCashAmountTextView != null) {
             // Convert satoshi to formatted string using FchUtils.formatSatoshiValue
             String formattedAmount = FchUtils.formatSatoshiValue(totalValue);
             selectedCashAmountTextView.setText(formattedAmount);
         }
-        
+
         if (selectedCashCdTextView != null) {
             // Format large number for CD (using the same format from HomeActivity)
             String formattedCd = formatLargeNumber(totalCd);
@@ -578,6 +653,129 @@ public class CashActivity extends BaseCryptoActivity {
         }
     }
 
+    private void showEmptyState() {
+        if (emptyStateTextView != null) {
+            emptyStateTextView.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private void hideEmptyState() {
+        if (emptyStateTextView != null) {
+            emptyStateTextView.setVisibility(View.GONE);
+        }
+    }
+
+    private void setupSortControls() {
+        // Set up "All" checkbox
+        checkboxAll.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            cashCardContainer.selectAll(isChecked);
+            updateButtonStates();
+            updateSummaryCard();
+            updateStatisticsBar();
+        });
+
+        // Set up Owner sort
+        sortOwnerContainer.setOnClickListener(v -> {
+            ownerSortState = getNextSortState(ownerSortState);
+            valueSortState = SortState.NONE;
+            cdSortState = SortState.NONE;
+            updateSortIcons();
+            applySorting();
+        });
+
+        // Set up Value sort
+        sortValueContainer.setOnClickListener(v -> {
+            valueSortState = getNextSortState(valueSortState);
+            ownerSortState = SortState.NONE;
+            cdSortState = SortState.NONE;
+            updateSortIcons();
+            applySorting();
+        });
+
+        // Set up CD sort
+        sortCdContainer.setOnClickListener(v -> {
+            cdSortState = getNextSortState(cdSortState);
+            ownerSortState = SortState.NONE;
+            valueSortState = SortState.NONE;
+            updateSortIcons();
+            applySorting();
+        });
+
+        // Set initial icons
+        updateSortIcons();
+    }
+
+    private SortState getNextSortState(SortState current) {
+        switch (current) {
+            case NONE:
+                return SortState.ASC;
+            case ASC:
+                return SortState.DESC;
+            case DESC:
+                return SortState.NONE;
+            default:
+                return SortState.NONE;
+        }
+    }
+
+    private void updateSortIcons() {
+        updateSortIcon(sortOwnerIcon, ownerSortState);
+        updateSortIcon(sortValueIcon, valueSortState);
+        updateSortIcon(sortCdIcon, cdSortState);
+    }
+
+    private void updateSortIcon(ImageView icon, SortState state) {
+        switch (state) {
+            case NONE:
+                icon.setImageResource(R.drawable.ic_sort_none);
+                break;
+            case ASC:
+                icon.setImageResource(R.drawable.ic_sort_asc);
+                break;
+            case DESC:
+                icon.setImageResource(R.drawable.ic_sort_desc);
+                break;
+        }
+    }
+
+    private void applySorting() {
+        if (ownerSortState != SortState.NONE) {
+            cashCardContainer.sortByOwner(ownerSortState == SortState.ASC, true);
+        } else if (valueSortState != SortState.NONE) {
+            cashCardContainer.sortByValue(valueSortState == SortState.ASC, true);
+        } else if (cdSortState != SortState.NONE) {
+            cashCardContainer.sortByCd(cdSortState == SortState.ASC, true);
+        }
+    }
+
+    /**
+     * Updates the statistics bar with current counts
+     */
+    private void updateStatisticsBar() {
+        // Update loaded count
+        int loadedCount = cashList != null ? cashList.size() : 0;
+        if (statsLoadedCountTextView != null) {
+            statsLoadedCountTextView.setText(String.valueOf(loadedCount));
+        }
+
+        // Update total count from database
+        int totalCount = cashManager != null ? cashManager.getCashDB().getSize() : 0;
+        if (statsTotalCountTextView != null) {
+            statsTotalCountTextView.setText(String.valueOf(totalCount));
+        }
+
+        // Update checked count
+        int checkedCount = cashCardContainer != null ? cashCardContainer.getSelectedCashes().size() : 0;
+        if (statsCheckedCountTextView != null) {
+            statsCheckedCountTextView.setText(String.valueOf(checkedCount));
+        }
+
+        // Hide statistics bar if list is empty
+        if (statisticsBar != null) {
+            statisticsBar.setVisibility(loadedCount == 0 ? View.GONE : View.VISIBLE);
+        }
+    }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -590,7 +788,7 @@ public class CashActivity extends BaseCryptoActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        
+
         if (requestCode == REQUEST_CREATE_TX) {
             // Refresh cash list when returning from CreateTxActivity
             // This is needed because cash may have been added or removed during transaction creation/signing

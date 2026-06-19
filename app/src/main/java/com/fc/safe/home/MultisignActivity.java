@@ -6,8 +6,8 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 
-import com.fc.fc_ajdk.data.fchData.Multisign;
-import com.fc.fc_ajdk.db.LocalDB;
+import com.fc.fc_ajdk.data.fchData.Multisig;
+import com.fc.safe.db.LocalDB;
 import com.fc.fc_ajdk.utils.TimberLogger;
 import com.fc.safe.R;
 import com.fc.safe.db.MultisignManager;
@@ -19,9 +19,7 @@ import com.fc.safe.multisign.SignMultisignTxActivity;
 import com.fc.safe.tx.SignTxActivity;
 import com.fc.safe.multisign.MultisignKeyCardManager;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class MultisignActivity extends BaseCryptoActivity {
     private static final String TAG = "MultisignActivity";
@@ -45,7 +43,7 @@ public class MultisignActivity extends BaseCryptoActivity {
         multisignCardManager = new MultisignKeyCardManager(this, multisignListContainer, false);
         setupScrollListener();
         
-        // Load initial multisign cards
+        // Load initial multisig cards
         loadMultisigns();
     }
 
@@ -56,7 +54,7 @@ public class MultisignActivity extends BaseCryptoActivity {
 
     @Override
     protected String getActivityTitle() {
-        return getString(R.string.multisign);
+        return getString(R.string.multisig);
     }
 
     protected void initializeViews() {
@@ -89,36 +87,26 @@ public class MultisignActivity extends BaseCryptoActivity {
     private void loadMultisigns() {
         if (isLoading) return;
         isLoading = true;
-        TimberLogger.d(TAG, "loadMultisigns: Starting to load multisigns. lastIndex=" + lastIndex);
+        TimberLogger.d(TAG, "loadMultisigns: Starting to load multisigs. lastIndex=" + lastIndex);
 
-        List<Multisign> multisigns;
-        LocalDB<Multisign> multisignDB = multisignManager.getMultisignDB();
-        Map<String, Multisign> map;
-        if(multisignDB.getSortType().equals(LocalDB.SortType.NO_SORT)) {
-            map = multisignDB.getAll();
-            if(map == null){
-                showToast(getString(R.string.no_multisigns_found));
-                isLoading = false;
-                return;
-            }
-            multisigns = new ArrayList<>(map.values());
-        } else {
-            multisigns = multisignManager.getPaginatedMultisigns(10, lastIndex, true);
-        }
+        List<Multisig> multisigs;
+        LocalDB<Multisig> multisignDB = multisignManager.getMultisignDB();
+
+        multisigs = multisignManager.getPaginatedMultisigns(10, lastIndex, true);
+
+        TimberLogger.d(TAG, "loadMultisigns: Retrieved " + (multisigs != null ? multisigs.size() : 0) + " multisigs");
         
-        TimberLogger.d(TAG, "loadMultisigns: Retrieved " + (multisigns != null ? multisigns.size() : 0) + " multisigns");
-        
-        if (multisigns != null && !multisigns.isEmpty()) {
+        if (multisigs != null && !multisigs.isEmpty()) {
             if(lastIndex == null) {
                 lastIndex = (long) multisignDB.getSize();
             }
-            lastIndex -= multisigns.size();
-            TimberLogger.d(TAG, "loadMultisigns: Adding " + multisigns.size() + " multisigns to container");
-            multisignCardManager.addMultisignCards(multisignListContainer, multisigns);
+            lastIndex -= multisigs.size();
+            TimberLogger.d(TAG, "loadMultisigns: Adding " + multisigs.size() + " multisigs to container");
+            multisignCardManager.addMultisignCards(multisignListContainer, multisigs);
             TimberLogger.d(TAG, "loadMultisigns: Container child count: " + multisignListContainer.getChildCount());
-            showToast(getString(R.string.loaded_multisigns, multisigns.size()));
+            showToast(getString(R.string.loaded_multisigns, multisigs.size()));
         } else {
-            TimberLogger.d(TAG, "loadMultisigns: No more multisigns to load");
+            TimberLogger.d(TAG, "loadMultisigns: No more multisigs to load");
             showToast(getString(R.string.no_more_multisigns_to_load));
         }
         
@@ -128,9 +116,9 @@ public class MultisignActivity extends BaseCryptoActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        TimberLogger.d(TAG, "onResume: Checking if multisign list needs refresh");
+        TimberLogger.d(TAG, "onResume: Checking if multisig list needs refresh");
         if (needsRefresh) {
-            TimberLogger.d(TAG, "onResume: Refreshing multisign list");
+            TimberLogger.d(TAG, "onResume: Refreshing multisig list");
             lastIndex = null;
             multisignListContainer.removeAllViews();
             loadMultisigns();
@@ -164,9 +152,9 @@ public class MultisignActivity extends BaseCryptoActivity {
         startActivity(intent);
     }
 
-    private void showKeyDetail(Multisign multisign) {
+    private void showKeyDetail(Multisig multisig) {
         Intent intent = new Intent(this, MultisignDetailActivity.class);
-        intent.putExtra("multisign", multisign);
+        intent.putExtra("multisig", multisig);
         startActivity(intent);
     }
 

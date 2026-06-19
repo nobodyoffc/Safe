@@ -18,8 +18,12 @@ import org.bouncycastle.jcajce.provider.asymmetric.util.ECUtil;
 import org.bouncycastle.jce.ECNamedCurveTable;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.jce.spec.*;
+import java.security.spec.ECPrivateKeySpec;
+import java.security.spec.ECPublicKeySpec;
+import java.security.spec.ECParameterSpec;
+import java.security.spec.EllipticCurve;
+import java.security.spec.ECFieldFp;
 import org.bouncycastle.math.ec.ECCurve;
-import org.bouncycastle.math.ec.ECPoint;
 import org.bouncycastle.util.encoders.Hex;
 
 import javax.crypto.Cipher;
@@ -40,7 +44,9 @@ public class Bitcore {
     private static final boolean NO_KEY = false;
 
     static {
-        Security.addProvider(new BouncyCastleProvider());
+        if (Security.getProvider("BC") == null) {
+            Security.addProvider(new BouncyCastleProvider());
+        }
     }
 
     public static byte[] encrypt(byte[] message, PublicKey recipientPublicKey) throws Exception {
@@ -154,7 +160,7 @@ public class Bitcore {
 
             ECNamedCurveParameterSpec params = ECNamedCurveTable.getParameterSpec("secp256k1");
             ECDomainParameters domainParams = new ECDomainParameters(params.getCurve(), params.getG(), params.getN(), params.getH());
-            ECPoint point = params.getCurve().decodePoint(pubkeyBytes);
+            org.bouncycastle.math.ec.ECPoint point = params.getCurve().decodePoint(pubkeyBytes);
             publicKey = new ECPublicKeyParameters(point, domainParams);
         } else {
             throw new Error("NO_KEY option is not supported in this implementation");
@@ -184,15 +190,7 @@ public class Bitcore {
     }
 
     private static boolean constantTimeEquals(byte[] a, byte[] b) {
-        if (a.length != b.length) {
-            return false;
-        }
-
-        int result = 0;
-        for (int i = 0; i < a.length; i++) {
-            result |= a[i] ^ b[i];
-        }
-        return result == 0;
+        return java.security.MessageDigest.isEqual(a, b);
     }
     // ... (keep other methods like generateSharedSecret, sha512, hmacSha256, etc.)
 
@@ -219,7 +217,13 @@ public class Bitcore {
     }
 
     public static KeyPair generateKeyPair() throws Exception {
-        KeyPairGenerator keyGen = KeyPairGenerator.getInstance("EC", "BC");
+        KeyPairGenerator keyGen;
+        try {
+            keyGen = KeyPairGenerator.getInstance("EC", "BC");
+        } catch (NoSuchProviderException | NoSuchAlgorithmException e) {
+            // Fallback to default provider if BC is not available
+            keyGen = KeyPairGenerator.getInstance("EC");
+        }
         ECNamedCurveGenParameterSpec ecSpec = new ECNamedCurveGenParameterSpec("secp256k1");
         keyGen.initialize(ecSpec, new SecureRandom());
         return keyGen.generateKeyPair();
@@ -232,23 +236,53 @@ public class Bitcore {
             throw new IllegalArgumentException("Private key must be 32 bytes");
         }
 
-        // Get curve parameters
-        X9ECParameters params = SECNamedCurves.getByName("secp256k1");
-        ECCurve curve = params.getCurve();
-        ECDomainParameters domainParams = new ECDomainParameters(curve, params.getG(), params.getN(), params.getH());
-
-        // Create EC Parameter Spec
-        ECParameterSpec ecSpec = new ECParameterSpec(curve, params.getG(), params.getN(), params.getH());
-
         // Convert byte array to BigInteger
         BigInteger privateKeyBigInteger = new BigInteger(1, privateKeyBytes);
 
-        // Create EC Private Key Spec
-        ECPrivateKeySpec privateKeySpec = new ECPrivateKeySpec(privateKeyBigInteger, ecSpec);
+        // Try BC provider first
+        try {
+            KeyFactory keyFactory = KeyFactory.getInstance("EC", "BC");
 
-        // Generate PrivateKey
-        KeyFactory keyFactory = KeyFactory.getInstance("ECDSA", "BC");
-        return keyFactory.generatePrivate(privateKeySpec);
+            // Get curve parameters for BC
+            X9ECParameters params = SECNamedCurves.getByName("secp256k1");
+            ECCurve curve = params.getCurve();
+
+            // Create BC EC Parameter Spec
+            org.bouncycastle.jce.spec.ECParameterSpec bcEcSpec =
+                new org.bouncycastle.jce.spec.ECParameterSpec(curve, params.getG(), params.getN(), params.getH());
+
+            // Create BC EC Private Key Spec
+            org.bouncycastle.jce.spec.ECPrivateKeySpec bcPrivateKeySpec =
+                new org.bouncycastle.jce.spec.ECPrivateKeySpec(privateKeyBigInteger, bcEcSpec);
+
+            return keyFactory.generatePrivate(bcPrivateKeySpec);
+        } catch (NoSuchProviderException | NoSuchAlgorithmException e) {
+            // Fallback to default provider with standard Java specs
+            KeyFactory keyFactory = KeyFactory.getInstance("EC");
+
+            // Create standard Java EC parameter spec for secp256k1
+            BigInteger p = new BigInteger("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F", 16);
+            BigInteger a = BigInteger.ZERO;
+            BigInteger b = BigInteger.valueOf(7);
+            ECFieldFp field = new ECFieldFp(p);
+            EllipticCurve curve = new EllipticCurve(field, a, b);
+
+            BigInteger gx = new BigInteger("79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798", 16);
+            BigInteger gy = new BigInteger("483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8", 16);
+            java.security.spec.ECPoint g = new java.security.spec.ECPoint(gx, gy);
+
+            BigInteger n = new BigInteger("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141", 16);
+            int h = 1;
+
+            java.security.spec.ECParameterSpec javaEcSpec =
+                new java.security.spec.ECParameterSpec(curve, g, n, h);
+
+            // Create standard Java EC Private Key Spec
+            java.security.spec.ECPrivateKeySpec javaPrivateKeySpec =
+                new java.security.spec.ECPrivateKeySpec(privateKeyBigInteger, javaEcSpec);
+
+            return keyFactory.generatePrivate(javaPrivateKeySpec);
+        }
     }
 
     public static KeyPair createKeyPair(byte[] privateKeyBytes) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidKeySpecException, InvalidKeySpecException {
@@ -256,25 +290,83 @@ public class Bitcore {
             throw new IllegalArgumentException("Private key must be 32 bytes");
         }
 
-        // Get curve parameters
-        X9ECParameters params = SECNamedCurves.getByName("secp256k1");
-        ECDomainParameters domainParams = new ECDomainParameters(params.getCurve(), params.getG(), params.getN(), params.getH());
-        ECParameterSpec ecSpec = new ECParameterSpec(params.getCurve(), params.getG(), params.getN(), params.getH());
-
-        // Create private key
+        // Convert byte array to BigInteger
         BigInteger privateKeyBigInteger = new BigInteger(1, privateKeyBytes);
-        ECPrivateKeySpec privateKeySpec = new ECPrivateKeySpec(privateKeyBigInteger, ecSpec);
 
-        // Derive public key
-        ECPoint q = domainParams.getG().multiply(privateKeyBigInteger);
-        ECPublicKeySpec publicKeySpec = new ECPublicKeySpec(q, ecSpec);
+        // Try BC provider first
+        try {
+            KeyFactory keyFactory = KeyFactory.getInstance("EC", "BC");
 
-        // Create KeyFactory and generate KeyPair
-        KeyFactory keyFactory = KeyFactory.getInstance("EC", "BC");
-        PrivateKey privateKey = keyFactory.generatePrivate(privateKeySpec);
-        PublicKey publicKey = keyFactory.generatePublic(publicKeySpec);
+            // Get curve parameters for BC
+            X9ECParameters params = SECNamedCurves.getByName("secp256k1");
+            ECDomainParameters domainParams = new ECDomainParameters(params.getCurve(), params.getG(), params.getN(), params.getH());
+            org.bouncycastle.jce.spec.ECParameterSpec bcEcSpec =
+                new org.bouncycastle.jce.spec.ECParameterSpec(params.getCurve(), params.getG(), params.getN(), params.getH());
 
-        return new KeyPair(publicKey, privateKey);
+            // Create BC private key spec
+            org.bouncycastle.jce.spec.ECPrivateKeySpec bcPrivateKeySpec =
+                new org.bouncycastle.jce.spec.ECPrivateKeySpec(privateKeyBigInteger, bcEcSpec);
+
+            // Derive public key using BC
+            org.bouncycastle.math.ec.ECPoint q = domainParams.getG().multiply(privateKeyBigInteger);
+            org.bouncycastle.jce.spec.ECPublicKeySpec bcPublicKeySpec =
+                new org.bouncycastle.jce.spec.ECPublicKeySpec(q, bcEcSpec);
+
+            PrivateKey privateKey = keyFactory.generatePrivate(bcPrivateKeySpec);
+            PublicKey publicKey = keyFactory.generatePublic(bcPublicKeySpec);
+
+            return new KeyPair(publicKey, privateKey);
+        } catch (NoSuchProviderException | NoSuchAlgorithmException e) {
+            // Fallback to default provider with standard Java specs
+            KeyFactory keyFactory = KeyFactory.getInstance("EC");
+
+            // Create standard Java EC parameter spec for secp256k1
+            BigInteger p = new BigInteger("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F", 16);
+            BigInteger a = BigInteger.ZERO;
+            BigInteger b = BigInteger.valueOf(7);
+            ECFieldFp field = new ECFieldFp(p);
+            EllipticCurve curve = new EllipticCurve(field, a, b);
+
+            BigInteger gx = new BigInteger("79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798", 16);
+            BigInteger gy = new BigInteger("483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8", 16);
+            java.security.spec.ECPoint g = new java.security.spec.ECPoint(gx, gy);
+
+            BigInteger n = new BigInteger("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141", 16);
+            int h = 1;
+
+            java.security.spec.ECParameterSpec javaEcSpec =
+                new java.security.spec.ECParameterSpec(curve, g, n, h);
+
+            // Create standard Java private key spec
+            java.security.spec.ECPrivateKeySpec javaPrivateKeySpec =
+                new java.security.spec.ECPrivateKeySpec(privateKeyBigInteger, javaEcSpec);
+
+            // Derive public key - use manual calculation since we're in fallback mode
+            // This is a simplified version that doesn't handle all edge cases
+            PrivateKey privateKey = keyFactory.generatePrivate(javaPrivateKeySpec);
+
+            // For public key, calculate the point using BC math but create Java spec
+            X9ECParameters params = SECNamedCurves.getByName("secp256k1");
+            org.bouncycastle.math.ec.ECPoint q = params.getG().multiply(privateKeyBigInteger);
+            byte[] publicKeyBytes = q.getEncoded(false);
+
+            // Parse the uncompressed public key (skip 0x04 prefix)
+            byte[] xBytes = new byte[32];
+            byte[] yBytes = new byte[32];
+            System.arraycopy(publicKeyBytes, 1, xBytes, 0, 32);
+            System.arraycopy(publicKeyBytes, 33, yBytes, 0, 32);
+
+            BigInteger x = new BigInteger(1, xBytes);
+            BigInteger y = new BigInteger(1, yBytes);
+            java.security.spec.ECPoint javaPoint = new java.security.spec.ECPoint(x, y);
+
+            java.security.spec.ECPublicKeySpec javaPublicKeySpec =
+                new java.security.spec.ECPublicKeySpec(javaPoint, javaEcSpec);
+
+            PublicKey publicKey = keyFactory.generatePublic(javaPublicKeySpec);
+
+            return new KeyPair(publicKey, privateKey);
+        }
     }
 
     public static void main(String[] args) throws Exception {
@@ -290,21 +382,9 @@ public class Bitcore {
         try {
             publicKey = createPublicKey(pubkey);
             return Bitcore.encrypt(msg, publicKey );
-
-        } catch (NoSuchAlgorithmException e) {
-            System.out.println(e.getLocalizedMessage());
-            return null;
-        } catch (NoSuchProviderException e) {
-            System.out.println(e.getLocalizedMessage());
-            return null;
-        } catch (InvalidKeySpecException e) {
-            System.out.println(e.getLocalizedMessage());
-            return null;
         } catch (Exception e) {
-            System.out.println(e.getLocalizedMessage());
             return null;
         }
-
     }
 
     
@@ -379,24 +459,89 @@ public class Bitcore {
             byteArrayOutputStream.write(cryptoDataByte.getIv());
             byteArrayOutputStream.write(cryptoDataByte.getCipher());
         } catch (IOException e) {
-            e.printStackTrace();
+            // Should not happen with ByteArrayOutputStream
         }
         return byteArrayOutputStream.toByteArray();
     }
 
     public static PublicKey createPublicKey(byte[] publicKeyBytes) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidKeySpecException {
-        // Get curve parameters
-        X9ECParameters params = SECNamedCurves.getByName("secp256k1");
-        ECParameterSpec ecSpec = new ECParameterSpec(params.getCurve(), params.getG(), params.getN(), params.getH());
+        // Try BC provider first
+        try {
+            KeyFactory keyFactory = KeyFactory.getInstance("EC", "BC");
 
-        // Create point from public key bytes
-        ECPoint point = params.getCurve().decodePoint(publicKeyBytes);
-        
-        // Create public key spec
-        ECPublicKeySpec publicKeySpec = new ECPublicKeySpec(point, ecSpec);
+            // Get curve parameters for BC
+            X9ECParameters params = SECNamedCurves.getByName("secp256k1");
+            org.bouncycastle.jce.spec.ECParameterSpec bcEcSpec =
+                new org.bouncycastle.jce.spec.ECParameterSpec(params.getCurve(), params.getG(), params.getN(), params.getH());
 
-        // Generate PublicKey
-        KeyFactory keyFactory = KeyFactory.getInstance("EC", "BC");
-        return keyFactory.generatePublic(publicKeySpec);
+            // Create point from public key bytes
+            org.bouncycastle.math.ec.ECPoint point = params.getCurve().decodePoint(publicKeyBytes);
+
+            // Create BC public key spec
+            org.bouncycastle.jce.spec.ECPublicKeySpec bcPublicKeySpec =
+                new org.bouncycastle.jce.spec.ECPublicKeySpec(point, bcEcSpec);
+
+            return keyFactory.generatePublic(bcPublicKeySpec);
+        } catch (NoSuchProviderException | NoSuchAlgorithmException e) {
+            // Fallback to default provider with standard Java specs
+            KeyFactory keyFactory = KeyFactory.getInstance("EC");
+
+            // Create standard Java EC parameter spec for secp256k1
+            BigInteger p = new BigInteger("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F", 16);
+            BigInteger a = BigInteger.ZERO;
+            BigInteger b = BigInteger.valueOf(7);
+            ECFieldFp field = new ECFieldFp(p);
+            EllipticCurve curve = new EllipticCurve(field, a, b);
+
+            BigInteger gx = new BigInteger("79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798", 16);
+            BigInteger gy = new BigInteger("483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8", 16);
+            java.security.spec.ECPoint g = new java.security.spec.ECPoint(gx, gy);
+
+            BigInteger n = new BigInteger("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141", 16);
+            int h = 1;
+
+            java.security.spec.ECParameterSpec javaEcSpec =
+                new java.security.spec.ECParameterSpec(curve, g, n, h);
+
+            // Parse public key bytes and create standard Java EC point
+            if (publicKeyBytes.length == 33 && (publicKeyBytes[0] == 0x02 || publicKeyBytes[0] == 0x03)) {
+                // Compressed format - need to decompress
+                X9ECParameters params = SECNamedCurves.getByName("secp256k1");
+                org.bouncycastle.math.ec.ECPoint bcPoint = params.getCurve().decodePoint(publicKeyBytes);
+                byte[] uncompressed = bcPoint.getEncoded(false);
+
+                // Skip the 0x04 prefix and extract x, y coordinates
+                byte[] xBytes = new byte[32];
+                byte[] yBytes = new byte[32];
+                System.arraycopy(uncompressed, 1, xBytes, 0, 32);
+                System.arraycopy(uncompressed, 33, yBytes, 0, 32);
+
+                BigInteger x = new BigInteger(1, xBytes);
+                BigInteger y = new BigInteger(1, yBytes);
+                java.security.spec.ECPoint javaPoint = new java.security.spec.ECPoint(x, y);
+
+                java.security.spec.ECPublicKeySpec javaPublicKeySpec =
+                    new java.security.spec.ECPublicKeySpec(javaPoint, javaEcSpec);
+
+                return keyFactory.generatePublic(javaPublicKeySpec);
+            } else if (publicKeyBytes.length == 65 && publicKeyBytes[0] == 0x04) {
+                // Uncompressed format
+                byte[] xBytes = new byte[32];
+                byte[] yBytes = new byte[32];
+                System.arraycopy(publicKeyBytes, 1, xBytes, 0, 32);
+                System.arraycopy(publicKeyBytes, 33, yBytes, 0, 32);
+
+                BigInteger x = new BigInteger(1, xBytes);
+                BigInteger y = new BigInteger(1, yBytes);
+                java.security.spec.ECPoint javaPoint = new java.security.spec.ECPoint(x, y);
+
+                java.security.spec.ECPublicKeySpec javaPublicKeySpec =
+                    new java.security.spec.ECPublicKeySpec(javaPoint, javaEcSpec);
+
+                return keyFactory.generatePublic(javaPublicKeySpec);
+            } else {
+                throw new InvalidKeySpecException("Invalid public key format");
+            }
+        }
     }
 }

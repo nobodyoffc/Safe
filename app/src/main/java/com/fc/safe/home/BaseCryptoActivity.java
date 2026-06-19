@@ -28,12 +28,14 @@ import com.fc.safe.db.KeyInfoManager;
 import com.fc.safe.qr.QrCodeActivity;
 import com.fc.safe.myKeys.ChooseKeyInfoActivity;
 import com.fc.safe.ui.IoIconsView;
+import com.fc.safe.utils.ChooseMode;
 import com.fc.safe.utils.KeyboardUtils;
 import com.fc.safe.utils.ToolbarUtils;
 import com.google.android.material.textfield.TextInputEditText;
 import com.fc.safe.utils.TextIconsUtils;
 
 import java.util.List;
+import com.fc.safe.utils.ToastUtils;
 
 public abstract class BaseCryptoActivity extends AppCompatActivity {
     protected ActivityResultLauncher<Intent> qrScanLauncher;
@@ -207,7 +209,7 @@ public abstract class BaseCryptoActivity extends AppCompatActivity {
     }
 
     protected void showToast(String message) {
-        Toast.makeText(this, message, SafeApplication.TOAST_LASTING).show();
+        ToastUtils.showInfo(this,message);
     }
 
     protected void clearInput(TextInputEditText input) {
@@ -249,8 +251,7 @@ public abstract class BaseCryptoActivity extends AppCompatActivity {
         }
     }
 
-    protected void showChooseKeyInfoDialog(Boolean isSingleChoice) {
-        TimberLogger.i(TAG, "Showing choose key info dialog, isSingleChoice: " + isSingleChoice);
+    protected void showChooseKeyInfoDialog(ChooseMode chooseMode) {
         List<KeyInfo> keyInfoList = keyInfoManager.getAllKeyInfoList();
         TimberLogger.i(TAG, "Retrieved " + keyInfoList.size() + " key info items");
         
@@ -260,7 +261,7 @@ public abstract class BaseCryptoActivity extends AppCompatActivity {
             return;
         }
 
-        Intent intent = ChooseKeyInfoActivity.newIntent(this, keyInfoList, isSingleChoice);
+        Intent intent = ChooseKeyInfoActivity.newIntent(this, keyInfoList, chooseMode);
         TimberLogger.i(TAG, "Launching ChooseKeyInfoActivity");
         chooseKeyLauncher.launch(intent);
     }
@@ -271,7 +272,7 @@ public abstract class BaseCryptoActivity extends AppCompatActivity {
 
     protected void setupKeyIcons(int keyView, int keyIcons, int QR_SCAN_KEY_REQUEST_CODE) {
         setupIoIconsView(keyView, keyIcons, false, true, true, false,
-                null, v -> showChooseKeyInfoDialog(true), () -> startQrScan(QR_SCAN_KEY_REQUEST_CODE), null);
+                null, v -> showChooseKeyInfoDialog(ChooseMode.CHOOSE_ONE_RETURN), () -> startQrScan(QR_SCAN_KEY_REQUEST_CODE), null);
     }
 
     protected void setupResultIcons(int resultView, int resultIcons, IoIconsView.OnMakeQrClickListener makeQrListener) {

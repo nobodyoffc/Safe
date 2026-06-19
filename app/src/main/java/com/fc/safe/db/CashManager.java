@@ -1,18 +1,14 @@
 package com.fc.safe.db;
 
-import static com.fc.fc_ajdk.constants.FieldNames.BIRTH_TIME;
-
 import android.content.Context;
-import android.widget.Toast;
-
 import com.fc.fc_ajdk.data.fchData.Cash;
-import com.fc.fc_ajdk.db.LocalDB;
 import com.fc.fc_ajdk.utils.TimberLogger;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import com.fc.safe.utils.ToastUtils;
 
 /**
  * A singleton class to manage and share the Cash database across activities.
@@ -57,7 +53,7 @@ public class CashManager {
                 TimberLogger.e(TAG, "Error closing database: " + e.getMessage());
             }
         }
-        cashDB = dbManager.getEntityDatabase(Cash.class, LocalDB.SortType.BIRTH_ORDER, BIRTH_TIME);
+        cashDB = dbManager.getEntityDatabase(Cash.class);
     }
 
     /**
@@ -110,6 +106,10 @@ public class CashManager {
         if (cash.getId() == null) {
             cash.makeId();
         }
+        if (cash.getId() == null) {
+            TimberLogger.w(TAG, "Cannot add cash with null ID (birthTxId or birthIndex may be missing)");
+            return;
+        }
         cashDB.put(cash.getId(), cash);
         TimberLogger.i(TAG, "Added Cash with ID: %s", cash.getId());
     }
@@ -126,10 +126,14 @@ public class CashManager {
             if(cash.getId() == null) {
                 cash.makeId();
             }
+            if (cash.getId() == null) {
+                TimberLogger.w(TAG, "Skipping cash with null ID (birthTxId or birthIndex may be missing)");
+                continue;
+            }
             cashMap.put(cash.getId(), cash);
             count++;
         }
-        cashDB.putAll(cashMap);
+        cashDB.put(cashMap);
         TimberLogger.i(TAG, "%s cashes added.", count);
     }
 
@@ -170,15 +174,15 @@ public class CashManager {
      * @param descending Whether to sort in descending order
      * @return A list of Cash objects for the requested page
      */
-    public List<Cash> getPaginatedCashes(int pageSize, Long lastIndex, boolean descending) {
+    public List<Cash> getPaginatedCashes(long pageSize, Long lastIndex, boolean descending) {
         return cashDB.getList(pageSize, null, lastIndex, true, null, null, false, descending);
     }
 
     /**
-     * Gets the index of a Cash object by its ID.
-     * 
+     * Gets the index (0-based position) of a Cash object by its ID.
+     *
      * @param id The ID of the Cash object
-     * @return The index of the Cash object
+     * @return The index of the Cash object, or -1 if not found
      */
     public Long getIndexById(String id) {
         return cashDB.getIndexById(id);
@@ -229,7 +233,7 @@ public class CashManager {
 
     /**
      * Gets all valid Cash objects owned by a specific FID.
-     * 
+     *
      * @param ownerFid The FID of the owner
      * @return A list of valid Cash objects owned by the specified FID
      */
@@ -244,6 +248,49 @@ public class CashManager {
         return validOwnerCashes;
     }
 
+    /** Available = valid AND not locked by a pending TX. This is what can actually be spent now. */
+    public List<Cash> getAvailableCashes() {
+        List<Cash> result = new ArrayList<>();
+        for (Cash cash : getAllCashList()) {
+            if (Boolean.TRUE.equals(cash.isValid()) && cash.getPendingId() == null) {
+                result.add(cash);
+            }
+        }
+        return result;
+    }
+
+    /** Locked = valid AND has a pendingId (input of a pending TX on this device). */
+    public List<Cash> getLockedCashes() {
+        List<Cash> result = new ArrayList<>();
+        for (Cash cash : getAllCashList()) {
+            if (Boolean.TRUE.equals(cash.isValid()) && cash.getPendingId() != null) {
+                result.add(cash);
+            }
+        }
+        return result;
+    }
+
+    /** Incoming = not yet valid AND has a pendingId (output of a pending TX, awaiting confirmation). */
+    public List<Cash> getIncomingCashes() {
+        List<Cash> result = new ArrayList<>();
+        for (Cash cash : getAllCashList()) {
+            if (!Boolean.TRUE.equals(cash.isValid()) && cash.getPendingId() != null) {
+                result.add(cash);
+            }
+        }
+        return result;
+    }
+
+    /** Sum of satoshi values over a cash list (null-safe). */
+    public static long sumSatoshi(List<Cash> cashes) {
+        long sum = 0L;
+        if (cashes == null) return 0L;
+        for (Cash cash : cashes) {
+            if (cash.getValue() != null) sum += cash.getValue();
+        }
+        return sum;
+    }
+
     /**
      * Utility method to save a Cash, commit, show a toast, set result, and finish the activity.
      */
@@ -251,20 +298,40 @@ public class CashManager {
         CashManager cashManager = CashManager.getInstance(activity);
         cashManager.addCash(cash);
         cashManager.commit();
-        Toast.makeText(activity, com.fc.safe.R.string.cash_saved_successfully, Toast.LENGTH_SHORT).show();
+        ToastUtils.showInfo(activity, com.fc.safe.R.string.cash_saved_successfully);
         activity.setResult(android.app.Activity.RESULT_OK);
         activity.finish();
     }
 
     /**
      * Utility method to save multiple Cash objects, commit, show a toast, set result, and finish the activity.
+     * Performs database operations on a background thread to avoid ANR.
+     * Note: The calling activity should show a WaitingDialog before calling this method.
+     * The dialog will remain visible until the activity finishes.
      */
     public static void saveAndFinish(android.app.Activity activity, List<Cash> cashList) {
-        CashManager cashManager = CashManager.getInstance(activity);
-        cashManager.addAllCash(cashList);
-        cashManager.commit();
-        Toast.makeText(activity, activity.getString(com.fc.safe.R.string.cash_saved_successfully_count, cashList.size()), Toast.LENGTH_SHORT).show();
-        activity.setResult(android.app.Activity.RESULT_OK);
-        activity.finish();
+        // Perform database operations on background thread to avoid ANR
+        new Thread(() -> {
+            try {
+                CashManager cashManager = CashManager.getInstance(activity);
+                cashManager.addAllCash(cashList);
+                cashManager.commit();
+
+                // Update UI on main thread
+                activity.runOnUiThread(() -> {
+                    ToastUtils.showInfo(activity, activity.getString(com.fc.safe.R.string.cash_saved_successfully_count, cashList.size()));
+                    activity.setResult(android.app.Activity.RESULT_OK);
+                    // WaitingDialog will be dismissed automatically when activity finishes
+                    activity.finish();
+                });
+            } catch (Exception e) {
+                TimberLogger.e(TAG, "Error saving cash list: %s", e.getMessage());
+                // Handle error on main thread
+                activity.runOnUiThread(() -> {
+                    ToastUtils.showError(activity, activity.getString(com.fc.safe.R.string.operation_failed_with_message, e.getMessage()));
+                    // Keep the activity open on error so user can retry
+                });
+            }
+        }).start();
     }
 } 

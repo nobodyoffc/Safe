@@ -13,7 +13,7 @@ import com.fc.fc_ajdk.core.crypto.KeyTools;
 import com.fc.fc_ajdk.data.fcData.AlgorithmId;
 import com.fc.fc_ajdk.data.fcData.KeyInfo;
 import com.fc.fc_ajdk.data.fcData.Signature;
-import com.fc.fc_ajdk.db.LocalDB;
+import com.fc.safe.db.LocalDB;
 import com.fc.fc_ajdk.utils.Hex;
 import com.fc.safe.R;
 import com.fc.safe.db.KeyInfoManager;

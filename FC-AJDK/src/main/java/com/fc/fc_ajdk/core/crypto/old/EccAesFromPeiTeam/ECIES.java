@@ -12,6 +12,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.util.Arrays;
 
+@Deprecated
 public class ECIES {
     BigInteger secretKey;
     BigInteger[] publicKey;

@@ -5,12 +5,9 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
-
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.fc.fc_ajdk.config.Configure;
-import com.fc.fc_ajdk.utils.BytesUtils;
 import com.fc.fc_ajdk.utils.IdNameUtils;
 import com.fc.fc_ajdk.utils.TimberLogger;
 import com.fc.safe.R;
@@ -25,6 +22,7 @@ import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputLayout;
 
 import java.util.Objects;
+import com.fc.safe.utils.ToastUtils;
 
 public class CreatePasswordActivity extends AppCompatActivity {
 
@@ -44,7 +42,7 @@ public class CreatePasswordActivity extends AppCompatActivity {
         setContentView(R.layout.activity_create_password);
 
         // Set up toolbar
-        ToolbarUtils.setupToolbar(this, "Create Password");
+        ToolbarUtils.setupToolbar(this, getString(R.string.create_password));
 
         initializeViews();
         setupClickListeners();
@@ -126,28 +124,28 @@ public class CreatePasswordActivity extends AppCompatActivity {
             savePassword();
         } catch (Exception e) {
             TimberLogger.e(TAG, "Error creating password: " + e.getMessage(), e);
-            showError("Error creating password");
+            showError(getString(R.string.error_with_message,e.getMessage()));
         }
     }
 
     private boolean isPasswordValid(String password, String confirmPassword) {
         if (password.isEmpty()) {
-            showError("Please enter a password");
+            showError(getString(R.string.please_enter_a_password));
             return false;
         }
 
         if (confirmPassword.isEmpty()) {
-            showError("Please confirm your password");
+            showError(getString(R.string.please_confirm_your_password));
             return false;
         }
 
         if (password.length() < MIN_PASSWORD_LENGTH) {
-            showError("Password must be at least " + MIN_PASSWORD_LENGTH + " characters long");
+            showError(getString(R.string.password_must_be_at_least_d_characters_long,MIN_PASSWORD_LENGTH));
             return false;
         }
 
         if (!password.equals(confirmPassword)) {
-            showError("Passwords do not match");
+            showError(getString(R.string.passwords_do_not_match));
             return false;
         }
 
@@ -157,38 +155,49 @@ public class CreatePasswordActivity extends AppCompatActivity {
     private void savePassword() {
         String password = passwordInput.getText().toString();
         if (password.isEmpty()) {
-            Toast.makeText(this, getString(R.string.please_enter_password), Toast.LENGTH_SHORT).show();
+            ToastUtils.showInfo(this, getString(R.string.please_enter_password));
             return;
         }
 
         byte[] passwordBytes = password.getBytes();
         String passwordName = IdNameUtils.makePasswordHashName(passwordBytes);
-        
+
         // Create new Configure object
         Configure configure = new Configure();
         configure.makeSymkeyFromPassword(passwordBytes);
         configure.setPasswordName(passwordName);
-        
+
         // Get DatabaseManager instance
         DatabaseManager dbManager = DatabaseManager.getInstance(this);
-        
+
         // Set the new password name, which will trigger database cleanup if needed
         dbManager.setCurrentPasswordName(passwordName);
-        
+
         // Reinitialize all managers with the new password
         KeyInfoManager.getInstance(this).initialize(this);
         SecretManager.getInstance(this).initialize(this);
         MultisignManager.getInstance(this).initialize(this);
-        
+
         // Store the Configure object in ConfigureManager
         ConfigureManager.getInstance().setConfigure(configure);
         ConfigureManager.getInstance().storeConfigure(this, configure);
-        
+
+        // Check if this is from background timeout - if so, clear stack and go to HomeActivity
+        boolean fromBackgroundTimeout = getIntent().getBooleanExtra("from_background_timeout", false);
+
         // Show reminder dialog and only finish activity after dialog is dismissed
         RemindDialog dialog = new RemindDialog(this, getString(R.string.remember_backup_keys));
         dialog.setOnDismissListener(d -> {
-            setResult(RESULT_OK);
-            finish();
+            if (fromBackgroundTimeout) {
+                // Clear all activities and go to HomeActivity since password context changed
+                Intent homeIntent = new Intent(CreatePasswordActivity.this, com.fc.safe.home.HomeActivity.class);
+                homeIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(homeIntent);
+                finish();
+            } else {
+                setResult(RESULT_OK);
+                finish();
+            }
         });
         dialog.show();
     }

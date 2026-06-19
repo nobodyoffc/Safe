@@ -18,10 +18,21 @@ import java.util.Base64;
 
 public class CryptoDataByte extends FcObject {
 
-    public static final String ALG_0 = "000000000000";
-    public static final String ALG_1 = "000000000001";
+    // Bundle algorithm prefixes: the first 12 hex chars (6 bytes) of each algorithm's
+    // on-chain protocol PID. Used as the bundle prefix written by toBundle().
+    private static final String ALG_PID_PREFIX_AesCbc256 = "51515d32878c";               //PID:51515d32878c8eabdab8b768386b2affedc50b3d00d1f6f697396266b34c235e
+    private static final String ALG_PID_PREFIX_EccK1AesCbc256 = "3ea47cd61381";           //PID:3ea47cd61381bdd97f3e36d4c71c8075a684a860db46791cc505abefbb8e923e
+    private static final String ALG_PID_PREFIX_AesGcm256 = "76f7b226a8b3";                //PID:76f7b226a8b3eed8296b73f4c9317d4c01c02c57eac021bc04beb61ff8ad0efd
+    private static final String ALG_PID_PREFIX_EccK1AesGcm256 = "a5acd7077805";           //PID:a5acd7077805d3e8ae6ddf7fb9d9ebd52c665942e5096e3d308f66d4cf5e844a
+    private static final String ALG_PID_PREFIX_X25519AesGcm256 = "b4a25b3c3043";          //PID:b4a25b3c3043105fd3a568a628bf2edfb2ae543c229f491276c0d166a4de46ee
+    private static final String ALG_PID_PREFIX_ChaCha20 = "bcc39a9628e2";                 //PID:bcc39a9628e265320ea5dfcdf35a50b1ac190cd62b9692a64de87fad925c4ade
+    private static final String ALG_PID_PREFIX_EccK1ChaCha20 = "355319f84bd5";            //PID:355319f84bd534be45548621edf56ebd467e8905d78cfe8c8741bb8555f76d4a
+    private static final String ALG_PID_PREFIX_ChaCha20Poly1305 = "b1788c3b7320";         //PID:b1788c3b73208c85f0afdec4bc5c366755c2f9de07dc01973d877fc1b31010a3
+    private static final String ALG_PID_PREFIX_EccK1ChaCha20Poly1305 = "d1691132aee1";    //PID:d1691132aee137b59002552b2909f8a33b9cbfcbbf3ca12bad20965e2f968a59
+
     private EncryptType type;
     private AlgorithmId alg;
+    private Kdf kdf;
 
     private transient byte[] data;
     private transient byte[] did;
@@ -86,6 +97,8 @@ public class CryptoDataByte extends FcObject {
             cryptoDataByte.setType(cryptoDataStr.getType());
         if (cryptoDataStr.getAlg() != null)
             cryptoDataByte.setAlg(cryptoDataStr.getAlg());
+        if (cryptoDataStr.getKdf() != null)
+            cryptoDataByte.setKdf(cryptoDataStr.getKdf());
         if (cryptoDataStr.getCipher() != null)
             cryptoDataByte.setCipher(Base64.getDecoder().decode(cryptoDataStr.getCipher()));
         if (cryptoDataStr.getIv() != null)
@@ -135,18 +148,35 @@ public class CryptoDataByte extends FcObject {
     }
 
     public byte[] toBundle() {
-        if (iv == null || cipher == null || sum == null || type == null || alg == null) {
+        if (iv == null || cipher == null || type == null || alg == null) {
             return null; // Handle basic null checks early
+        }
+
+        // For AES-GCM algorithms, sum is not required (built-in authentication)
+        boolean requiresSum = (alg != AlgorithmId.FC_AesGcm256_No1_NrC7 &&
+                              alg != AlgorithmId.FC_EccK1AesGcm256_No1_NrC7 &&
+                              alg != AlgorithmId.FC_X25519AesGcm256_No1_NrC7);
+
+        if (requiresSum && sum == null) {
+            return null; // sum is required but missing for non-GCM algorithms
         }
 
         if (type.equals(EncryptType.Symkey) || type.equals(EncryptType.Password)) {
             if (keyName == null) return null;
         }
 
-        // Create algorithm byte array
+        // Create algorithm byte array: the first 12 hex chars (6 bytes) of each
+        // algorithm's on-chain protocol PID. See ALG_PID_PREFIX_* constants.
         byte[] algBytes = switch (alg) {
-            case FC_AesCbc256_No1_NrC7 -> new byte[]{0, 0, 0, 0, 0, 1};  // Defaults to all zeroes
-            case FC_EccK1AesCbc256_No1_NrC7 -> new byte[]{0, 0, 0, 0, 0, 2};
+            case FC_AesCbc256_No1_NrC7 -> Hex.fromHex(ALG_PID_PREFIX_AesCbc256);
+            case FC_EccK1AesCbc256_No1_NrC7 -> Hex.fromHex(ALG_PID_PREFIX_EccK1AesCbc256);
+            case FC_AesGcm256_No1_NrC7 -> Hex.fromHex(ALG_PID_PREFIX_AesGcm256);
+            case FC_EccK1AesGcm256_No1_NrC7 -> Hex.fromHex(ALG_PID_PREFIX_EccK1AesGcm256);
+            case FC_X25519AesGcm256_No1_NrC7 -> Hex.fromHex(ALG_PID_PREFIX_X25519AesGcm256);
+            case FC_ChaCha20_No1_NrC7 -> Hex.fromHex(ALG_PID_PREFIX_ChaCha20);
+            case FC_EccK1ChaCha20_No1_NrC7 -> Hex.fromHex(ALG_PID_PREFIX_EccK1ChaCha20);
+            case FC_ChaCha20Poly1305_No1_NrC7 -> Hex.fromHex(ALG_PID_PREFIX_ChaCha20Poly1305);
+            case FC_EccK1ChaCha20Poly1305_No1_NrC7 -> Hex.fromHex(ALG_PID_PREFIX_EccK1ChaCha20Poly1305);
             default -> null;
         };
 
@@ -161,29 +191,29 @@ public class CryptoDataByte extends FcObject {
 
             // Conditionally write pubKeyA based on EncryptType
             if (type == EncryptType.AsyOneWay || type == EncryptType.AsyTwoWay) {
-                if (pubkeyA == null) return null; // Check if pubKeyA is needed but not provided
+                if (pubkeyA == null) return null;
                 outputStream.write(pubkeyA);
             }
 
             // Conditionally write keyName based on EncryptType
-            if (type == EncryptType.Symkey || type == EncryptType.Password) {
+            if (type == EncryptType.Symkey) {
                 outputStream.write(keyName);
             }
 
-            // Write iv (16 bytes)
+            // Write iv (12 or 16 bytes depending on algorithm)
             outputStream.write(iv);
 
             // Write cipher (variable length)
             outputStream.write(cipher);
 
-            // Write sum (4 bytes)
-            outputStream.write(sum);
+            // Write sum (4 bytes) only for non-GCM algorithms
+            if (requiresSum) {
+                outputStream.write(sum);
+            }
 
             // Convert the output stream to a byte array
             return outputStream.toByteArray();
         } catch (IOException e) {
-            // Handle potential IO exceptions (shouldn't happen with ByteArrayOutputStream)
-            e.printStackTrace();
             return null;
         }
     }
@@ -215,25 +245,43 @@ public class CryptoDataByte extends FcObject {
         CryptoDataByte cryptoData = new CryptoDataByte();
 
         // Extract the algorithm bytes
-
         byte[] algBytes = new byte[6];
         System.arraycopy(bundle, offset, algBytes, 0, 6);
         offset += 6;
-        // Map algorithm bytes back to AlgorithmId
-        AlgorithmId alg = switch (Arrays.toString(algBytes)) {
-            case "[0, 0, 0, 0, 0, 1]" -> AlgorithmId.FC_AesCbc256_No1_NrC7;
-            case "[0, 0, 0, 0, 0, 2]" -> AlgorithmId.FC_EccK1AesCbc256_No1_NrC7;
+        // Map algorithm bytes back to AlgorithmId. Both the new PID-based prefixes
+        // and the legacy sequential prefixes are accepted so old ciphers still decrypt.
+        AlgorithmId alg = switch (Hex.toHex(algBytes)) {
+            // New PID-based prefixes (first 12 hex chars of the on-chain PID)
+            case ALG_PID_PREFIX_AesCbc256 -> AlgorithmId.FC_AesCbc256_No1_NrC7;
+            case ALG_PID_PREFIX_EccK1AesCbc256 -> AlgorithmId.FC_EccK1AesCbc256_No1_NrC7;
+            case ALG_PID_PREFIX_AesGcm256 -> AlgorithmId.FC_AesGcm256_No1_NrC7;
+            case ALG_PID_PREFIX_EccK1AesGcm256 -> AlgorithmId.FC_EccK1AesGcm256_No1_NrC7;
+            case ALG_PID_PREFIX_X25519AesGcm256 -> AlgorithmId.FC_X25519AesGcm256_No1_NrC7;
+            case ALG_PID_PREFIX_ChaCha20 -> AlgorithmId.FC_ChaCha20_No1_NrC7;
+            case ALG_PID_PREFIX_EccK1ChaCha20 -> AlgorithmId.FC_EccK1ChaCha20_No1_NrC7;
+            case ALG_PID_PREFIX_ChaCha20Poly1305 -> AlgorithmId.FC_ChaCha20Poly1305_No1_NrC7;
+            case ALG_PID_PREFIX_EccK1ChaCha20Poly1305 -> AlgorithmId.FC_EccK1ChaCha20Poly1305_No1_NrC7;
+            // Legacy sequential prefixes (kept for backward-compatible decryption)
+            case "000000000001" -> AlgorithmId.FC_AesCbc256_No1_NrC7;
+            case "000000000002" -> AlgorithmId.FC_EccK1AesCbc256_No1_NrC7;
+            case "000000000003" -> AlgorithmId.FC_AesGcm256_No1_NrC7;
+            case "000000000004" -> AlgorithmId.FC_EccK1AesGcm256_No1_NrC7;
+            case "000000000005" -> AlgorithmId.FC_X25519AesGcm256_No1_NrC7;
+            case "000000000006" -> AlgorithmId.FC_ChaCha20_No1_NrC7;
+            case "000000000007" -> AlgorithmId.FC_EccK1ChaCha20_No1_NrC7;
+            case "000000000008" -> AlgorithmId.FC_ChaCha20Poly1305_No1_NrC7;
+            case "000000000009" -> AlgorithmId.FC_EccK1ChaCha20Poly1305_No1_NrC7;
             default -> null;
         };
 
-        if (alg == null) return null; // Return null if the algorithm ID isn't recognized
+        if (alg == null) return null;
 
         cryptoData.setAlg(alg);
 
         // Extract the EncryptType byte
         byte typeByte = bundle[6];
         offset++;
-        EncryptType type = EncryptType.fromNumber(typeByte); // Assuming EncryptType has a method to get type from a number
+        EncryptType type = EncryptType.fromNumber(typeByte);
 
         if (type == null) return null;
 
@@ -241,33 +289,45 @@ public class CryptoDataByte extends FcObject {
 
         // Check if pubKeyA exists for Asy
         if (type == EncryptType.AsyOneWay || type == EncryptType.AsyTwoWay) {
-            // Extract pubKeyA (33 bytes)
-            byte[] pubKeyA = new byte[33];
-            System.arraycopy(bundle, offset, pubKeyA, 0, 33);
+            // Determine public key size based on algorithm
+            int pubKeySize = (alg == AlgorithmId.FC_X25519AesGcm256_No1_NrC7) ? 32 : 33;
+            byte[] pubKeyA = new byte[pubKeySize];
+            System.arraycopy(bundle, offset, pubKeyA, 0, pubKeySize);
             cryptoData.setPubkeyA(pubKeyA);
-            offset += 33;
+            offset += pubKeySize;
         }
 
-        // Check if keyName exists for Symkey or Password
-        if (type == EncryptType.Symkey || type == EncryptType.Password) {
-            // Extract pubKeyA (33 bytes)
+        // Check if keyName exists for Symkey
+        if (type == EncryptType.Symkey) {
             byte[] keyName = new byte[6];
             System.arraycopy(bundle, offset, keyName, 0, 6);
             cryptoData.setKeyName(keyName);
             offset += 6;
         }
 
-        // Extract iv (16 bytes)
-        byte[] iv = new byte[16];
-        System.arraycopy(bundle, offset, iv, 0, 16);
+        // Extract iv (length depends on algorithm: 12 bytes for GCM/ChaCha20, 16 bytes for CBC)
+        boolean uses12ByteIv = (alg == AlgorithmId.FC_AesGcm256_No1_NrC7 ||
+                                alg == AlgorithmId.FC_EccK1AesGcm256_No1_NrC7 ||
+                                alg == AlgorithmId.FC_X25519AesGcm256_No1_NrC7 ||
+                                alg == AlgorithmId.FC_ChaCha20_No1_NrC7 ||
+                                alg == AlgorithmId.FC_EccK1ChaCha20_No1_NrC7);
+
+        int ivLength = uses12ByteIv ? 12 : 16;
+        byte[] iv = new byte[ivLength];
+        System.arraycopy(bundle, offset, iv, 0, ivLength);
         cryptoData.setIv(iv);
-        offset += 16;
+        offset += ivLength;
+
+        // For AES-GCM algorithms, sum is not included (built-in authentication)
+        boolean hasSum = (alg != AlgorithmId.FC_AesGcm256_No1_NrC7 &&
+                         alg != AlgorithmId.FC_EccK1AesGcm256_No1_NrC7 &&
+                         alg != AlgorithmId.FC_X25519AesGcm256_No1_NrC7);
 
         // Calculate cipher length dynamically
-        int sumLength = 4;
+        int sumLength = hasSum ? 4 : 0;
         int cipherLength = bundle.length - offset - sumLength;
 
-        if (cipherLength <= 0) return null; // Sanity check to ensure we have a valid cipher length
+        if (cipherLength <= 0) return null;
 
         // Extract cipher
         byte[] cipher = new byte[cipherLength];
@@ -275,11 +335,13 @@ public class CryptoDataByte extends FcObject {
         cryptoData.setCipher(cipher);
         offset += cipherLength;
 
-        // Extract sum (last 4 bytes)
-        byte[] sum = new byte[4];
-        System.arraycopy(bundle, offset, sum, 0, 4);
-        cryptoData.setSum(sum);
-
+        // Extract sum (last 4 bytes) only for non-GCM algorithms
+        if (hasSum) {
+            byte[] sum = new byte[4];
+            System.arraycopy(bundle, offset, sum, 0, 4);
+            cryptoData.setSum(sum);
+        }
+        cryptoData.setCode(0);
         return cryptoData;
     }
 
@@ -350,6 +412,14 @@ public class CryptoDataByte extends FcObject {
 
     public void setAlg(AlgorithmId alg) {
         this.alg = alg;
+    }
+
+    public Kdf getKdf() {
+        return kdf;
+    }
+
+    public void setKdf(Kdf kdf) {
+        this.kdf = kdf;
     }
 
     public EncryptType getType() {

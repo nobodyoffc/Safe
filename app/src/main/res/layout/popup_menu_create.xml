@@ -22,35 +22,6 @@
         android:background="?android:attr/listDivider"/>
 
     <TextView
-        android:id="@+id/input_phrase"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="16dp"
-        android:text="@string/input_phrase"
-        android:textSize="16sp"
-        android:textColor="?android:attr/textColorPrimary"
-        android:background="?attr/selectableItemBackground"/>
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="?android:attr/listDivider"/>
-    <TextView
-        android:id="@+id/from_pri_key"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="16dp"
-        android:text="@string/Input_prikey"
-        android:textSize="16sp"
-        android:textColor="?android:attr/textColorPrimary"
-        android:background="?attr/selectableItemBackground"/>
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="?android:attr/listDivider"/>
-
-    <TextView
         android:id="@+id/from_pri_key_cipher"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -101,6 +72,35 @@
         android:layout_height="wrap_content"
         android:padding="16dp"
         android:text="@string/find_a_nice_fid"
+        android:textSize="16sp"
+        android:textColor="?android:attr/textColorPrimary"
+        android:background="?attr/selectableItemBackground"/>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="?android:attr/listDivider"/>
+
+    <TextView
+        android:id="@+id/input_phrase"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp"
+        android:text="@string/input_phrase"
+        android:textSize="16sp"
+        android:textColor="?android:attr/textColorPrimary"
+        android:background="?attr/selectableItemBackground"/>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="?android:attr/listDivider"/>
+    <TextView
+        android:id="@+id/from_pri_key"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp"
+        android:text="@string/Input_prikey"
         android:textSize="16sp"
         android:textColor="?android:attr/textColorPrimary"
         android:background="?attr/selectableItemBackground"/>

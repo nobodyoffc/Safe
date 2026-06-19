@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
@@ -13,156 +14,161 @@
         android:orientation="vertical"
         android:padding="16dp">
 
-        <!-- txContainer (7/9) -->
-        <LinearLayout
-            android:id="@+id/txContainer"
+        <ScrollView
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="8"
-            android:orientation="vertical">
+            android:layout_weight="1"
+            android:fillViewport="true">
 
-            <!-- inputCardsContainer (3/7) -->
+            <!-- txContainer (7/9) -->
             <LinearLayout
+                android:id="@+id/txContainer"
                 android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="3"
-                android:background="@drawable/container_outline"
-                android:padding="8dp">
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
 
-                <ScrollView
+                <!-- inputCardsContainer (3/7) -->
+                <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:background="@color/main_background"
-                    android:fillViewport="true">
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/container_outline"
+                    android:padding="8dp">
 
-                    <LinearLayout
-                        android:id="@+id/inputCardsContainer"
+                    <ScrollView
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:orientation="vertical">
+                        android:background="@color/main_background"
+                        android:fillViewport="true">
 
-                        <TextView
-                            android:id="@+id/inputHint"
-                            android:layout_width="wrap_content"
+                        <LinearLayout
+                            android:id="@+id/inputCardsContainer"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="@string/add_cash_to_spend"
-                            android:textColor="@color/hint"
-                            android:layout_marginBottom="4dp" />
+                            android:orientation="vertical">
 
-                    </LinearLayout>
-                </ScrollView>
-            </LinearLayout>
+                            <TextView
+                                android:id="@+id/inputHint"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/add_cash_to_spend"
+                                android:textColor="@color/hint"
+                                android:layout_marginBottom="4dp" />
 
-            <include
-                android:id="@+id/plusInputButton"
-                layout="@layout/layout_plus_button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="end"
-                android:layout_marginTop="-4dp"
-                android:layout_marginEnd="0dp"
-                android:layout_marginBottom="16dp" />
+                        </LinearLayout>
+                    </ScrollView>
+                </LinearLayout>
 
-            <TextView
-                android:id="@+id/totalInputText"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="-50dp"
-                android:gravity="start"
-                android:textColor="@color/text_color"
-                android:layout_marginBottom="12dp"
-                android:textSize="16sp" />
+                <include
+                    android:id="@+id/plusInputButton"
+                    layout="@layout/layout_plus_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="end"
+                    android:layout_marginTop="-4dp"
+                    android:layout_marginEnd="0dp"
+                    android:layout_marginBottom="16dp" />
 
-            <!-- outputCardsContainer (3/7) -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="3"
-                android:layout_marginTop="4dp"
-                android:background="@drawable/container_outline"
-                android:padding="8dp"
-                android:paddingTop="16dp">
-
-                <ScrollView
+                <TextView
+                    android:id="@+id/totalInputText"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:background="@color/main_background"
-                    android:fillViewport="true">
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="-50dp"
+                    android:gravity="start"
+                    android:textColor="@color/text_color"
+                    android:layout_marginBottom="12dp"
+                    android:textSize="16sp" />
 
-                    <LinearLayout
-                        android:id="@+id/outputCardsContainer"
+                <!-- outputCardsContainer (3/7) -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:background="@drawable/container_outline"
+                    android:padding="8dp"
+                    android:paddingTop="16dp">
+
+                    <ScrollView
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:orientation="vertical">
+                        android:background="@color/main_background"
+                        android:fillViewport="true">
 
-                        <TextView
-                            android:id="@+id/outputHint"
-                            android:layout_width="wrap_content"
+                        <LinearLayout
+                            android:id="@+id/outputCardsContainer"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="@string/pay_to"
-                            android:textColor="@color/hint"
-                            android:layout_marginBottom="4dp" />
+                            android:orientation="vertical">
 
-                    </LinearLayout>
-                </ScrollView>
-            </LinearLayout>
+                            <TextView
+                                android:id="@+id/outputHint"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/add_payee"
+                                android:textColor="@color/hint"
+                                android:layout_marginBottom="4dp" />
 
-            <include
-                android:id="@+id/plusOutputButton"
-                layout="@layout/layout_plus_button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="end"
-                android:layout_marginTop="-4dp"
-                android:layout_marginEnd="0dp"
-                android:layout_marginBottom="8dp" />
-
-            <TextView
-                android:id="@+id/totalAndFeeText"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="-44dp"
-                android:gravity="start"
-                android:textColor="@color/text_color"
-                android:layout_marginBottom="16dp"
-                android:textSize="16sp" />
-
-            <!-- opreturnContainer (1/8) -->
-            <LinearLayout
-                android:id="@+id/opreturnContainer"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="0dp"
-                >
+                        </LinearLayout>
+                    </ScrollView>
+                </LinearLayout>
 
                 <include
-                    android:id="@+id/opreturnInput"
-                    layout="@layout/layout_text_input_with_scan"
-                    android:layout_width="match_parent"
-                    android:layout_height="70dp"
-                    />
+                    android:id="@+id/plusOutputButton"
+                    layout="@layout/layout_plus_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="end"
+                    android:layout_marginTop="-4dp"
+                    android:layout_marginEnd="0dp"
+                    android:layout_marginBottom="8dp" />
 
+                <TextView
+                    android:id="@+id/totalAndFeeText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="-44dp"
+                    android:gravity="start"
+                    android:textColor="@color/text_color"
+                    android:layout_marginBottom="16dp"
+                    android:textSize="16sp" />
+
+                <!-- opreturnContainer (1/8) -->
+                <LinearLayout
+                    android:id="@+id/opreturnContainer"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="0dp"
+                    >
+
+                    <include
+                        android:id="@+id/opreturnInput"
+                        layout="@layout/layout_text_input_with_scan"
+                        android:layout_width="match_parent"
+                        android:layout_height="70dp"
+                        />
+
+                </LinearLayout>
+
+                <!-- keyContainer-->
+                <LinearLayout
+                    android:id="@+id/keyContainer"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    >
+
+                    <include
+                        android:id="@+id/multisignIdInput"
+                        layout="@layout/layout_key_input_with_people_and_scan"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        />
+
+                </LinearLayout>
             </LinearLayout>
 
-            <!-- keyContainer-->
-            <LinearLayout
-                android:id="@+id/keyContainer"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                >
+        </ScrollView>
 
-                <include
-                    android:id="@+id/multisignIdInput"
-                    layout="@layout/layout_key_input_with_people_and_scan"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    />
-
-            </LinearLayout>
-        </LinearLayout>
-
-        <!-- buttonContainer (1/9) -->
+        <!-- buttonContainer  -->
         <LinearLayout
             android:id="@+id/buttonContainer"
             android:layout_width="match_parent"

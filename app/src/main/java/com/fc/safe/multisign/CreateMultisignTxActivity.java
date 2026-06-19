@@ -24,10 +24,9 @@ import android.content.ClipData;
 
 import com.fc.fc_ajdk.core.crypto.KeyTools;
 import com.fc.fc_ajdk.core.fch.RawTxInfo;
-import com.fc.fc_ajdk.core.fch.TxCreator;
+import com.fc.fc_ajdk.core.fch.TxHandler;
 import com.fc.fc_ajdk.data.fchData.Cash;
-import com.fc.fc_ajdk.data.fchData.Multisign;
-import com.fc.fc_ajdk.data.fchData.SendTo;
+import com.fc.fc_ajdk.data.fchData.Multisig;
 import com.fc.fc_ajdk.utils.FchUtils;
 import com.fc.fc_ajdk.utils.Hex;
 import com.fc.fc_ajdk.utils.JsonUtils;
@@ -48,7 +47,7 @@ import com.fc.safe.tx.SignTxActivity;
 import com.google.android.material.textfield.TextInputEditText;
 import android.view.LayoutInflater;
 import android.widget.ImageView;
-import android.widget.ImageButton;
+
 import com.fc.safe.db.MultisignManager;
 
 import java.util.ArrayList;
@@ -60,6 +59,7 @@ import java.text.DecimalFormat;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
+import com.fc.safe.utils.ToastUtils;
 
 public class CreateMultisignTxActivity extends BaseCryptoActivity {
     private static final String TAG = "CreateMultisignTxActivity";
@@ -125,10 +125,10 @@ public class CreateMultisignTxActivity extends BaseCryptoActivity {
         }
         if (rawTxInfo == null) {
             rawTxInfo = new RawTxInfo();
-            // If we have a Multisign in the intent, set it
-            Multisign multisign = (Multisign) getIntent().getSerializableExtra("multisign");
-            if (multisign != null) {
-                rawTxInfo.setMultisign(multisign);
+            // If we have a Multisig in the intent, set it
+            Multisig multisig = (Multisig) getIntent().getSerializableExtra("multisig");
+            if (multisig != null) {
+                rawTxInfo.setMultisign(multisig);
             }
         }
         
@@ -141,7 +141,7 @@ public class CreateMultisignTxActivity extends BaseCryptoActivity {
             }
         }
         TimberLogger.i(TAG, "RawTxInfo initialized");
-        feeRateLong = (long) (TxCreator.DEFAULT_FEE_RATE / 1000 * COIN_TO_SATOSHI);
+        feeRateLong = (long) (TxHandler.DEFAULT_FEE_RATE / 1000 * COIN_TO_SATOSHI);
 
         // Initialize chooseMultisignLauncher
         chooseMultisignLauncher = registerForActivityResult(
@@ -323,7 +323,7 @@ public class CreateMultisignTxActivity extends BaseCryptoActivity {
             AddOutputFromFidListDialog dialog = new AddOutputFromFidListDialog(this, rawTxInfo, rest);
             currentDialog = dialog;
             dialog.setOnDoneListener(sendToList -> {
-                for (SendTo sendTo : sendToList) {
+                for (Cash sendTo : sendToList) {
                     TxOutputCard card = new TxOutputCard(this);
                     card.setSendTo(sendTo, this, true);
                     card.setOnDeleteListener(this::removeOutputCard);
@@ -387,7 +387,7 @@ public class CreateMultisignTxActivity extends BaseCryptoActivity {
             if (!makeRawTxInfo()) return;
 
             if (rawTxInfo == null) {
-                TimberLogger.e(TAG, "Failed to create multisign TX");
+                TimberLogger.e(TAG, "Failed to create multisig TX");
                 Toast.makeText(this, getString(R.string.failed_to_create_multisign_tx), SafeApplication.TOAST_LASTING).show();
                 return;
             }
@@ -410,25 +410,25 @@ public class CreateMultisignTxActivity extends BaseCryptoActivity {
 
         String multisignText = multisignInput.getText().toString();
 
-        Multisign multisign;
+        Multisig multisig;
         if(KeyTools.isGoodFid(multisignText) && multisignText.startsWith("3")){
-            multisign = rawTxInfo.getMultisign();
-            if (multisign == null) {
-                // If we have a multisign FID but no multisign object, try to get it from MultisignManager
+            multisig = rawTxInfo.getMultisign();
+            if (multisig == null) {
+                // If we have a multisig FID but no multisig object, try to get it from MultisignManager
                 MultisignManager multisignManager = MultisignManager.getInstance(this);
-                multisign = multisignManager.getMultisignById(multisignText);
-                if (multisign == null) {
+                multisig = multisignManager.getMultisignById(multisignText);
+                if (multisig == null) {
                     Toast.makeText(this, getString(R.string.input_the_script_or_multisign_or_select_a_multisign_fid), SafeApplication.TOAST_LASTING).show();
                     return false;
                 }
-                rawTxInfo.setMultisign(multisign);
+                rawTxInfo.setMultisign(multisig);
             }
         } else if (Hex.isHexString(multisignText)) {
-            multisign = Multisign.parseMultisignRedeemScript(multisignText);
-            rawTxInfo.setMultisign(multisign);
+            multisig = Multisig.parseMultisignRedeemScript(multisignText);
+            rawTxInfo.setMultisign(multisig);
         } else if (JsonUtils.isJson(multisignText)) {
-            multisign = Multisign.fromJson(multisignText, Multisign.class);
-            rawTxInfo.setMultisign(multisign);
+            multisig = Multisig.fromJson(multisignText, Multisig.class);
+            rawTxInfo.setMultisign(multisig);
         }else{
             Toast.makeText(this, R.string.failed_to_parse_multisign, SafeApplication.TOAST_LASTING).show();
             return false;
@@ -436,7 +436,7 @@ public class CreateMultisignTxActivity extends BaseCryptoActivity {
 
         if(!goodTxInfo(rawTxInfo)) return false;
 
-        rawTxInfo.setSender(multisign.getId());
+        rawTxInfo.setSender(multisig.getId());
         return true;
     }
 
@@ -536,20 +536,21 @@ public class CreateMultisignTxActivity extends BaseCryptoActivity {
         }
 
         totalOutput = 0;
-        for(SendTo sendTo : rawTxInfo.getOutputs()){
+        for(Cash sendTo : rawTxInfo.getOutputs()){
             totalOutput += FchUtils.coinToSatoshi(sendTo.getAmount());
         }
 
-        int opReturnBytesLen = rawTxInfo.getOpReturn() == null ?0: rawTxInfo.getOpReturn().getBytes().length;
-        int inputNum = rawTxInfo.getInputs().size();
-        int outputNum = rawTxInfo.getOutputs().size();
-
-
-        int m = rawTxInfo.getMultisign()==null? 2: rawTxInfo.getMultisign().getM();
-        int n = rawTxInfo.getMultisign()==null? 3: rawTxInfo.getMultisign().getN();
-
-        fee = feeRateLong * TxCreator.calcSizeMultiSign(inputNum, outputNum, opReturnBytesLen, m, n);
-        rest = totalInput-totalOutput-fee;
+        if (rawTxInfo.getFeeRate() == null || rawTxInfo.getFeeRate() == 0) {
+            rawTxInfo.setFeeRate(TxHandler.DEFAULT_FEE_RATE);
+        }
+        if (rawTxInfo.getInputs().isEmpty() && rawTxInfo.getOutputs().isEmpty()) {
+            fee = 0;
+            rest = 0;
+        } else {
+            TxHandler.FeeResult feeResult = TxHandler.calcFee(rawTxInfo);
+            fee = feeResult != null && feeResult.fee() != null ? feeResult.fee() : 0;
+            rest = totalInput - totalOutput - fee;
+        }
     }
 
     private void removeInputCard(TxInputCard card) {
@@ -643,7 +644,7 @@ public class CreateMultisignTxActivity extends BaseCryptoActivity {
         // Add output cards
         if (rawTxInfo.getOutputs() != null) {
             TimberLogger.i(TAG, "Adding output cards, count: " + rawTxInfo.getOutputs().size());
-            for (SendTo sendTo : rawTxInfo.getOutputs()) {
+            for (Cash sendTo : rawTxInfo.getOutputs()) {
                 TimberLogger.i(TAG, "Creating output card for sendTo: " + sendTo);
                 TxOutputCard card = new TxOutputCard(this);
                 card.setSendTo(sendTo, this, true);
@@ -754,7 +755,7 @@ public class CreateMultisignTxActivity extends BaseCryptoActivity {
 
     @Override
     protected void handleChooseKeyResult(Intent data) {
-        Map<String, Multisign> resultMap = ChooseMultisignIdActivity.getSelectedMultisignMap(data);
+        Map<String, Multisig> resultMap = ChooseMultisignIdActivity.getSelectedMultisignMap(data);
         if (!resultMap.isEmpty()) {
             // Hide keyboard
             View currentFocus = getCurrentFocus();
@@ -763,11 +764,11 @@ public class CreateMultisignTxActivity extends BaseCryptoActivity {
                 imm.hideSoftInputFromWindow(currentFocus.getWindowToken(), 0);
             }
 
-            // Get the first (and only) Multisign from the map
-            Multisign selectedMultisign = resultMap.values().iterator().next();
-            // Set the Multisign input with the selected Multisign's ID
-            multisignInput.setText(selectedMultisign.getId());
-            rawTxInfo.setMultisign(selectedMultisign);
+            // Get the first (and only) Multisig from the map
+            Multisig selectedMultisig = resultMap.values().iterator().next();
+            // Set the Multisig input with the selected Multisig's ID
+            multisignInput.setText(selectedMultisig.getId());
+            rawTxInfo.setMultisign(selectedMultisig);
         }
     }
 
@@ -945,6 +946,6 @@ public class CreateMultisignTxActivity extends BaseCryptoActivity {
         ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
         ClipData clip = ClipData.newPlainText(label, text);
         clipboard.setPrimaryClip(clip);
-        Toast.makeText(this, R.string.copied, Toast.LENGTH_SHORT).show();
+        ToastUtils.showInfo(this, this.getString(R.string.copied));
     }
 } 

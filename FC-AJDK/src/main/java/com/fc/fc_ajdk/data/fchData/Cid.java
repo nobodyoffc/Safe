@@ -1,6 +1,5 @@
 package com.fc.fc_ajdk.data.fchData;
 
-import com.fc.fc_ajdk.ui.Shower;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fc.fc_ajdk.data.fcData.FcSubject;
 import com.fc.fc_ajdk.core.fch.Weight;
@@ -19,7 +18,6 @@ import static com.fc.fc_ajdk.constants.FieldNames.CID;
 import static com.fc.fc_ajdk.constants.FieldNames.ID;
 import static com.fc.fc_ajdk.constants.FieldNames.LAST_HEIGHT;
 import static com.fc.fc_ajdk.constants.FieldNames.LAST_TIME;
-import static com.fc.fc_ajdk.ui.Shower.DEFAULT_PAGE_SIZE;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Cid extends FcSubject {
@@ -85,9 +83,6 @@ public class Cid extends FcSubject {
     }
 
 
-    public static List<Cid> showCidList(String title, List<Cid> list, Integer maxFieldWidth, boolean choose, BufferedReader br) {
-        return Shower.showOrChooseListInPages("FID Info", list, DEFAULT_PAGE_SIZE, null, choose, Cid.class, br);
-    }
         public void reCalcWeight() {
         if(reputation==null)reputation=0L;
         if(cdd == null)cdd =0L;
@@ -122,7 +117,7 @@ public class Cid extends FcSubject {
         addFieldToMap(fieldMap, "birthHeight", "Birth Height", "创建高度");
         addFieldToMap(fieldMap, "nameTime", "Name Time", "命名时间");
         addFieldToMap(fieldMap, "lastHeight", "Last Height", "最后高度");
-        addFieldToMap(fieldMap, "multisign", "Multisign", "多重签名");
+        addFieldToMap(fieldMap, "multisig", "Multisig", "多重签名");
 
         return fieldMap;
     }

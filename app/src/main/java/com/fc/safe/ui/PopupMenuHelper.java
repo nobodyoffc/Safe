@@ -8,9 +8,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.PopupWindow;
 import android.widget.TextView;
-import android.widget.Toast;
-
 import com.fc.safe.R;
+import com.fc.safe.utils.ToastUtils;
 import com.fc.safe.db.DatabaseManager;
 import com.fc.safe.home.ArticleDisplayActivity;
 import com.fc.safe.initiate.ConfigureManager;
@@ -213,6 +212,7 @@ public class PopupMenuHelper {
         TextView backupAllSecrets = popupView.findViewById(R.id.backup_all_secrets);
         TextView importKeys = popupView.findViewById(R.id.import_keys);
         TextView importSecrets = popupView.findViewById(R.id.import_secrets);
+        TextView appMessages = popupView.findViewById(R.id.app_messages);
         TextView security_guidelines = popupView.findViewById(R.id.security_guidelines);
         TextView clearAllData = popupView.findViewById(R.id.clear_all_data);
         TextView removeMe = popupView.findViewById(R.id.remove_me);
@@ -243,6 +243,11 @@ public class PopupMenuHelper {
             Intent intent = new Intent(context, ImportSecretActivity.class);
             intent.putExtra("type", "secret");
             context.startActivity(intent);
+        });
+
+        appMessages.setOnClickListener(v -> {
+            popupWindow.dismiss();
+            context.startActivity(new Intent(context, com.fc.safe.home.ToastActivity.class));
         });
 
         security_guidelines.setOnClickListener(v -> {
@@ -302,7 +307,7 @@ public class PopupMenuHelper {
                     DatabaseManager databaseManager = DatabaseManager.getInstance(context);
                     databaseManager.clearAllDatabases();
 //                    ConfigureManager.getInstance().removeConfigure(context,databaseManager.getCurrentPasswordName());
-                    Toast.makeText(context, R.string.all_data_cleared_successfully , Toast.LENGTH_SHORT).show();
+                    ToastUtils.showInfo(context, context.getString(R.string.all_data_cleared_successfully));
                 }
             }, true);
         secondDialog.show();
@@ -331,10 +336,10 @@ public class PopupMenuHelper {
                     
                     // Remove the configure for current password name
                     ConfigureManager.getInstance().removeConfigure(context, currentPasswordName);
-                    
+
                     // Show success message
-                    Toast.makeText(context, R.string.all_data_cleared_successfully, Toast.LENGTH_SHORT).show();
-                    
+                    ToastUtils.showInfo(context, context.getString(R.string.all_data_cleared_successfully));
+
                     // Close the app
                     if (context instanceof android.app.Activity) {
                         ((android.app.Activity) context).finish();

@@ -22,6 +22,10 @@
 
     </ScrollView>
 
+    <include
+        android:id="@+id/checkbox_control"
+        layout="@layout/key_checkbox_control" />
+
     <LinearLayout
         android:id="@+id/button_container"
         android:layout_width="match_parent"

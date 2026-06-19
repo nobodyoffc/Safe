@@ -3,36 +3,59 @@ package com.fc.safe.home;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ScrollView;
+import android.widget.TextView;
 import android.widget.Toast;
 
-import com.fc.fc_ajdk.constants.Constants;
 import com.fc.fc_ajdk.data.fcData.KeyInfo;
-import com.fc.fc_ajdk.db.LocalDB;
+import com.fc.safe.db.LocalDB;
 import com.fc.fc_ajdk.utils.TimberLogger;
 import com.fc.safe.SafeApplication;
 import com.fc.safe.R;
-import com.fc.safe.ui.FcEntityListFragment;
 import com.fc.safe.ui.PopupMenuHelper;
 import com.fc.safe.ui.WaitingDialog;
+import com.fc.safe.utils.ChooseMode;
+import com.fc.safe.utils.KeyCardContainer;
 
 import java.util.ArrayList;
 import java.util.List;
+import com.fc.safe.utils.ToastUtils;
 
 public class MyKeysActivity extends BaseCryptoActivity {
     private static final String TAG = "My Keys";
     private static final int DEFAULT_PAGE_SIZE = 50; // Default page size for loading keys
-    
-    private FcEntityListFragment<KeyInfo> entityListFragment;
+
+    private KeyCardContainer keyCardContainer;
 
     private Button deleteButton;
     private Button createNewButton;
     private Button addToListButton;
     private Button exportButton;
     private PopupMenuHelper popupMenuHelper;
-    
+
+    private CheckBox checkboxAll;
+    private ImageView sortFidIcon;
+    private ImageView sortTimeIcon;
+    private ImageView sortLabelIcon;
+    private LinearLayout sortFidContainer;
+    private LinearLayout sortTimeContainer;
+    private LinearLayout sortLabelContainer;
+
+    // Statistics bar UI elements
+    private View statisticsBar;
+    private TextView statsLoadedCountTextView;
+    private TextView statsTotalCountTextView;
+    private TextView statsCheckedCountTextView;
+
+    private enum SortState { NONE, ASC, DESC }
+    private SortState fidSortState = SortState.NONE;
+    private SortState timeSortState = SortState.DESC;  // Default
+    private SortState labelSortState = SortState.NONE;
+
     private final List<KeyInfo> keyInfoList = new ArrayList<>();
     private Long lastIndex = null;
     private boolean isLoadingMore = false;
@@ -68,6 +91,32 @@ public class MyKeysActivity extends BaseCryptoActivity {
         deleteButton = findViewById(R.id.delete_button);
         createNewButton = findViewById(R.id.create_button);
         addToListButton = findViewById(R.id.add_to_list_button);
+        exportButton = findViewById(R.id.export_button);
+
+        // Initialize sort controls
+        checkboxAll = findViewById(R.id.checkbox_all);
+        sortFidIcon = findViewById(R.id.sort_fid_icon);
+        sortTimeIcon = findViewById(R.id.sort_time_icon);
+        sortLabelIcon = findViewById(R.id.sort_label_icon);
+        sortFidContainer = findViewById(R.id.sort_fid_container);
+        sortTimeContainer = findViewById(R.id.sort_time_container);
+        sortLabelContainer = findViewById(R.id.sort_label_container);
+
+        // Initialize statistics bar UI elements
+        statisticsBar = findViewById(R.id.statistics_bar);
+        statsLoadedCountTextView = findViewById(R.id.stats_loaded_count);
+        statsTotalCountTextView = findViewById(R.id.stats_total_count);
+        statsCheckedCountTextView = findViewById(R.id.stats_checked_count);
+
+        // Initialize KeyCardContainer
+        LinearLayout keyListContainer = findViewById(R.id.key_list_container);
+        keyCardContainer = new KeyCardContainer(this, keyListContainer, ChooseMode.CHOOSE_MULTI);
+
+        // Set up sort controls
+        setupSortControls();
+
+        // Initialize statistics bar with zeros
+        updateStatisticsBar();
     }
 
     @Override
@@ -86,7 +135,8 @@ public class MyKeysActivity extends BaseCryptoActivity {
 
             if(newList == null || newList.isEmpty()) {
                 dismissWaitingDialog();
-                showToast(getString(R.string.no_key_info_found));
+                keyInfoList.clear();
+                loadListFragment();  // This will show the empty state message
                 updateButtonStates();
                 return;
             }
@@ -99,7 +149,7 @@ public class MyKeysActivity extends BaseCryptoActivity {
             // If we have data, get the last index for pagination
             if (!keyInfoList.isEmpty()) {
                 // Get the last item's index
-                lastIndex = keyInfoManager.getIndexById(keyInfoList.get(keyInfoList.size() - 1).getId());
+                lastIndex = (long) keyInfoManager.getIndexById(keyInfoList.get(keyInfoList.size() - 1).getId());
 
                 // Check if there's more data to load
                 hasMoreData = lastIndex > 1;
@@ -119,26 +169,31 @@ public class MyKeysActivity extends BaseCryptoActivity {
 
     private void updateButtonStates() {
         boolean hasKeyInfos = !(keyInfoList==null || keyInfoList.isEmpty());
-        
+
         deleteButton.setEnabled(hasKeyInfos);
         deleteButton.setAlpha(hasKeyInfos ? 1.0f : 0.5f);
         addToListButton.setEnabled(hasKeyInfos);
         addToListButton.setAlpha(hasKeyInfos ? 1.0f : 0.5f);
         exportButton.setEnabled(hasKeyInfos);
         exportButton.setAlpha(hasKeyInfos ? 1.0f : 0.5f);
+
+        // Update statistics bar
+        updateStatisticsBar();
     }
 
     private void loadListFragment() {
-        // Create fragment with the initial KeyInfo objects
-        entityListFragment = FcEntityListFragment.newInstance(keyInfoList, KeyInfo.class, false);
-        
-        // Add fragment to container
-        getSupportFragmentManager()
-                .beginTransaction()
-                .replace(R.id.fragment_container, entityListFragment)
-                .commit();
+        // Clear existing cards
+        keyCardContainer.clearAll();
 
-        // Update button states after fragment is loaded
+        // Add all key cards
+        for (KeyInfo keyInfo : keyInfoList) {
+            keyCardContainer.addKeyCard(keyInfo);
+        }
+
+        // Apply default sort (saveTime DESC)
+        applySorting();
+
+        // Update button states after list is loaded
         updateButtonStates();
     }
 
@@ -146,61 +201,34 @@ public class MyKeysActivity extends BaseCryptoActivity {
      * Sets up the scroll listener to detect when the user reaches the end of the list
      */
     private void setupScrollListener() {
-        // Get the ScrollView from the fragment
-        View fragmentView = entityListFragment.getView();
-        if (fragmentView != null) {
-            // Find the ScrollView in the fragment's view hierarchy
-            View scrollView = findScrollView(fragmentView);
-            if (scrollView != null) {
-                // Add scroll listener
-                scrollView.setOnScrollChangeListener((v, scrollX, scrollY, oldScrollX, oldScrollY) -> {
-                    boolean atBottom = isAtBottom(scrollView);
-                    boolean scrollingUp = scrollY < oldScrollY;
-                    
-                    // Check if we've reached the bottom of the scroll view and user is scrolling up
-                    if (atBottom && scrollingUp && !isLoadingMore && hasMoreData) {
-                        TimberLogger.i(TAG, "Loading more data - reached bottom while scrolling up");
-                        loadMoreData();
-                    }
-                });
-            }
-        }
-    }
-    
-    /**
-     * Recursively finds a ScrollView in the view hierarchy
-     */
-    private View findScrollView(View view) {
-        if (view instanceof ScrollView) {
-            return view;
-        }
-        
-        if (view instanceof ViewGroup viewGroup) {
-            for (int i = 0; i < viewGroup.getChildCount(); i++) {
-                View child = viewGroup.getChildAt(i);
-                View result = findScrollView(child);
-                if (result != null) {
-                    return result;
+        // Get the ScrollView from the layout
+        ScrollView scrollView = findViewById(android.R.id.content).findViewById(R.id.key_list_container).getParent() instanceof ScrollView ?
+                (ScrollView) findViewById(R.id.key_list_container).getParent() : null;
+
+        if (scrollView != null) {
+            scrollView.setOnScrollChangeListener((v, scrollX, scrollY, oldScrollX, oldScrollY) -> {
+                boolean atBottom = isAtBottom(scrollView);
+                boolean scrollingUp = scrollY < oldScrollY;
+
+                // Check if we've reached the bottom of the scroll view and user is scrolling up
+                if (atBottom && scrollingUp && !isLoadingMore && hasMoreData) {
+                    TimberLogger.i(TAG, "Loading more data - reached bottom while scrolling up");
+                    loadMoreData();
                 }
-            }
+            });
         }
-        
-        return null;
     }
-    
+
     /**
      * Checks if the scroll view is at the bottom
      */
-    private boolean isAtBottom(View scrollView) {
-        if (scrollView instanceof ScrollView sv) {
-            int scrollY = sv.getScrollY();
-            int height = sv.getHeight();
-            int viewHeight = sv.getChildAt(0).getHeight();
-            
-            // If we're within 100 pixels of the bottom, consider it at the bottom
-            return (viewHeight - scrollY - height) <= 100;
-        }
-        return false;
+    private boolean isAtBottom(ScrollView scrollView) {
+        int scrollY = scrollView.getScrollY();
+        int height = scrollView.getHeight();
+        int viewHeight = scrollView.getChildAt(0).getHeight();
+
+        // If we're within 100 pixels of the bottom, consider it at the bottom
+        return (viewHeight - scrollY - height) <= 100;
     }
     
     /**
@@ -226,27 +254,33 @@ public class MyKeysActivity extends BaseCryptoActivity {
                 runOnUiThread(() -> {
                     if (moreKeyInfos != null && !moreKeyInfos.isEmpty()) {
                         // Update the lastIndex for the next page
-                        lastIndex = keyInfoManager.getIndexById(moreKeyInfos.get(moreKeyInfos.size() - 1).getId());
-                        
+                        lastIndex = (long) keyInfoManager.getIndexById(moreKeyInfos.get(moreKeyInfos.size() - 1).getId());
+
                         // Check if there's more data to load
                         hasMoreData = lastIndex > 1;
-                        
+
                         // Add the new items to the list
                         keyInfoList.addAll(moreKeyInfos);
-                        
-                        // Update the fragment's list
-                        entityListFragment.updateList(keyInfoList);
+
+                        // Add the new cards to the container
+                        for (KeyInfo keyInfo : moreKeyInfos) {
+                            keyCardContainer.addKeyCard(keyInfo);
+                        }
+
+                        // Apply current sorting
+                        applySorting();
+
                         updateButtonStates();
 
-                        Toast.makeText(this, moreKeyInfos.size()+R.string.keys_loaded, Toast.LENGTH_SHORT).show();
+                        ToastUtils.showInfo(this, moreKeyInfos.size()+R.string.keys_loaded);
                         
                         if (!hasMoreData) {
-                            Toast.makeText(this, R.string.no_more_keys, Toast.LENGTH_LONG).show();
+                            ToastUtils.showWarning(this, this.getString(R.string.no_more_keys));
                         }
                     } else {
                         // No more data to load
                         hasMoreData = false;
-                        Toast.makeText(this, getString(R.string.no_more_keys), Toast.LENGTH_LONG).show();
+                        ToastUtils.showWarning(this, getString(R.string.no_more_keys));
                     }
                     
                     isLoadingMore = false;
@@ -257,7 +291,7 @@ public class MyKeysActivity extends BaseCryptoActivity {
                 runOnUiThread(() -> {
                     isLoadingMore = false;
                     dismissWaitingDialog();
-                    Toast.makeText(this, getString(R.string.error_loading_more_keys) + e.getMessage(), Toast.LENGTH_LONG).show();
+                    ToastUtils.showError(this, getString(R.string.error_loading_more_keys) + e.getMessage());
                 });
             }
         }).start();
@@ -267,28 +301,48 @@ public class MyKeysActivity extends BaseCryptoActivity {
     protected void setupButtons() {
         // Set click listeners
         deleteButton.setOnClickListener(v -> {
-            List<KeyInfo> chosenObjects = entityListFragment.getSelectedObjects();
+            List<KeyInfo> chosenObjects = keyCardContainer.getSelectedKeys();
             if (chosenObjects.isEmpty()) {
                 Toast.makeText(this, R.string.no_items_selected, SafeApplication.TOAST_LASTING).show();
                 return;
             }
-            // Implement delete functionality
-            keyInfoManager.removeKeyInfos(chosenObjects);
-            
-            // Commit changes to disk
-            keyInfoManager.commit();
-            
-            // Remove deleted items from the current list
-            keyInfoList.removeAll(chosenObjects);
-            
-            // Update the fragment's list directly
-            entityListFragment.updateList(keyInfoList);
-            
-            // Update button states
-            updateButtonStates();
-            
-            // Show confirmation message
-            Toast.makeText(this, R.string.deleted , SafeApplication.TOAST_LASTING).show();
+
+            // Show waiting dialog during deletion
+            showWaitingDialog(getString(R.string.deleting));
+
+            // Perform deletion on background thread
+            new Thread(() -> {
+                try {
+                    // Implement delete functionality
+                    keyInfoManager.removeKeyInfos(chosenObjects);
+
+                    // Commit changes to disk
+                    keyInfoManager.commit();
+
+                    runOnUiThread(() -> {
+                        // Remove deleted items from the current list
+                        keyInfoList.removeAll(chosenObjects);
+
+                        // Remove from card container
+                        keyCardContainer.removeSelectedKeys();
+
+                        // Update button states
+                        updateButtonStates();
+
+                        // Dismiss waiting dialog
+                        dismissWaitingDialog();
+
+                        // Show confirmation message
+                        Toast.makeText(this, R.string.deleted , SafeApplication.TOAST_LASTING).show();
+                    });
+                } catch (Exception e) {
+                    TimberLogger.e(TAG, "Error deleting keys: %s", e.getMessage());
+                    runOnUiThread(() -> {
+                        dismissWaitingDialog();
+                        Toast.makeText(this, getString(R.string.error_delete), SafeApplication.TOAST_LASTING).show();
+                    });
+                }
+            }).start();
         });
 
         createNewButton.setOnClickListener(v -> {
@@ -298,7 +352,7 @@ public class MyKeysActivity extends BaseCryptoActivity {
         });
 
         addToListButton.setOnClickListener(v -> {
-            List<KeyInfo> chosenObjects = entityListFragment.getSelectedObjects();
+            List<KeyInfo> chosenObjects = keyCardContainer.getSelectedKeys();
             if (chosenObjects.isEmpty()) {
                 Toast.makeText(this, R.string.no_items_selected , SafeApplication.TOAST_LASTING).show();
                 return;
@@ -313,9 +367,8 @@ public class MyKeysActivity extends BaseCryptoActivity {
             Toast.makeText(this, this.getString(R.string.some_fids_added_to_list, chosenObjects.size() ), SafeApplication.TOAST_LASTING).show();
         });
 
-        exportButton = findViewById(R.id.export_button);
         exportButton.setOnClickListener(v -> {
-            List<KeyInfo> chosenObjects = entityListFragment.getSelectedObjects();
+            List<KeyInfo> chosenObjects = keyCardContainer.getSelectedKeys();
             if (chosenObjects.isEmpty()) {
                 Toast.makeText(this, R.string.no_items_selected , SafeApplication.TOAST_LASTING).show();
                 return;
@@ -326,11 +379,94 @@ public class MyKeysActivity extends BaseCryptoActivity {
             startActivity(intent);
         });
 
-        // Set up selection change listener for the fragment
-        if (entityListFragment != null) {
-            entityListFragment.setOnSelectionChangeListener(() -> {
+        // Set up selection change listener for the container
+        if (keyCardContainer != null) {
+            keyCardContainer.setOnKeyListChangedListener(updatedKeyList -> {
                 updateButtonStates();
+                updateStatisticsBar();
             });
+        }
+    }
+
+    private void setupSortControls() {
+        // Set up "All" checkbox
+        checkboxAll.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            keyCardContainer.selectAll(isChecked);
+            updateButtonStates();
+            updateStatisticsBar();
+        });
+
+        // Set up FID sort
+        sortFidContainer.setOnClickListener(v -> {
+            fidSortState = getNextSortState(fidSortState);
+            timeSortState = SortState.NONE;
+            labelSortState = SortState.NONE;
+            updateSortIcons();
+            applySorting();
+        });
+
+        // Set up Time sort
+        sortTimeContainer.setOnClickListener(v -> {
+            timeSortState = getNextSortState(timeSortState);
+            fidSortState = SortState.NONE;
+            labelSortState = SortState.NONE;
+            updateSortIcons();
+            applySorting();
+        });
+
+        // Set up Label sort
+        sortLabelContainer.setOnClickListener(v -> {
+            labelSortState = getNextSortState(labelSortState);
+            fidSortState = SortState.NONE;
+            timeSortState = SortState.NONE;
+            updateSortIcons();
+            applySorting();
+        });
+
+        // Set initial icons
+        updateSortIcons();
+    }
+
+    private SortState getNextSortState(SortState current) {
+        switch (current) {
+            case NONE:
+                return SortState.ASC;
+            case ASC:
+                return SortState.DESC;
+            case DESC:
+                return SortState.NONE;
+            default:
+                return SortState.NONE;
+        }
+    }
+
+    private void updateSortIcons() {
+        updateSortIcon(sortFidIcon, fidSortState);
+        updateSortIcon(sortTimeIcon, timeSortState);
+        updateSortIcon(sortLabelIcon, labelSortState);
+    }
+
+    private void updateSortIcon(ImageView icon, SortState state) {
+        switch (state) {
+            case NONE:
+                icon.setImageResource(R.drawable.ic_sort_none);
+                break;
+            case ASC:
+                icon.setImageResource(R.drawable.ic_sort_asc);
+                break;
+            case DESC:
+                icon.setImageResource(R.drawable.ic_sort_desc);
+                break;
+        }
+    }
+
+    private void applySorting() {
+        if (fidSortState != SortState.NONE) {
+            keyCardContainer.sortById(fidSortState == SortState.ASC, true);
+        } else if (timeSortState != SortState.NONE) {
+            keyCardContainer.sortBySaveTime(timeSortState == SortState.ASC, true);
+        } else if (labelSortState != SortState.NONE) {
+            keyCardContainer.sortByLabel(labelSortState == SortState.ASC, true);
         }
     }
     
@@ -352,25 +488,16 @@ public class MyKeysActivity extends BaseCryptoActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        
+
         // Only refresh if we're returning from creating a new key
         if (getIntent().getBooleanExtra("fromCreateKey", false)) {
             refreshList();
             // Clear the flag
             getIntent().removeExtra("fromCreateKey");
         }
-        
-        // Wait for fragment view to be ready before setting up scroll listener
-        if (entityListFragment != null && entityListFragment.getView() != null) {
-            setupScrollListener();
-        } else {
-            // Try again after a short delay to ensure fragment view is ready
-            new android.os.Handler().postDelayed(() -> {
-                if (entityListFragment != null && entityListFragment.getView() != null) {
-                    setupScrollListener();
-                }
-            }, 100);
-        }
+
+        // Set up scroll listener
+        new android.os.Handler().postDelayed(this::setupScrollListener, 100);
     }
 
     private void showWaitingDialog(String message) {
@@ -387,6 +514,34 @@ public class MyKeysActivity extends BaseCryptoActivity {
     private void dismissWaitingDialog() {
         if (waitingDialog != null && waitingDialog.isShowing() && !isFinishing()) {
             waitingDialog.dismiss();
+        }
+    }
+
+    /**
+     * Updates the statistics bar with current counts
+     */
+    private void updateStatisticsBar() {
+        // Update loaded count
+        int loadedCount = keyInfoList != null ? keyInfoList.size() : 0;
+        if (statsLoadedCountTextView != null) {
+            statsLoadedCountTextView.setText(String.valueOf(loadedCount));
+        }
+
+        // Update total count from database
+        int totalCount = keyInfoManager != null ? keyInfoManager.getKeyInfoDB().getSize() : 0;
+        if (statsTotalCountTextView != null) {
+            statsTotalCountTextView.setText(String.valueOf(totalCount));
+        }
+
+        // Update checked count
+        int checkedCount = keyCardContainer != null ? keyCardContainer.getSelectedKeys().size() : 0;
+        if (statsCheckedCountTextView != null) {
+            statsCheckedCountTextView.setText(String.valueOf(checkedCount));
+        }
+
+        // Hide statistics bar if list is empty
+        if (statisticsBar != null) {
+            statisticsBar.setVisibility(loadedCount == 0 ? View.GONE : View.VISIBLE);
         }
     }
 

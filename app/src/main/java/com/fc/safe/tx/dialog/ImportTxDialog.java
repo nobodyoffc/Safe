@@ -5,13 +5,12 @@ import android.content.Context;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Toast;
-
 import androidx.annotation.NonNull;
 
 import com.fc.fc_ajdk.core.fch.RawTxInfo;
 import com.fc.fc_ajdk.utils.JsonUtils;
 import com.fc.safe.R;
+import com.fc.safe.utils.ToastUtils;
 
 
 public class ImportTxDialog extends Dialog {
@@ -46,13 +45,13 @@ public class ImportTxDialog extends Dialog {
         doneButton.setOnClickListener(v -> {
             String jsonText = jsonInput.getText().toString();
             if (!JsonUtils.isJson(jsonText)) {
-                Toast.makeText(getContext(), R.string.invalid_json_format, Toast.LENGTH_SHORT).show();
+                ToastUtils.showError(getContext(), getContext().getString(R.string.invalid_json_format));
                 return;
             }
 
             RawTxInfo rawTxInfo = RawTxInfo.fromString(jsonText);
             if (rawTxInfo == null) {
-                Toast.makeText(getContext(), R.string.failed_to_parse_json, Toast.LENGTH_SHORT).show();
+                ToastUtils.showError(getContext(), getContext().getString(R.string.failed_to_parse_json));
                 return;
             }
 

@@ -3,39 +3,85 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
-    android:padding="8dp"
-    android:background="@drawable/card_background">
+    android:padding="6dp"
+    android:layout_margin="4dp"
+    android:background="@drawable/card_background_outlined">
 
     <CheckBox
         android:id="@+id/key_checkbox"
-        android:layout_width="30dp"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
-        android:layout_marginStart="0dp"
-        android:textColor="@color/text_color"/>
-
-    <ImageView
-        android:id="@+id/key_avatar"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginEnd="8dp"/>
-
-    <TextView
-        android:id="@+id/key_label"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
-        android:layout_marginEnd="8dp"
-        android:textSize="14sp"
-        android:textColor="@color/text_color"/>
+        android:layout_marginEnd="8dp"/>
 
-    <TextView
-        android:id="@+id/key_id"
+    <ImageView
+        android:id="@+id/key_avatar"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        android:layout_marginEnd="12dp"
+        android:scaleType="fitCenter"
+        android:contentDescription="@string/avatar" />
+
+    <LinearLayout
+        android:id="@+id/content_container"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:layout_gravity="center_vertical"
-        android:textSize="16sp"/>
+        android:layout_marginEnd="8dp"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:id="@+id/first_row"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="4dp">
+
+            <TextView
+                android:id="@+id/key_cid"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="14sp"
+                android:textColor="@color/text_color"
+                android:textStyle="bold"
+                android:layout_marginEnd="8dp"/>
+
+            <TextView
+                android:id="@+id/key_label"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textSize="14sp"
+                android:textColor="@color/text_color"
+                android:layout_marginEnd="8dp"
+                android:ellipsize="end"
+                android:maxLines="1"/>
+
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/key_id"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="13sp"
+            android:textColor="@color/hint"
+            android:ellipsize="middle"
+            android:maxLines="2"/>
+        <TextView
+            android:id="@+id/key_save_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:textSize="12sp"
+            android:textColor="@color/hint"/>
+
+    </LinearLayout>
+
+    <ImageView
+        android:id="@+id/edit_icon"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:src="@drawable/ic_edit"
+        android:contentDescription="@string/edit"/>
 
 </LinearLayout> 

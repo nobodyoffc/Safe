@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <!-- Back + symbol (positioned upper right, closer) -->
+    <path
+        android:fillColor="@color/colorAccent"
+        android:pathData="M19,9h-4v4h-2v-4h-4v-2h4V3h2v4h4v2z"/>
+    <!-- Shadow for front + symbol -->
+    <path
+        android:fillColor="#66000000"
+        android:pathData="M14.5,12.5h-4v4h-2v-4h-4v-2h4v-4h2v4h4v2z"/>
+    <!-- Front + symbol (standard size, in front, closer) -->
+    <path
+        android:fillColor="@color/colorAccent"
+        android:pathData="M14,12h-4v4h-2v-4H4v-2h4V6h2v4h4v2z"/>
+</vector>

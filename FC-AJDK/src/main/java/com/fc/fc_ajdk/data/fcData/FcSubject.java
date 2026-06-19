@@ -1,5 +1,6 @@
 package com.fc.fc_ajdk.data.fcData;
 
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 import java.security.SecureRandom;
@@ -44,7 +45,13 @@ public class FcSubject extends FcEntity {
     }
 
     public static FcSubject createNew() {
-        ECKey eckey = new ECKey(new SecureRandom());
+        SecureRandom sr;
+        try {
+            sr = SecureRandom.getInstanceStrong();
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
+        ECKey eckey = new ECKey(sr);
         byte[] prikey = eckey.getPrivKeyBytes();
         return new FcSubject(prikey);
     }

@@ -4,8 +4,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.app.AlertDialog;
-import android.widget.Toast;
-
 import com.fc.fc_ajdk.core.crypto.KeyTools;
 import com.fc.fc_ajdk.data.fcData.KeyInfo;
 import com.fc.fc_ajdk.utils.TimberLogger;
@@ -14,6 +12,7 @@ import com.fc.safe.home.BaseCryptoActivity;
 import com.fc.safe.ui.DetailFragment;
 import com.google.android.material.textfield.TextInputEditText;
 import com.fc.safe.utils.TextIconsUtils;
+import com.fc.safe.utils.ToastUtils;
 
 public class CreateKeyByFidActivity extends BaseCryptoActivity {
     private static final String TAG = "CreateKeyByFid";
@@ -106,7 +105,7 @@ public class CreateKeyByFidActivity extends BaseCryptoActivity {
     private void previewKeyInfo() {
         String fid = fidInput.getText() != null ? fidInput.getText().toString() : "";
         if(!KeyTools.isGoodFid(fid)){
-            Toast.makeText(this, getString(R.string.invalid_fid), Toast.LENGTH_SHORT).show();
+            ToastUtils.showError(this, getString(R.string.invalid_fid));
             return;
         }
         String label = labelInput.getText() != null ? labelInput.getText().toString() : "";
@@ -152,7 +151,7 @@ public class CreateKeyByFidActivity extends BaseCryptoActivity {
             // Use the previewed KeyInfo
             KeyInfo keyInfo = (KeyInfo) detailFragment.getCurrentEntity();
             if (keyInfo == null) {
-                Toast.makeText(this, getString(R.string.failed_to_save_key_info), Toast.LENGTH_SHORT).show();
+                ToastUtils.showError(this, getString(R.string.failed_to_save_key_info));
                 return;
             }
             saveKeyInfoToDatabase(keyInfo);
@@ -162,13 +161,13 @@ public class CreateKeyByFidActivity extends BaseCryptoActivity {
     private KeyInfo createKeyInfoFromInputs() {
         String fid = fidInput.getText() != null ? fidInput.getText().toString() : "";
         if(!KeyTools.isGoodFid(fid)){
-            Toast.makeText(this, getString(R.string.invalid_fid), Toast.LENGTH_SHORT).show();
+            ToastUtils.showError(this, getString(R.string.invalid_fid));
             return null;
         }
         String label = labelInput.getText() != null ? labelInput.getText().toString() : "";
 
         if (fid.isEmpty()) {
-            Toast.makeText(this, getString(R.string.fid_is_empty), Toast.LENGTH_SHORT).show();
+            ToastUtils.showWarning(this, getString(R.string.fid_is_empty));
             return null;
         }
 

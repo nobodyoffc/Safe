@@ -7,13 +7,12 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.LinearLayout;
-import android.widget.Toast;
-
 import com.fc.fc_ajdk.core.crypto.KeyTools;
 import com.fc.fc_ajdk.utils.TimberLogger;
 import com.fc.safe.R;
 import com.fc.safe.SafeApplication;
 import com.google.android.material.textfield.TextInputEditText;
+import com.fc.safe.utils.ToastUtils;
 
 public class AddFidActivity extends BaseCryptoActivity {
     private static final String TAG = "AddFidActivity";
@@ -74,7 +73,7 @@ public class AddFidActivity extends BaseCryptoActivity {
             }
             
             if (!hasValidFid) {
-                Toast.makeText(this, R.string.invalid_fid, Toast.LENGTH_SHORT).show();
+                ToastUtils.showError(this, this.getString(R.string.invalid_fid));
                 finish();
                 return;
             }

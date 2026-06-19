@@ -7,20 +7,21 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.widget.NestedScrollView;
 
 import com.fc.fc_ajdk.config.Configure;
 import com.fc.fc_ajdk.utils.TimberLogger;
-import com.fc.safe.SafeApplication;
 import com.fc.safe.R;
 import com.fc.safe.db.DatabaseManager;
+import com.fc.safe.db.PendingTxManager;
+import com.fc.safe.db.ToastManager;
 import com.fc.safe.initiate.ConfigureManager;
 import com.fc.safe.utils.IconCreator;
 import com.fc.safe.ui.PopupMenuHelper;
 import com.fc.safe.ui.RemindDialog;
+import com.fc.safe.utils.ToastUtils;
 
 
 public class HomeActivity extends AppCompatActivity {
@@ -47,6 +48,8 @@ public class HomeActivity extends AppCompatActivity {
                 if (passwordName != null) {
                     DatabaseManager.getInstance(this).setCurrentPasswordName(passwordName);
                     TimberLogger.d(TAG, "Set current password name to: " + passwordName);
+
+                    ToastManager.getInstance(this);
                 }
             } else {
                 TimberLogger.w(TAG, "No Configure object available in ConfigureManager");
@@ -66,8 +69,8 @@ public class HomeActivity extends AppCompatActivity {
             }
 
             // Generate icons for all menu items
-            generateMenuIcons();
-            TimberLogger.d(TAG, "Menu icons generated successfully");
+//            generateMenuIcons();
+//            TimberLogger.d(TAG, "Menu icons generated successfully");
 
             // Initialize click listeners for all menu items
             setupMenuClickListeners();
@@ -84,7 +87,7 @@ public class HomeActivity extends AppCompatActivity {
         } catch (Exception ex) {
             // Log any exceptions that occur during initialization
             TimberLogger.e(TAG, "Error in HomeActivity onCreate: " + ex.getMessage(), ex);
-            Toast.makeText(this, getString(R.string.error_initializing_home, ex.getMessage()), SafeApplication.TOAST_LASTING).show();
+            ToastUtils.showError(this, getString(R.string.error_initializing_home, ex.getMessage()));
         }
     }
 
@@ -96,8 +99,8 @@ public class HomeActivity extends AppCompatActivity {
             generateIconForMenuItem(R.id.menu_totp, getString(R.string.menu_totp));
         //    generateIconForMenuItem(R.id.menu_test, getString(R.string.menu_test));
 //            generateIconForMenuItem(R.id.menu_decode, getString(R.string.menu_decode));
-            generateIconForMenuItem(R.id.menu_multisign, getString(R.string.menu_multi_sign));
-            generateIconForMenuItem(R.id.menu_sign_tx, getString(R.string.menu_sign_tx));
+            generateIconForMenuItem(R.id.menu_multisign, getString(R.string.menu_multisign));
+            generateIconForMenuItem(R.id.menu_sign_tx, getString(R.string.menu_tx));
             generateIconForMenuItem(R.id.menu_convert, getString(R.string.menu_convert));
             generateIconForMenuItem(R.id.menu_secrets, getString(R.string.menu_secrets));
             generateIconForMenuItem(R.id.menu_my_keys, getString(R.string.menu_my_keys));
@@ -217,7 +220,7 @@ public class HomeActivity extends AppCompatActivity {
                 TimberLogger.e(TAG, "menu_sign_tx view not found");
             }
 
-            // Multisign
+            // Multisig
             View multisignView = findViewById(R.id.menu_multisign);
             if (multisignView != null) {
                 multisignView.setOnClickListener(v -> {
@@ -266,6 +269,17 @@ public class HomeActivity extends AppCompatActivity {
                 TimberLogger.e(TAG, "menu_scan_qr view not found");
             }
 
+            // Pending TX
+            View pendingTxView = findViewById(R.id.menu_pending_tx);
+            if (pendingTxView != null) {
+                pendingTxView.setOnClickListener(v -> {
+                    Intent intent = new Intent(HomeActivity.this, PendingTxListActivity.class);
+                    startActivity(intent);
+                });
+            } else {
+                TimberLogger.e(TAG, "menu_pending_tx view not found");
+            }
+
             // Settings
             View settingsView = findViewById(R.id.menu_settings);
             if (settingsView != null) {
@@ -277,7 +291,29 @@ public class HomeActivity extends AppCompatActivity {
             }
         } catch (Exception ex) {
             TimberLogger.e(TAG, "Error in setupMenuClickListeners: " + ex.getMessage(), ex);
-            Toast.makeText(this, getString(R.string.error_setting_up_menu, ex.getMessage()), SafeApplication.TOAST_LASTING).show();
+            ToastUtils.showError(this, getString(R.string.error_setting_up_menu, ex.getMessage()));
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        refreshPendingTxBadge();
+    }
+
+    private void refreshPendingTxBadge() {
+        TextView badge = findViewById(R.id.menu_pending_tx_badge);
+        if (badge == null) return;
+        try {
+            int count = PendingTxManager.getInstance(this).pendingCount();
+            if (count > 0) {
+                badge.setText(count > 99 ? "99+" : String.valueOf(count));
+                badge.setVisibility(View.VISIBLE);
+            } else {
+                badge.setVisibility(View.GONE);
+            }
+        } catch (Exception e) {
+            badge.setVisibility(View.GONE);
         }
     }
 } 

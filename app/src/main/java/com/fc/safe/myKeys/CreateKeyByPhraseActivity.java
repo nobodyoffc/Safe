@@ -4,9 +4,11 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.app.AlertDialog;
-import android.widget.Toast;
+
+import androidx.core.util.Consumer;
 
 import com.fc.fc_ajdk.core.crypto.Hash;
+import com.fc.fc_ajdk.core.crypto.Kdf;
 import com.fc.fc_ajdk.data.fcData.KeyInfo;
 import com.fc.fc_ajdk.utils.TimberLogger;
 import com.fc.safe.R;
@@ -16,6 +18,7 @@ import com.fc.safe.initiate.ConfigureManager;
 import com.fc.safe.ui.DetailFragment;
 import com.google.android.material.textfield.TextInputEditText;
 import com.fc.safe.utils.TextIconsUtils;
+import com.fc.safe.utils.ToastUtils;
 
 public class CreateKeyByPhraseActivity extends BaseCryptoActivity {
     private static final String TAG = "CreateKeyByPhrase";
@@ -104,21 +107,43 @@ public class CreateKeyByPhraseActivity extends BaseCryptoActivity {
         String label = labelInput.getText() != null ? labelInput.getText().toString() : "";
 
         if (phrase.isEmpty()) {
-            Toast.makeText(this, getString(R.string.please_input_phrase), Toast.LENGTH_SHORT).show();
+            ToastUtils.showInfo(this, getString(R.string.please_input_phrase));
             return;
         }
 
-        // Generate private key from phrase using SHA-256
-        byte[] priKey32 = Hash.sha256(phrase.getBytes());
+        chooseKdfMethod(useArgon2id -> {
+            byte[] priKey32 = derivePrivateKey(phrase, useArgon2id);
+            KeyInfo keyInfo = new KeyInfo(label, priKey32, ConfigureManager.getInstance().getSymkey());
+            generateAndSaveAvatar(keyInfo);
+            showDetailFragment(keyInfo);
+        });
+    }
 
-        // Create a new KeyInfo object
-        KeyInfo keyInfo = new KeyInfo(label, priKey32, ConfigureManager.getInstance().getSymkey());
+    private byte[] derivePrivateKey(String phrase, boolean useArgon2id) {
+        if (useArgon2id) {
+            // Empty salt keeps derivation deterministic for the same phrase
+            return Kdf.Argon2id_No1_NrC7.deriveSymkey(phrase.toCharArray(), new byte[0]);
+        }
+        return Hash.sha256(phrase.getBytes());
+    }
 
-        // Generate and save avatar for the new key
-        generateAndSaveAvatar(keyInfo);
+    private void chooseKdfMethod(Consumer<Boolean> onChosen) {
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.choose_key_derivation)
+                .setMessage(R.string.choose_key_derivation_message)
+                .setPositiveButton(R.string.kdf_argon2id_recommended, (d, w) -> onChosen.accept(true))
+                .setNegativeButton(R.string.kdf_sha256, (d, w) -> confirmSha256(onChosen))
+                .setNeutralButton(R.string.cancel, null)
+                .show();
+    }
 
-        // Show the KeyInfo in the detail fragment
-        showDetailFragment(keyInfo);
+    private void confirmSha256(Consumer<Boolean> onChosen) {
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.sha256_warning_title)
+                .setMessage(R.string.sha256_warning_message)
+                .setPositiveButton(R.string.continue_anyway, (d, w) -> onChosen.accept(false))
+                .setNegativeButton(R.string.cancel, null)
+                .show();
     }
 
     private void showDetailFragment(KeyInfo keyInfo) {
@@ -133,27 +158,23 @@ public class CreateKeyByPhraseActivity extends BaseCryptoActivity {
     }
 
     private void saveKeyInfo() {
-        KeyInfo keyInfo = null;
-        
         if (detailFragment == null) {
-            // If no preview was done, try to create KeyInfo from inputs
-            keyInfo = createKeyInfoFromInputs();
-            if (keyInfo == null) {
-                return;
-            }
-        } else {
-            // Use the previewed KeyInfo
-            keyInfo = (KeyInfo) detailFragment.getCurrentEntity();
-            if (keyInfo == null) {
-                Toast.makeText(this, getString(R.string.failed_to_get_keyinfo_from_preview), Toast.LENGTH_SHORT).show();
-                return;
-            }
+            // If no preview was done, ask for the derivation method then build KeyInfo
+            createKeyInfoFromInputs(keyInfo -> {
+                if (keyInfo == null) return;
+                generateAndSaveAvatar(keyInfo);
+                saveKeyInfoToDatabase(keyInfo);
+            });
+            return;
         }
 
-        // Always generate and save avatar for the key before saving
+        // Use the previewed KeyInfo
+        KeyInfo keyInfo = (KeyInfo) detailFragment.getCurrentEntity();
+        if (keyInfo == null) {
+            ToastUtils.showError(this, getString(R.string.failed_to_get_keyinfo_from_preview));
+            return;
+        }
         generateAndSaveAvatar(keyInfo);
-        
-        // Save the KeyInfo to database
         saveKeyInfoToDatabase(keyInfo);
     }
 
@@ -177,28 +198,29 @@ public class CreateKeyByPhraseActivity extends BaseCryptoActivity {
         } catch (Exception e) {
             TimberLogger.e(TAG, "Error generating avatar for key %s: %s", keyInfo.getId(), e.getMessage());
             // Show user-friendly error message
-            Toast.makeText(this, getString(R.string.warning_failed_to_generate_avatar), Toast.LENGTH_LONG).show();
+            ToastUtils.showError(this, getString(R.string.warning_failed_to_generate_avatar));
         }
     }
 
-    private KeyInfo createKeyInfoFromInputs() {
+    private void createKeyInfoFromInputs(Consumer<KeyInfo> onReady) {
         String phrase = phraseInput.getText() != null ? phraseInput.getText().toString() : "";
         String label = labelInput.getText() != null ? labelInput.getText().toString() : "";
 
         if (phrase.isEmpty()) {
-            Toast.makeText(this, getString(R.string.please_input_phrase), Toast.LENGTH_SHORT).show();
-            return null;
+            ToastUtils.showInfo(this, getString(R.string.please_input_phrase));
+            onReady.accept(null);
+            return;
         }
 
-        // Generate private key from phrase using SHA-256
-        byte[] priKey32 = Hash.sha256(phrase.getBytes());
-
-        return new KeyInfo(label, priKey32, ConfigureManager.getInstance().getSymkey());
+        chooseKdfMethod(useArgon2id -> {
+            byte[] priKey32 = derivePrivateKey(phrase, useArgon2id);
+            onReady.accept(new KeyInfo(label, priKey32, ConfigureManager.getInstance().getSymkey()));
+        });
     }
 
     private void saveKeyInfoToDatabase(KeyInfo keyInfo) {
         if (keyInfo == null) {
-            Toast.makeText(this, getString(R.string.error_keyinfo_is_null), Toast.LENGTH_SHORT).show();
+            ToastUtils.showError(this, getString(R.string.error_keyinfo_is_null));
             return;
         }
 
@@ -221,12 +243,12 @@ public class CreateKeyByPhraseActivity extends BaseCryptoActivity {
         try {
             keyInfoManager.addKeyInfo(keyInfo);
             keyInfoManager.commit();
-            Toast.makeText(this, getString(R.string.key_saved_successfully), Toast.LENGTH_SHORT).show();
+            ToastUtils.showInfo(this, getString(R.string.key_saved_successfully));
             setResult(RESULT_OK);
             finish();
         } catch (Exception e) {
             TimberLogger.e(TAG, "Error saving KeyInfo: %s", e.getMessage());
-            Toast.makeText(this, getString(R.string.error_saving_key_with_message, e.getMessage()), Toast.LENGTH_LONG).show();
+            ToastUtils.showError(this, getString(R.string.error_saving_key_with_message, e.getMessage()));
         }
     }
 } 

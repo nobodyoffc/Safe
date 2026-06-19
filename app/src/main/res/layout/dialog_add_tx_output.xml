@@ -8,7 +8,7 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/pay_to"
+        android:text="@string/add_payee"
         android:textSize="18sp"
         android:textStyle="bold"
         android:layout_marginBottom="16dp"/>
@@ -39,6 +39,16 @@
         android:focusable="true"
         android:gravity="end"
         android:padding="4dp"/>
+
+    <!-- Optional lock height (CLTV). Leave blank for a normal output. -->
+    <com.google.android.material.textfield.TextInputEditText
+        android:id="@+id/lockHeightInput"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:hint="@string/input_lock_height_hint"
+        android:inputType="number"
+        android:textSize="14sp" />
 
     <!-- Buttons -->
     <LinearLayout

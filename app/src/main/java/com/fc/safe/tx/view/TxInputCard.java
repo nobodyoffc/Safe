@@ -5,10 +5,10 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
-
 import androidx.cardview.widget.CardView;
 
 import com.fc.fc_ajdk.data.fchData.Cash;
@@ -16,6 +16,7 @@ import com.fc.fc_ajdk.utils.FchUtils;
 import com.fc.fc_ajdk.utils.NumberUtils;
 import com.fc.fc_ajdk.utils.StringUtils;
 import com.fc.safe.R;
+import com.fc.safe.utils.ToastUtils;
 
 public class TxInputCard extends CardView {
     private TextView txIdText;
@@ -84,7 +85,7 @@ public class TxInputCard extends CardView {
         ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
         ClipData clip = ClipData.newPlainText(label, text);
         clipboard.setPrimaryClip(clip);
-        Toast.makeText(context, R.string.copied, Toast.LENGTH_SHORT).show();
+        ToastUtils.showInfo(context, context.getString(R.string.copied));
     }
 
     public void setCash(Cash cash) {
@@ -92,6 +93,19 @@ public class TxInputCard extends CardView {
         txIdText.setText(StringUtils.omitMiddle(cash.getBirthTxId(), 13));
         indexText.setText(String.valueOf(cash.getBirthIndex()));
         amountText.setText(NumberUtils.formatAmount(FchUtils.satoshiToCoin(cash.getValue())) + " " + getContext().getString(R.string.currency_fch));
+        renderLockTime(cash.getLockTime());
+    }
+
+    private void renderLockTime(Long lockTime) {
+        LinearLayout container = findViewById(R.id.lockTimeContainer);
+        if (container == null) return;
+        if (lockTime == null || lockTime <= 0) {
+            container.setVisibility(View.GONE);
+            return;
+        }
+        TextView text = findViewById(R.id.lockTimeText);
+        text.setText(getContext().getString(R.string.unlock_at_block, lockTime));
+        container.setVisibility(View.VISIBLE);
     }
 
     public Cash getCash() {

@@ -21,9 +21,9 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 
 import com.fc.fc_ajdk.core.crypto.KeyTools;
-import com.fc.fc_ajdk.core.fch.TxCreator;
+import com.fc.fc_ajdk.core.fch.TxHandler;
 import com.fc.fc_ajdk.data.fcData.KeyInfo;
-import com.fc.fc_ajdk.data.fchData.Multisign;
+import com.fc.fc_ajdk.data.fchData.Multisig;
 import com.fc.fc_ajdk.utils.DateUtils;
 import com.fc.fc_ajdk.utils.Hex;
 import com.fc.fc_ajdk.utils.StringUtils;
@@ -32,7 +32,8 @@ import com.fc.safe.R;
 import com.fc.safe.db.MultisignManager;
 import com.fc.safe.home.MultisignActivity;
 import com.fc.safe.ui.IoIconsView;
-import com.fc.safe.utils.KeyCardManager;
+import com.fc.safe.utils.KeyCardContainer;
+import com.fc.safe.utils.ChooseMode;
 import com.fc.safe.utils.KeyboardUtils;
 import com.google.android.material.textfield.TextInputEditText;
 import com.fc.safe.db.KeyInfoManager;
@@ -47,7 +48,7 @@ public class CreateMultisignIdActivity extends BaseCryptoActivity {
     private static final int QR_SCAN_KEY_REQUEST_CODE = 1001;
     
     private LinearLayout keyListContainer;
-    private KeyCardManager keyCardManager;
+    private KeyCardContainer keyCardManager;
     private RadioGroup signerNumberRadioGroup;
     private TextInputEditText keyInput;
     private LinearLayout buttonContainer;
@@ -121,7 +122,7 @@ public class CreateMultisignIdActivity extends BaseCryptoActivity {
     @Override
     protected void initializeViews() {
         keyListContainer = findViewById(R.id.keyListContainer);
-        keyCardManager = new KeyCardManager(this, keyListContainer, null);
+        keyCardManager = new KeyCardContainer(this, keyListContainer, ChooseMode.CHOOSE_MULTI_WITHOUT_EDIT);
         keyCardManager.setOnKeyListChangedListener(updatedKeyInfoList -> {
             memberList.clear();
             memberList.addAll(updatedKeyInfoList);
@@ -167,7 +168,7 @@ public class CreateMultisignIdActivity extends BaseCryptoActivity {
         keyIcons.init(this, false, true, true, false);
         keyIcons.setSingleChoice(false);
         keyIcons.setOnPeopleClickListener(isSingleChoice -> {
-            showChooseKeyInfoDialog(false);
+            showChooseKeyInfoDialog(ChooseMode.CHOOSE_MULTI_WITHOUT_EDIT);
         });
         keyIcons.setOnScanClickListener(() -> startQrScan(QR_SCAN_KEY_REQUEST_CODE));
 
@@ -287,19 +288,19 @@ public class CreateMultisignIdActivity extends BaseCryptoActivity {
         String str = selectedKeyInfo == null ? keyInput.getText().toString() : selectedKeyInfo.getPubkey();
         if (!KeyTools.isPubkey(str)) {
             try {
-                Multisign multisign = Multisign.parseMultisignRedeemScript(str);
-                if(multisign==null || multisign.getPubKeys()==null || multisign.getPubKeys().isEmpty()){
+                Multisig multisig = Multisig.parseMultisignRedeemScript(str);
+                if(multisig ==null || multisig.getPubKeys()==null || multisig.getPubKeys().isEmpty()){
                     showToast(getString(R.string.invalid_public_key_or_redeem_script));
                     return;
                 }
-                for(String key: multisign.getPubKeys()){
+                for(String key: multisig.getPubKeys()){
                     KeyInfo newKeyInfo = new KeyInfo(null, key);
                     memberList.add(newKeyInfo);
                     keyCardManager.addKeyCard(newKeyInfo);
                 }
                 
-                // Set the radio button corresponding to multisign.getM() as selected
-                int m = multisign.getM();
+                // Set the radio button corresponding to multisig.getM() as selected
+                int m = multisig.getM();
                 if (m > 0 && m <= radioButtons.length) {
                     signerNumberRadioGroup.check(radioButtons[m - 1].getId());
                 }
@@ -352,7 +353,7 @@ public class CreateMultisignIdActivity extends BaseCryptoActivity {
         }
         
         try {
-            // Create Multisign
+            // Create Multisig
             List<byte[]> pubkeyList = new ArrayList<>();
             for (KeyInfo keyInfo : memberList) {
                 if(keyInfo.getPubkey()==null){
@@ -362,24 +363,24 @@ public class CreateMultisignIdActivity extends BaseCryptoActivity {
                 pubkeyList.add(Hex.fromHex(keyInfo.getPubkey()));
             }
             
-            Multisign multisign = TxCreator.createMultisign(pubkeyList, signerNumber);
-            if(multisign ==null){
+            Multisig multisig = new TxHandler().createMultisign(pubkeyList, signerNumber);
+            if(multisig ==null){
                 showToast(getString(R.string.failed_to_create_multisign_id));
                 return;
             }
             // Set save time before adding to database
-            multisign.setSaveTime(DateUtils.longToTime(System.currentTimeMillis(), DateUtils.TO_MINUTE));
+            multisig.setSaveTime(DateUtils.longToTime(System.currentTimeMillis(), DateUtils.TO_MINUTE));
             
             // Show label dialog
-            showLabelDialog(multisign);
+            showLabelDialog(multisig);
         } catch (Exception e) {
-            String errorMessage = "Failed to create multisign ID: " + e.getMessage();
+            String errorMessage = "Failed to create multisig ID: " + e.getMessage();
             showToast(getString(R.string.operation_failed_with_message, e.getMessage()));
             TimberLogger.e(TAG, errorMessage);
         }
     }
 
-    private void showLabelDialog(Multisign multisign) {
+    private void showLabelDialog(Multisig multisig) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(getString(R.string.enter_label_for_multisign_id));
         
@@ -390,17 +391,17 @@ public class CreateMultisignIdActivity extends BaseCryptoActivity {
         EditText labelInput = dialogView.findViewById(R.id.label_input);
         ProgressBar progressBar = dialogView.findViewById(R.id.progress_bar);
         
-        idTextView.setText(multisign.getId());
+        idTextView.setText(multisig.getId());
         
         builder.setPositiveButton("OK", (dialog, which) -> {
             String label = labelInput.getText().toString().trim();
             if (!label.isEmpty()) {
-                multisign.setLabel(label);
+                multisig.setLabel(label);
             }
             
             try {
                 // Add to database
-                multisignManager.getMultisignDB().put(multisign.getId(), multisign);
+                multisignManager.getMultisignDB().put(multisig.getId(), multisig);
                 multisignManager.commit();
                 
                 dialog.dismiss();
@@ -408,7 +409,7 @@ public class CreateMultisignIdActivity extends BaseCryptoActivity {
                 MultisignActivity.setNeedsRefresh(true);
                 finish();
             } catch (Exception e) {
-                String errorMessage = "Failed to save multisign ID: " + e.getMessage();
+                String errorMessage = "Failed to save multisig ID: " + e.getMessage();
                 TimberLogger.e(TAG, errorMessage);
                 showToast(getString(R.string.operation_failed_with_message, e.getMessage()));
             }

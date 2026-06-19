@@ -10,33 +10,34 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.fc.fc_ajdk.data.fchData.Multisign;
+import com.fc.fc_ajdk.data.fchData.Multisig;
 import com.fc.fc_ajdk.data.fcData.KeyInfo;
 import com.fc.safe.SafeApplication;
 import com.fc.safe.R;
 import com.fc.safe.db.MultisignManager;
 import com.fc.safe.multisign.CreateMultisignTxActivity;
 import com.fc.safe.ui.DetailFragment;
-import com.fc.safe.utils.KeyCardManager;
+import com.fc.safe.utils.KeyCardContainer;
+import com.fc.safe.utils.ChooseMode;
 
 import java.util.List;
 
 public class MultisignDetailActivity extends BaseCryptoActivity {
     private static final String TAG = "MultisignDetailActivity";
-    private Multisign multisign;
+    private Multisig multisig;
     private LinearLayout memberCardsContainer;
     private LinearLayout detailContainer;
     private Button createTxButton;
     private Button copyButton;
-    private KeyCardManager keyCardManager;
+    private KeyCardContainer keyCardManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Get Multisign from intent
-        multisign = (Multisign) getIntent().getSerializableExtra("multisign");
-        if (multisign == null) {
+        // Get Multisig from intent
+        multisig = (Multisig) getIntent().getSerializableExtra("multisig");
+        if (multisig == null) {
             finish();
             return;
         }
@@ -61,7 +62,7 @@ public class MultisignDetailActivity extends BaseCryptoActivity {
 
     @Override
     protected String getActivityTitle() {
-        return getString(R.string.multisign_detail);
+        return getString(R.string.multisig_detail);
     }
 
     @Override
@@ -77,9 +78,9 @@ public class MultisignDetailActivity extends BaseCryptoActivity {
 
         // Setup copy button
         copyButton.setOnClickListener(v -> {
-            String jsonString = multisign.toNiceJson();
+            String jsonString = multisig.toNiceJson();
             ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-            ClipData clip = ClipData.newPlainText("Multisign JSON", jsonString);
+            ClipData clip = ClipData.newPlainText("Multisig JSON", jsonString);
             clipboard.setPrimaryClip(clip);
             Toast.makeText(this, getString(R.string.copied), SafeApplication.TOAST_LASTING).show();
         });
@@ -87,7 +88,7 @@ public class MultisignDetailActivity extends BaseCryptoActivity {
         // Setup delete button
         Button deleteButton = findViewById(R.id.deleteButton);
         deleteButton.setOnClickListener(v -> {
-            MultisignManager.getInstance(this.getApplicationContext()).removeMultisign(multisign);
+            MultisignManager.getInstance(this.getApplicationContext()).removeMultisign(multisig);
             MultisignManager.getInstance(this.getApplicationContext()).commit();
             MultisignActivity.setNeedsRefresh(true);
             finish();
@@ -107,11 +108,11 @@ public class MultisignDetailActivity extends BaseCryptoActivity {
         keyCardList.setOrientation(LinearLayout.VERTICAL);
         memberCardsContainer.addView(keyCardList);
 
-        // Initialize KeyCardManager
-        keyCardManager = new KeyCardManager(this, keyCardList, null);
+        // Initialize KeyCardContainer
+        keyCardManager = new KeyCardContainer(this, keyCardList, ChooseMode.WITHOUT_CHOOSE);
 
         // Create KeyInfo objects from pubKeys and add them to the card manager
-        List<String> pubKeys = multisign.getPubKeys();
+        List<String> pubKeys = multisig.getPubKeys();
         if(pubKeys!=null && !pubKeys.isEmpty())
             for (String pubKey : pubKeys) {
                 KeyInfo keyInfo = new KeyInfo(null, pubKey);
@@ -121,7 +122,7 @@ public class MultisignDetailActivity extends BaseCryptoActivity {
 
     private void setupDetailFragment() {
         // Create and add detail fragment
-        DetailFragment detailFragment = DetailFragment.newInstance(multisign, Multisign.class);
+        DetailFragment detailFragment = DetailFragment.newInstance(multisig, Multisig.class);
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.detailContainer, detailFragment)
                 .commit();
@@ -130,7 +131,7 @@ public class MultisignDetailActivity extends BaseCryptoActivity {
     private void setupCreateTxButton() {
         createTxButton.setOnClickListener(v -> {
             Intent intent = new Intent(this, CreateMultisignTxActivity.class);
-            intent.putExtra("multisign", multisign);
+            intent.putExtra("multisig", multisig);
             startActivity(intent);
         });
     }
@@ -142,7 +143,7 @@ public class MultisignDetailActivity extends BaseCryptoActivity {
 
         // Set click listeners
         deleteButton.setOnClickListener(v -> {
-            MultisignManager.getInstance(this.getApplicationContext()).removeMultisign(multisign);
+            MultisignManager.getInstance(this.getApplicationContext()).removeMultisign(multisig);
             MultisignManager.getInstance(this.getApplicationContext()).commit();
             MultisignActivity.setNeedsRefresh(true);
             finish();
@@ -150,7 +151,7 @@ public class MultisignDetailActivity extends BaseCryptoActivity {
 
         createTxButton.setOnClickListener(v -> {
             Intent intent = new Intent(this, CreateMultisignTxActivity.class);
-            intent.putExtra("multisign", multisign);
+            intent.putExtra("multisig", multisig);
             startActivity(intent);
         });
     }

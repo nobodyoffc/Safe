@@ -2,8 +2,6 @@ package com.fc.safe;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.widget.Toast;
-
 import androidx.activity.EdgeToEdge;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -17,12 +15,12 @@ import com.fc.safe.initiate.ConfigureManager;
 import com.fc.safe.ui.RemindDialog;
 
 import java.util.Objects;
+import com.fc.safe.utils.ToastUtils;
 
 public class MainActivity extends AppCompatActivity {
     public static final String TAG = "MainActivity";
-    private DatabaseManager dbManager;
     private ActivityResultLauncher<Intent> passwordLauncher;
-    private boolean hasLaunchedPasswordActivity = false;
+    private boolean hasLaunchedPasswordActivity;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,26 +53,21 @@ public class MainActivity extends AppCompatActivity {
 
 
     private void initializeDatabase() {
-        dbManager = DatabaseManager.getInstance(this);
+        DatabaseManager.getInstance(this);
     }
 
     private void initiate() {
-        // Check if there are any Configure objects in ConfigureManager
-        if (ConfigureManager.getInstance().isConfigEmpty(this)) {
-            // Show security guidelines dialog before creating password
+
+        // Show security guidelines dialog before creating password
             RemindDialog dialog = new RemindDialog(this, getString(R.string.safe_v_by_no1_nrc7)+"\n\n"+getString(R.string.offline_notation));
             dialog.setOnDismissListener(dialogInterface -> {
                 if (!hasLaunchedPasswordActivity) {
                     hasLaunchedPasswordActivity = true;
-                    Intent createPasswordIntent = new Intent(this, CreatePasswordActivity.class);
-                    passwordLauncher.launch(createPasswordIntent);
+                    Intent checkPasswordIntent = new Intent(this, CheckPasswordActivity.class);
+                    passwordLauncher.launch(checkPasswordIntent);
                 }
             });
             dialog.show();
-        } else {
-            Intent checkPasswordIntent = new Intent(this, CheckPasswordActivity.class);
-            passwordLauncher.launch(checkPasswordIntent);
-        }
     }
 
     private void handlePasswordResult(androidx.activity.result.ActivityResult result) {
@@ -90,7 +83,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void handleError(String message) {
         TimberLogger.e(TAG, message);
-        Toast.makeText(this, getString(R.string.failed_to_initiate), Toast.LENGTH_SHORT).show();
+        ToastUtils.showError(this, getString(R.string.failed_to_initiate));
     }
 
     private void launchHomeActivity() {
@@ -100,7 +93,7 @@ public class MainActivity extends AppCompatActivity {
             finish(); // Close MainActivity
         } catch (Exception ex) {
             TimberLogger.e(TAG, "Error launching HomeActivity: " + ex.getMessage(), ex);
-            Toast.makeText(this, getString(R.string.error_launching_homeactivity) + ex.getMessage(), Toast.LENGTH_LONG).show();
+            ToastUtils.showError(this, getString(R.string.error_launching_homeactivity) + ex.getMessage());
         }
     }
 

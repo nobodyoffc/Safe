@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(./gradlew:*)",
+      "Bash(find:*)",
+      "Bash(while read file)",
+      "Bash(do:*)",
+      "Bash(done)",
+      "Bash(python3:*)",
+      "Bash(chmod:*)",
+      "Bash(grep -nA 8 \"public void setAmount\\\\|public Double getAmount\" /Users/liuchangyong/AndroidStudioProjects/Freer/FC-AJDK/src/main/java/com/fc/fc_ajdk/data/fchData/Cash.java)",
+      "Bash(grep -nA 15 \"public static boolean isGoodFid\" /Users/liuchangyong/AndroidStudioProjects/Safe/FC-AJDK/src/main/java/com/fc/fc_ajdk/core/crypto/KeyTools.java)",
+      "Bash(echo \"exit: $?\")",
+      "Bash(git add *)",
+      "Bash(git commit -q -m ' *)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

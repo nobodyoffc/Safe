@@ -16,7 +16,7 @@ import com.fc.fc_ajdk.core.crypto.Decryptor;
 import com.fc.fc_ajdk.core.crypto.EncryptType;
 import com.fc.fc_ajdk.core.crypto.KeyTools;
 import com.fc.fc_ajdk.data.fcData.KeyInfo;
-import com.fc.fc_ajdk.db.LocalDB;
+import com.fc.safe.db.LocalDB;
 import com.fc.fc_ajdk.utils.JsonUtils;
 import com.fc.fc_ajdk.utils.StringUtils;
 import com.fc.fc_ajdk.utils.TimberLogger;

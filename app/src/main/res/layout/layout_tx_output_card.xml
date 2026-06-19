@@ -97,6 +97,34 @@
 
             </LinearLayout>
 
+            <!-- Row 3: Lock time (only visible when cash.lockTime is set) -->
+            <LinearLayout
+                android:id="@+id/lockTimeContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:visibility="gone">
+
+                <ImageView
+                    android:id="@+id/lockTimeIcon"
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:layout_marginEnd="4dp"
+                    android:contentDescription="@string/lock_time"
+                    android:src="@drawable/ic_lock"
+                    app:tint="@color/warning_color" />
+
+                <TextView
+                    android:id="@+id/lockTimeText"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:textColor="@color/warning_color"
+                    android:textSize="12sp" />
+            </LinearLayout>
+
         </LinearLayout>
 
         <!-- Right side: Delete Button -->

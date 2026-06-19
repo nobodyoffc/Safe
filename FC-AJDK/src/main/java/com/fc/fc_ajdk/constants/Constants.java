@@ -37,6 +37,11 @@ public class Constants {
     public static final long FchToSatoshi = 100000000;
     public static final double MinPayValue = 0.00001;
 
+    // Fee size (in bytes) for change output subtraction in fee calculation.
+    // When rest == -CHANGE_OUTPUT_FEE, we can skip the change output.
+    public static final long CHANGE_P2SH_OUTPUT_FEE = 32;
+    public static final long CHANGE_OUTPUT_FEE = 34;
+
     public static final String OPRETURN_FILE_DIR = "opreturn";
     public static final String OPRETURN_FILE_NAME = "opreturn0.byte";
     public static final String FCH_ADDR = "fchAddr";

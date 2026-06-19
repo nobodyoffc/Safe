@@ -56,11 +56,10 @@
 
                 <TextView
                     android:id="@+id/cash_amount_value"
-                    android:layout_width="0dp"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
                     android:textSize="14sp"
-                    android:textColor="@color/text_color"
+                    android:textColor="@color/field_name"
                     android:clickable="true"
                     android:focusable="true"
                     android:background="?attr/selectableItemBackground"
@@ -75,6 +74,7 @@
                     android:textColor="@color/text_color"
                     android:clickable="true"
                     android:focusable="true"
+                    android:gravity="end"
                     android:background="?attr/selectableItemBackground"/>
 
             </LinearLayout>

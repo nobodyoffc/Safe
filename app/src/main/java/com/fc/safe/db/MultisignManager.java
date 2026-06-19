@@ -1,30 +1,26 @@
 package com.fc.safe.db;
 
-import static com.fc.fc_ajdk.constants.FieldNames.SAVE_TIME;
-
 import android.content.Context;
-import android.widget.Toast;
 
-import com.fc.fc_ajdk.data.fchData.Multisign;
-import com.fc.fc_ajdk.db.LocalDB;
+import com.fc.fc_ajdk.data.fchData.Multisig;
 import com.fc.fc_ajdk.utils.DateUtils;
 import com.fc.fc_ajdk.utils.TimberLogger;
 import com.fc.safe.R;
-import com.fc.safe.SafeApplication;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import com.fc.safe.utils.ToastUtils;
 
 /**
- * A singleton class to manage and share the Multisign database across activities.
- * This provides a centralized way to access the Multisign database from any activity.
+ * A singleton class to manage and share the Multisig database across activities.
+ * This provides a centralized way to access the Multisig database from any activity.
  */
 public class MultisignManager {
     private static final String TAG = "MultisignManager";
 
     private static MultisignManager instance;
-    private LocalDB<Multisign> multisignDB;
+    private LocalDB<Multisig> multisignDB;
 
     private MultisignManager() {
         // Private constructor to prevent direct instantiation
@@ -44,6 +40,21 @@ public class MultisignManager {
         return instance;
     }
 
+    public static synchronized void reset() {
+        if (instance != null) {
+            if (instance.multisignDB != null) {
+                try {
+                    instance.multisignDB.close();
+                } catch (Exception e) {
+                    TimberLogger.e(TAG, "Error closing database on reset: " + e.getMessage());
+                }
+                instance.multisignDB = null;
+            }
+            instance = null;
+            TimberLogger.d(TAG, "MultisignManager instance reset");
+        }
+    }
+
     /**
      * Initializes the MultisignManager with the given context.
      * 
@@ -59,78 +70,78 @@ public class MultisignManager {
                 TimberLogger.e(TAG, "Error closing database: " + e.getMessage());
             }
         }
-        multisignDB = dbManager.getEntityDatabase(Multisign.class, LocalDB.SortType.BIRTH_ORDER, SAVE_TIME);
+        multisignDB = dbManager.getEntityDatabase(Multisig.class);
     }
 
     /**
-     * Gets the Multisign database.
+     * Gets the Multisig database.
      * 
-     * @return The Multisign database
+     * @return The Multisig database
      */
-    public LocalDB<Multisign> getMultisignDB() {
+    public LocalDB<Multisig> getMultisignDB() {
         return multisignDB;
     }
 
     /**
-     * Gets all Multisign objects from the database.
+     * Gets all Multisig objects from the database.
      * 
-     * @return A map of Multisign objects with their IDs as keys
+     * @return A map of Multisig objects with their IDs as keys
      */
-    public Map<String, Multisign> getAllMultisigns() {
+    public Map<String, Multisig> getAllMultisigns() {
         return multisignDB.getAll();
     }
 
     /**
-     * Gets a list of all Multisign objects from the database.
+     * Gets a list of all Multisig objects from the database.
      * 
-     * @return A list of all Multisign objects
+     * @return A list of all Multisig objects
      */
-    public List<Multisign> getAllMultisignList() {
+    public List<Multisig> getAllMultisignList() {
         return new ArrayList<>(multisignDB.getAll().values());
     }
 
     /**
-     * Gets a Multisign object by its ID.
+     * Gets a Multisig object by its ID.
      * 
-     * @param id The ID of the Multisign object to get
-     * @return The Multisign object, or null if not found
+     * @param id The ID of the Multisig object to get
+     * @return The Multisig object, or null if not found
      */
-    public Multisign getMultisignById(String id) {
+    public Multisig getMultisignById(String id) {
         return multisignDB.get(id);
     }
 
     /**
-     * Adds a Multisign object to the database.
+     * Adds a Multisig object to the database.
      * 
-     * @param script The redeem script to create and add Multisign
+     * @param script The redeem script to create and add Multisig
      */
     public void addMultisign(String script,Context context) {
-        Multisign multisign = Multisign.parseMultisignRedeemScript(script);
-        if(multisign ==null){
-            Toast.makeText(context, context.getString(R.string.failed_to_parse_script_to_multisign), Toast.LENGTH_LONG).show();
+        Multisig multisig = Multisig.parseMultisignRedeemScript(script);
+        if(multisig ==null){
+            ToastUtils.showError(context, context.getString(R.string.failed_to_parse_script_to_multisign));
             return;
         }
-        multisign.setSaveTime(DateUtils.longToTime(System.currentTimeMillis(), DateUtils.TO_MINUTE));
-        multisignDB.put(multisign.getId(), multisign);
-        TimberLogger.i(TAG, "Added Multisign with ID: %s", multisign.getId());
+        multisig.setSaveTime(DateUtils.longToTime(System.currentTimeMillis(), DateUtils.TO_MINUTE));
+        multisignDB.put(multisig.getId(), multisig);
+        TimberLogger.i(TAG, "Added Multisig with ID: %s", multisig.getId());
     }
 
     /**
-     * Removes a Multisign object from the database.
+     * Removes a Multisig object from the database.
      * 
-     * @param multisign The Multisign object to remove
+     * @param multisig The Multisig object to remove
      */
-    public void removeMultisign(Multisign multisign) {
-        multisignDB.remove(multisign.getId());
+    public void removeMultisign(Multisig multisig) {
+        multisignDB.remove(multisig.getId());
     }
 
     /**
-     * Removes multiple Multisign objects from the database.
+     * Removes multiple Multisig objects from the database.
      * 
-     * @param multisigns The list of Multisign objects to remove
+     * @param multisigs The list of Multisig objects to remove
      */
-    public void removeMultisigns(List<Multisign> multisigns) {
-        multisignDB.remove(multisigns);
+    public void removeMultisigns(List<Multisig> multisigs) {
+        multisignDB.remove(multisigs);
     }
 
     /**
@@ -141,35 +152,29 @@ public class MultisignManager {
     }
 
     /**
-     * Gets a paginated list of Multisign objects.
+     * Gets a paginated list of Multisig objects.
      * 
      * @param pageSize The number of items per page
      * @param lastIndex The index of the last item from the previous page, or null for the first page
      * @param descending Whether to sort in descending order
-     * @return A list of Multisign objects for the requested page
+     * @return A list of Multisig objects for the requested page
      */
-    public List<Multisign> getPaginatedMultisigns(int pageSize, Long lastIndex, boolean descending) {
-        if(multisignDB.getSortType().equals(LocalDB.SortType.NO_SORT)){
-            TimberLogger.e(TAG, "getPaginatedMultisigns: The DB should been sorted.", SafeApplication.TOAST_LASTING);
-            return null;
-        }
-
-        List<Multisign> result = multisignDB.getList(pageSize, null, lastIndex, true, null, null, false, descending);
-        return result;
+    public List<Multisig> getPaginatedMultisigns(long pageSize, Long lastIndex, boolean descending) {
+        return multisignDB.getList(pageSize, null, lastIndex, true, null, null, false, descending);
     }
 
     /**
-     * Gets the index of a Multisign object by its ID.
-     * 
-     * @param id The ID of the Multisign object
-     * @return The index of the Multisign object
+     * Gets the index (0-based position) of a Multisig object by its ID.
+     *
+     * @param id The ID of the Multisig object
+     * @return The index of the Multisig object, or -1 if not found
      */
-    public Long getIndexById(String id) {
+    public long getIndexById(String id) {
         return multisignDB.getIndexById(id);
     }
 
     /**
-     * Checks if a Multisign with the given ID already exists in the database.
+     * Checks if a Multisig with the given ID already exists in the database.
      * 
      * @param id The ID to check
      * @return true if the key exists, false otherwise

@@ -1,5 +1,6 @@
 package com.fc.fc_ajdk.core.crypto.old.EccAesFromPeiTeam;
 
+@Deprecated
 public class util {
     private final static char[] hexArray = "0123456789ABCDEF".toCharArray();
 

@@ -4,8 +4,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.app.AlertDialog;
-import android.widget.Toast;
-
 import com.fc.fc_ajdk.core.crypto.KeyTools;
 import com.fc.fc_ajdk.data.fcData.KeyInfo;
 import com.fc.fc_ajdk.utils.TimberLogger;
@@ -15,6 +13,7 @@ import com.fc.safe.initiate.ConfigureManager;
 import com.fc.safe.ui.DetailFragment;
 import com.google.android.material.textfield.TextInputEditText;
 import com.fc.safe.utils.TextIconsUtils;
+import com.fc.safe.utils.ToastUtils;
 
 public class CreateKeyByPrikeyActivity extends BaseCryptoActivity {
     private static final String TAG = "CreateKeyByPrikey";
@@ -106,7 +105,7 @@ public class CreateKeyByPrikeyActivity extends BaseCryptoActivity {
 
         byte[] prikey32 = KeyTools.getPrikey32(prikey);
         if(prikey32 ==null){
-            Toast.makeText(this, getString(R.string.invalid_private_key), Toast.LENGTH_SHORT).show();
+            ToastUtils.showError(this, getString(R.string.invalid_private_key));
             return;
         }
 
@@ -157,12 +156,12 @@ public class CreateKeyByPrikeyActivity extends BaseCryptoActivity {
         String label = labelInput.getText() != null ? labelInput.getText().toString() : "";
 
         if (prikey.isEmpty()) {
-            Toast.makeText(this, getString(R.string.private_key_is_empty), Toast.LENGTH_SHORT).show();
+            ToastUtils.showWarning(this, getString(R.string.private_key_is_empty));
             return null;
         }
         byte[] prikey32 = KeyTools.getPrikey32(prikey);
         if(prikey32==null){
-            Toast.makeText(this, getString(R.string.invalid_private_key), Toast.LENGTH_SHORT).show();
+            ToastUtils.showError(this, getString(R.string.invalid_private_key));
             return null;
         }
 

@@ -10,8 +10,8 @@ android {
         applicationId = "com.fc.safe"
         minSdk = 28
         targetSdk = 34
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 104
+        versionName = "1.4"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -45,6 +45,7 @@ android {
 
 dependencies {
     implementation(libs.hawk)
+    implementation("com.tencent:mmkv:1.3.9")
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
     
     implementation("androidx.appcompat:appcompat:1.6.1")
@@ -53,6 +54,7 @@ dependencies {
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     implementation("androidx.recyclerview:recyclerview:1.3.2")
     implementation("androidx.cardview:cardview:1.0.0")
+    implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
     implementation("com.jakewharton.timber:timber:5.0.1")
     implementation(project(":FC-AJDK"))
     

@@ -9,6 +9,7 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 
+@Deprecated
 public class envelop {
     String symKey;
     ECIES ecies;

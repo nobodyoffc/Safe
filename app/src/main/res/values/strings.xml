@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Safe</string>
+    <string name="safe_v_by_no1_nrc7">Safe v2.2 By No1_NrC7</string>
+
     <string name="scan">Scan</string>
     <string name="make">Make</string>
     <string name="clear">Clear</string>
@@ -48,8 +50,8 @@
     <string name="menu_secrets">Secrets</string>
     <string name="menu_convert">Convert</string>
     <string name="menu_tools">Tools</string>
-    <string name="menu_sign_tx">Sign TX</string>
-    <string name="menu_multi_sign">Multi Sign</string>
+    <string name="menu_tx">TX</string>
+    <string name="menu_multisign">Multisign</string>
     <string name="menu_sign_words">Sign Words</string>
     <string name="menu_verify">Verify</string>
     <string name="menu_encrypt">Encrypt</string>
@@ -60,7 +62,7 @@
     <string name="menu_qr_code">QR Code</string>
     <string name="menu_settings">Settings</string>
     <string name="menu_test">Test</string>
-    <string name="home_slogan">Protect your passwords, keys, secrets and privacy with cryptography.</string>
+    <string name="home_slogan">Protect your passwords, keys, secrets and privacy with cryptography</string>
     <string name="failed_decode">Could not decode. Please check the text.</string>
     <string name="hash_input_hint">Enter text to be hashed</string>
     <string name="failed_hash">Failed to hash input</string>
@@ -153,8 +155,8 @@
     <string name="import_tx">Import</string>
     <string name="add">Add</string>
     <string name="input_the_text_carved_on_chain">Input the text carved on chain</string>
-    <string name="sender_from_script_or_multisign">Sender from script or multisign JSO</string>
-    <string name="pay_to">Pay to</string>
+    <string name="sender_from_script_or_multisign">Sender from script or multisig JSON</string>
+    <string name="add_payee">Add payee</string>
     <string name="add_cash_to_spend">Add cash to spend</string>
     <string name="please_input_required_signer_number">Please input required signer number</string>
     <string name="invalid_signer_number">Invalid signer number</string>
@@ -169,7 +171,7 @@
     <string name="avatar">Avatar</string>
 
     <string name="choose_multisign_id">Choose Multisign ID</string>
-    <string name="no_multisign_found">No multisign found</string>
+    <string name="no_multisign_found">No multisig found</string>
     <string name="signed">Signed</string>
     <string name="sender">Sender</string>
     <string name="spending">Spending</string>
@@ -194,7 +196,7 @@
     <string name="build">Build</string>
     <string name="copy_result">Copy Result</string>
     <string name="built_you_can_broadcast_it">Built! You can broadcast it.</string>
-    <string name="failed_to_build_multisign_tx">Failed to build multisign TX.</string>
+    <string name="failed_to_build_multisign_tx">Failed to build multisig TX.</string>
     <string name="add_to_fid_list">Add to FID list</string>
     <string name="clear_fid_list">Clear FID list</string>
     <string name="added_to_fid_list">Added to FID list.</string>
@@ -277,7 +279,7 @@
     <string name="show_detail">Show Detail</string>
     <string name="shown_in">Shown in:</string>
     <string name="safe">Safe</string>
-    <string name="error_initializing_camera">"Error initializing camera: "</string>
+    <string name="retry_after_authorization">"Retry after authorization"</string>
     <string name="cannot_open_image">Cannot open image</string>
     <string name="cannot_decode_image">Cannot decode image</string>
 
@@ -315,8 +317,8 @@
     <string name="paying">Paying</string>
     <string name="convert">Convert</string>
     <string name="start">Start</string>
-    <string name="multisign">Multisign</string>
-    <string name="multisign_detail">Multisign Detail</string>
+    <string name="multisig">Multisig</string>
+    <string name="multisig_detail">Multisig Detail</string>
     <string name="my_keys">My Keys</string>
     <string name="my_secrets">My Secrets</string>
     <string name="sign_words">Sign Words</string>
@@ -348,7 +350,7 @@
     <string name="check_password">Check Password</string>
     <string name="please_enter_matching_characters">Please enter matching characters</string>
     <string name="no_totp_found">No TOTP found</string>
-    <string name="no_multisigns_found">No multisigns found.</string>
+    <string name="no_multisigns_found">No multisigs found.</string>
     <string name="please_input_text">Please input text</string>
     <string name="no_content_to_generate_qr_code">No content to generate QR code</string>
     <string name="no_key_available">No key available</string>
@@ -357,10 +359,9 @@
     <string name="json_converter">JSON Converter</string>
     <string name="menu_json_converter">JSON Convert</string>
     <string name="input_json">Input JSON string</string>
-    <string name="safe_v_by_no1_nrc7">Safe v0.29 By No1_NrC7</string>
     <string name="failed_to_parse_multisign">Failed to parse Multisign.</string>
-    <string name="input_the_script_or_multisign_or_select_a_multisign_fid">Input the script or Multisign. Or select a multisign FID.</string>
-    <string name="failed_to_create_multisign_tx">Failed to create multisign TX.</string>
+    <string name="input_the_script_or_multisign_or_select_a_multisign_fid">Input the script or Multisign. Or select a multisig FID.</string>
+    <string name="failed_to_create_multisign_tx">Failed to create multisig TX.</string>
     <string name="failed_to_create_transaction_info">Failed to create transaction info</string>
     <string name="no_transaction_to_copy">No transaction to copy</string>
     <string name="error_initializing_home">Error initializing HomeActivity: %1$s</string>
@@ -388,6 +389,7 @@
     <string name="symkey_is_null">SymKey is null</string>
     <string name="no_data_to_make_qr_code">No data to make QR code</string>
     <string name="nothing_to_copy">Nothing to copy</string>
+    <string name="failed_to_encrypt">Failed to encrypt</string>
     <string name="error_encrypting_secret">Error encrypting secret: %1$s</string>
     <string name="error_encrypting_key">Error encrypting key: %1$s</string>
     <string name="storage_permission_required">Storage permission is required</string>
@@ -406,9 +408,10 @@
     <string name="don_t_encrypt">Don\'t encrypt</string>
     <string name="current_password">Current Password</string>
     <string name="_00_00_00" translatable="false">00:00:00</string>
-    <string name="to_hex">To Hex</string>
+    <string name="to_hex">Hex</string>
     <string name="base58" translatable="false">Base58</string>
     <string name="base58_new">Base58 New</string>
+    <string name="mnemonic">Mnemonic</string>
     <string name="ecdsa" translatable="false">ECDSA</string>
     <string name="schnorr" translatable="false">Schnorr</string>
     <string name="promote">Promote</string>
@@ -416,6 +419,20 @@
     <string name="small_avatar_image" translatable="false">Small Avatar Image</string>
     <string name="next">Next</string>
     <string name="enter_label">Enter label</string>
+    <string name="label">Label</string>
+    <string name="all">All</string>
+    <string name="sort_by_fid">Sort by FID</string>
+    <string name="sort_by_time">Sort by Time</string>
+    <string name="sort_by_label">Sort by Label</string>
+    <string name="sort_by_type">Sort by Type</string>
+    <string name="sort_by_title">Sort by Title</string>
+    <string name="type">Type</string>
+    <string name="title">Title</string>
+
+    <string name="update">Update</string>
+    <string name="edit">Edit</string>
+    <string name="remove">Remove</string>
+    <string name="on_chain_status">On-chain Status</string>
     <string name="please_wait">Please wait...</string>
     <string name="set_as_default">Set as Default</string>
     <string name="_default">Default</string>
@@ -442,10 +459,10 @@
     <string name="please_input_json_text">Please input JSON text</string>
     <string name="invalid_json_format">Invalid JSON format</string>
     <string name="selected_keys_have_no_public_keys">Selected keys have no public keys</string>
-    <string name="failed_to_create_multisign_id">Failed to create multisign ID.</string>
+    <string name="failed_to_create_multisign_id">Failed to create multisig ID.</string>
     <string name="multisign_id_created_successfully">Multisign ID created successfully</string>
     <string name="please_input_json">Please input JSON</string>
-    <string name="invalid_multisign_data">Invalid multisign data</string>
+    <string name="invalid_multisign_data">Invalid multisig data</string>
     <string name="no_signatures_to_build">No signatures to build</string>
     <string name="failed_to_merge_signatures">Failed to merge signatures: %1$s</string>
     <string name="failed_to_build_transaction">Failed to build transaction</string>
@@ -456,8 +473,8 @@
     <string name="please_input_both_text_and_key">Please input both text and key</string>
     <string name="wrong_key">Wrong key.</string>
     <string name="failed_to_sign_words">Failed to sign words.</string>
-    <string name="loaded_multisigns">Loaded %1$d multisigns</string>
-    <string name="no_more_multisigns_to_load">No more multisigns to load</string>
+    <string name="loaded_multisigns">Loaded %1$d multisigs</string>
+    <string name="no_more_multisigns_to_load">No more multisigs to load</string>
     <string name="selected_key_has_no_id">Selected key has no ID</string>
     <string name="please_input_signature">Please input signature</string>
     <string name="symkey_required_for_sha256_signature">The symKey is required for SHA256 signature</string>
@@ -499,17 +516,52 @@
     <string name="cash_saved_successfully">Cash saved successfully</string>
     <string name="cash_saved_successfully_count">%d cash saved successfully</string>
     <string name="all_cash_must_have_same_owner">All selected cash must have the same owner FID</string>
-    
+
+    <!-- Pending TX -->
+    <string name="cash_locked_by_pending_tx">One or more selected cashes are locked by a pending transaction</string>
+    <string name="pending_tx">Pending Transactions</string>
+    <string name="pending_tx_list">Pending TXs</string>
+    <string name="pending_tx_none">No pending transactions</string>
+    <string name="pending_tx_status_pending">Pending</string>
+    <string name="pending_tx_status_confirmed">Confirmed</string>
+    <string name="pending_tx_status_canceled">Canceled</string>
+    <string name="pending_tx_confirm_broadcast">Confirm broadcast</string>
+    <string name="pending_tx_mark_canceled">Mark canceled</string>
+    <string name="pending_tx_confirm_broadcast_prompt">Mark this transaction as broadcast and confirmed on-chain?</string>
+    <string name="pending_tx_cancel_prompt">Mark this transaction as canceled? Locked inputs will be released and pending outputs removed.</string>
+    <string name="pending_tx_confirmed_done">Marked confirmed</string>
+    <string name="pending_tx_canceled_done">Marked canceled</string>
+    <string name="pending_tx_partial_multisig">Partial multisig — not yet fully built</string>
+    <string name="pending_tx_created_at">Created</string>
+    <string name="pending_tx_updated_at">Updated</string>
+    <string name="pending_tx_on_chain_id">On-chain TX ID</string>
+    <string name="pending_tx_none_yet">(none yet)</string>
+    <string name="balance_available">Available</string>
+    <string name="balance_locked">Locked</string>
+    <string name="balance_incoming">Incoming</string>
+
     <!-- Create Cash Dialog strings -->
     <string name="create_cash">Create Cash</string>
     <string name="birth_time">Birth Time</string>
     <string name="birth_time_hint">Enter date and time (YYYY-MM-DD HH:MM:SS)</string>
+    <string name="birth_height">Birth Height</string>
+    <string name="birth_height_hint">Enter birth block height</string>
+    <string name="invalid_height_format">Invalid block height</string>
     <string name="invalid_date_format_please_use_yyyy_mm_dd">Invalid date format. Please use YYYY-MM-DD HH:MM:SS</string>
     <string name="cash_created_successfully">Cash created successfully</string>
 
     <string name="my_cash">My cash</string>
     <string name="please_input_phrase">Please input the phrase</string>
-    
+
+    <!-- Key derivation method chooser -->
+    <string name="choose_key_derivation">Choose key derivation method</string>
+    <string name="choose_key_derivation_message">Argon2id is slow and memory-hard, making it much harder to brute-force the phrase. SHA256 is fast but offers no protection against brute-force attacks.</string>
+    <string name="kdf_argon2id_recommended">Argon2id (Recommended)</string>
+    <string name="kdf_sha256">SHA256</string>
+    <string name="sha256_warning_title">SHA256 is not recommended</string>
+    <string name="sha256_warning_message">Deriving a private key from a phrase with plain SHA256 provides no protection against brute-force or dictionary attacks. If your phrase has low entropy, the key can be recovered easily. Use Argon2id unless you need compatibility with an existing SHA256-derived key. Continue with SHA256?</string>
+    <string name="continue_anyway">Continue anyway</string>
+
     <!-- CreateKeyByPhraseActivity strings -->
     <string name="failed_to_get_keyinfo_from_preview">Failed to get KeyInfo from preview</string>
     <string name="warning_failed_to_generate_avatar">Warning: Failed to generate avatar, but key will still be saved</string>
@@ -533,10 +585,10 @@
     <string name="failed_to_decrypt_private_key">Failed to decrypt private key</string>
     <string name="no_keys_selected">No keys selected</string>
     <string name="find_nice_keys">Find Nice Keys</string>
-    <string name="please_select_at_least_one_multisign">Please select at least one multisign</string>
+    <string name="please_select_at_least_one_multisign">Please select at least one multisig</string>
     <string name="tx_is_well_signed_build_it">The TX is well signed! Build it.</string>
     <string name="failed_to_get_prikey_of">Failed to get the priKey of %1$s</string>
-    <string name="selected_key_not_part_of_multisign">Selected key is not part of this multisign transaction</string>
+    <string name="selected_key_not_part_of_multisign">Selected key is not part of this multisig transaction</string>
     <string name="failed_to_get_key_info_of">Failed to get the key info of %1$s</string>
     <string name="enter_label_for_multisign_id">Enter Label for Multisign ID</string>
     <string name="selected_cashes_count">Selected: %1$d cashes</string>
@@ -556,7 +608,7 @@
     <string name="wif_uncompressed">WIF uncompressed</string>
     <string name="wif_compressed_with_ver_0">WIF compressed with ver 0</string>
     <string name="wif_compressed_without_ver">WIF compressed without ver</string>
-    <string name="failed_to_parse_script_to_multisign">Failed to parse script to multisign.</string>
+    <string name="failed_to_parse_script_to_multisign">Failed to parse script to multisig.</string>
     <string name="app_password_cannot_be_shown">App password can not be shown. Please keep it carefully.</string>
     
     <!-- Toast Messages -->
@@ -579,4 +631,45 @@
     <string name="error_saving_avatar">Error saving avatar: %1$s</string>
     <string name="error_initializing_cash_activity">Error initializing cash activity.</string>
     <string name="change">Change</string>
+    <string name="key_not_found">Key not found</string>
+    <string name="input_the_32_bytes_hex_symkey">Input the 32 bytes hex symkey:</string>
+    <string name="input_current_password">Input current password:</string>
+
+    <!-- Toast Activity strings -->
+    <string name="app_messages">App Messages</string>
+    <string name="no_toast_messages">No messages yet</string>
+    <string name="clear_all">Clear All</string>
+    <string name="update_secret">Update secret</string>
+    <string name="label_updated">Label updated</string>
+    <string name="app_password_can_not_be_shown_please_keep_it_carefully">App password can not be shown. Please keep it carefully.</string>
+    <string name="close">Close</string>
+    <string name="json_icon">JSON Icon</string>
+    <string name="generating_keys">Generating keys...</string>
+    <string name="deleting">Deleting...</string>
+    <string name="error_delete">Error in deleting</string>
+    <string name="please_create_your_keys">Please create your keys</string>
+    <string name="importing">Importing</string>
+    <string name="saving">Saving</string>
+
+    <string name="sort_by_owner">Sort by Owner</string>
+    <string name="sort_by_value">Sort by Value</string>
+    <string name="sort_by_cd">Sort by CD</string>
+    <string name="please_import_or_create_cash">Please import or create your cash</string>
+    <string name="error_deleting_cash">Error deleting cash</string>
+
+    <!-- Statistics Bar -->
+    <string name="loaded">Loaded:</string>
+    <string name="total">Total:</string>
+    <string name="checked">Checked:</string>
+    <string name="please_enter_a_password">Please enter a password</string>
+    <string name="please_confirm_your_password">Please confirm your password</string>
+    <string name="password_must_be_at_least_d_characters_long">Password must be at least %d characters long</string>
+    <string name="passwords_do_not_match">Passwords do not match</string>
+    <string name="lock_time">Lock time</string>
+    <string name="input_lock_height_hint">Unlock at block height</string>
+    <string name="unlock_at_block">Unlocks at block %1$d</string>
+    <string name="invalid_lock_height">Invalid lock height</string>
+    <string name="input_redeem_script_hint">Redeem script (hex, optional)</string>
+    <string name="invalid_redeem_script">Invalid redeem script</string>
+    <string name="multisig_not_found_for_cltv_output">Multisig %1$s is not saved locally; can\'t create a time-locked multisig output.</string>
 </resources>

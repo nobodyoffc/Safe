@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="0dp">
+
+    <!-- Header section with title and close icon -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="16dp"
+        android:background="@color/colorPrimary"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:id="@+id/dialogTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/carving"
+            android:textColor="@color/main_background"
+            android:textSize="18sp"
+            android:textStyle="bold"/>
+
+        <ImageView
+            android:id="@+id/jsonIcon"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:src="@drawable/ic_json"
+            android:scaleType="fitCenter"
+            android:contentDescription="@string/json_icon"/>
+
+    </LinearLayout>
+
+    <!-- ScrollView with JSON content -->
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true"
+        android:background="@color/main_background"
+        android:padding="16dp">
+
+        <TextView
+            android:id="@+id/jsonTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/text_color"
+            android:typeface="monospace"
+            android:textSize="14sp"
+            android:padding="8dp"
+            android:textIsSelectable="true"
+            android:background="@drawable/card_background_outlined"/>
+
+    </ScrollView>
+
+    <!-- Button bar at bottom -->
+    <LinearLayout
+        style="?android:attr/buttonBarStyle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="8dp"
+        android:background="@color/main_background">
+
+        <Button
+            android:id="@+id/copyButton"
+            style="@style/ButtonStyle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/copy"
+            android:layout_marginEnd="8dp" />
+
+        <Button
+            android:id="@+id/closeButton"
+            style="@style/ButtonStyle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/close"/>
+
+    </LinearLayout>
+
+</LinearLayout>

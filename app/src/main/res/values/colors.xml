@@ -2,8 +2,8 @@
 <resources>
     <color name="black">#000000</color>
     <color name="white">#FFFFFF</color>
-    <color name="background_light">#FFFFFF</color>
-    <color name="background_dark">#DDDDDD</color>
+    <color name="background_light">#EEEEEE</color>
+    <color name="background_dark">#CCCCCC</color>
     <color name="main_background">#F5F5F5</color>
     <color name="text_area_background">#F0F0F0</color>
     <color name="text_color">#000000</color>
@@ -12,15 +12,22 @@
     <color name="error">#FF0000</color>
     <color name="outline">#CCCCCC</color>
     <color name="stroke_color">#DDDDDD</color>
-    <color name="outline_color">#222222</color>
+    <color name="container_outline">#CCCCCC</color>
     <color name="colorAccent">#2196F3</color>
     <color name="colorPrimary">#1976D2</color>
     <color name="headerBackground">#908C8C</color>
     <color name="field_name">#225555</color>
     <color name="input_field_background">#FFFFFF</color>
     <color name="cash_card_background">#E8F4FD</color>
-    <color name="cash_card_border">#BBDEFB</color>
+    <color name="card_outline">#AAAAAA</color>
     <color name="cash_card_dark_background">#E0E0E0</color>
     <color name="dialog_background">#FFFFFF</color>
-    <color name="dialog_border">#2196F3</color>
+    <color name="dialog_border">#BBBBBB</color>
+    <color name="purple">#420290</color>
+    <color name="grey">#BBBBBB</color>
+
+    <!-- Toast level colors -->
+    <color name="info_color">#2196F3</color>
+    <color name="warning_color">#FF9800</color>
+    <color name="error_color">#F44336</color>
 </resources>

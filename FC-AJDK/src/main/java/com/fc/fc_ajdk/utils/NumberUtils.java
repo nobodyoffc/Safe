@@ -1,7 +1,5 @@
 package com.fc.fc_ajdk.utils;
 
-import com.fc.fc_ajdk.ui.Shower;
-
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
@@ -98,38 +96,6 @@ public class NumberUtils {
 
         // Format the BigDecimal number with commas
         return formatter.format(bigDecimal);
-    }
-
-    public static String formatNumberValue(Number value, int width) {
-        // First try with maximum precision
-        String str = String.valueOf(value);
-        if(str.contains(".")){
-            if (str.length() <= width) return str;
-
-            int decimalIndex = str.indexOf('.');
-
-            if(decimalIndex < width)return str.substring(0, width);
-
-            str = str.substring(0, decimalIndex);
-        }
-
-        if (str.length() <= width) return str;
-
-        long longvalue = Long.parseLong(str);
-        // Try K format
-        if (longvalue >= 1000) {
-            str = String.valueOf(longvalue / 1000) + "K";
-            if (str.length() <= width) return str;
-        }
-
-        // Try M format
-        if (longvalue >= 1000000) {
-            str = String.valueOf(longvalue / 1000000) + "M";
-            if (str.length() <= width) return str;
-        }
-
-        // If still too long, use omitMiddle
-        return Shower.omitMiddle(String.valueOf(value), width);
     }
 
     public static long doubleToLong(double amount, int decimal) {

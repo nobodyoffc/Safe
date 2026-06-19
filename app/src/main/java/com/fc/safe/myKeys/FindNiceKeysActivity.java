@@ -11,8 +11,6 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
-
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
@@ -23,7 +21,8 @@ import com.fc.fc_ajdk.utils.TimberLogger;
 import com.fc.safe.R;
 import com.fc.safe.initiate.ConfigureManager;
 import com.fc.safe.initiate.PasswordVerificationDialog;
-import com.fc.safe.utils.KeyCardManager;
+import com.fc.safe.utils.KeyCardContainer;
+import com.fc.safe.utils.ChooseMode;
 import com.fc.safe.utils.KeyLabelManager;
 import com.google.android.material.textfield.TextInputEditText;
 
@@ -34,12 +33,13 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
+import com.fc.safe.utils.ToastUtils;
 
 public class FindNiceKeysActivity extends AppCompatActivity {
     private static final String TAG = "FindNiceKeys";
     private static final long PASSWORD_VERIFICATION_THRESHOLD = 30000; // 30 seconds in milliseconds
-    
-    private KeyCardManager keyCardManager;
+
+    private KeyCardContainer keyCardManager;
     private KeyLabelManager keyLabelManager;
     private Map<String, byte[]> avatarCache = new HashMap<>();
     private PowerManager.WakeLock wakeLock;
@@ -73,7 +73,7 @@ public class FindNiceKeysActivity extends AppCompatActivity {
         getSupportActionBar().setTitle(getString(R.string.find_nice_keys));
         toolbar.setNavigationOnClickListener(v -> {
             if (isFinding.get()) {
-                Toast.makeText(this, R.string.stop_finding_progress_first, Toast.LENGTH_SHORT).show();
+                ToastUtils.showInfo(this, this.getString(R.string.stop_finding_progress_first));
                 return;
             }
             if (hasExceededThreshold) {
@@ -88,7 +88,7 @@ public class FindNiceKeysActivity extends AppCompatActivity {
         
         // Initialize managers
         LinearLayout keyListContainer = findViewById(R.id.keyListContainer);
-        keyCardManager = new KeyCardManager(this, keyListContainer, false);
+        keyCardManager = new KeyCardContainer(this, keyListContainer, ChooseMode.CHOOSE_MULTI_WITHOUT_EDIT);
         keyLabelManager = new KeyLabelManager(this);
         
         // Setup buttons
@@ -195,13 +195,13 @@ public class FindNiceKeysActivity extends AppCompatActivity {
                         // Now that password is verified, start the finding process
                         startFindingAfterVerification();
                     } else {
-                        Toast.makeText(FindNiceKeysActivity.this, R.string.incorrect_password, Toast.LENGTH_SHORT).show();
+                        ToastUtils.showError(FindNiceKeysActivity.this, FindNiceKeysActivity.this.getString(R.string.incorrect_password));
                     }
                 }
 
                 @Override
                 public void onVerificationCancelled() {
-                    Toast.makeText(FindNiceKeysActivity.this, R.string.password_verification_cancelled, Toast.LENGTH_SHORT).show();
+                    ToastUtils.showInfo(FindNiceKeysActivity.this, FindNiceKeysActivity.this.getString(R.string.password_verification_cancelled));
                 }
             });
             return;
@@ -214,7 +214,7 @@ public class FindNiceKeysActivity extends AppCompatActivity {
         String matchChars = matchInput.getText().toString().toLowerCase();
         if (matchChars.isEmpty()) {
             TimberLogger.i(TAG, "Match characters empty, cannot start finding");
-            Toast.makeText(this, R.string.please_enter_matching_characters , Toast.LENGTH_SHORT).show();
+            ToastUtils.showInfo(this, this.getString(R.string.please_enter_matching_characters));
             return;
         }
         
@@ -237,7 +237,7 @@ public class FindNiceKeysActivity extends AppCompatActivity {
     }
 
     private void stopFinding() {
-        TimberLogger.i(TAG, "Stopping find operation. Final key count: %d", keyCardManager.getKeyInfoList().size());
+        TimberLogger.i(TAG, "Stopping find operation. Final key count: %d", keyCardManager.getKeyList().size());
         isFinding.set(false);
         
         // Release WakeLock if held
@@ -253,10 +253,10 @@ public class FindNiceKeysActivity extends AppCompatActivity {
 
     private void findNiceKeys(String matchChars) {
         TimberLogger.i(TAG, "Starting to find nice keys with match pattern: %s", matchChars);
-        int currentKeyCount = keyCardManager.getKeyInfoList().size();
+        int currentKeyCount = keyCardManager.getKeyList().size();
         int targetKeyCount = currentKeyCount + 10;
-        
-        while (isFinding.get() && keyCardManager.getKeyInfoList().size() < targetKeyCount) {
+
+        while (isFinding.get() && keyCardManager.getKeyList().size() < targetKeyCount) {
             FcSubject fcSubject = FcSubject.genPrikeyAndFid();
             String newFid = fcSubject.getId();
             byte[] prikeyBytes = fcSubject.getPrikeyBytes();
@@ -275,7 +275,7 @@ public class FindNiceKeysActivity extends AppCompatActivity {
                 }
                 
                 mainHandler.post(() -> {
-                    TimberLogger.i(TAG, "Adding new key to list. Current size: %d", keyCardManager.getKeyInfoList().size());
+                    TimberLogger.i(TAG, "Adding new key to list. Current size: %d", keyCardManager.getKeyList().size());
                     keyCardManager.addKeyCard(newKeyInfo);
                 });
             }
@@ -336,14 +336,14 @@ public class FindNiceKeysActivity extends AppCompatActivity {
                     hasExceededThreshold = false; // Reset the flag after successful verification
                     FindNiceKeysActivity.super.finish();
                 } else {
-                    Toast.makeText(FindNiceKeysActivity.this, R.string.incorrect_password, Toast.LENGTH_SHORT).show();
+                    ToastUtils.showError(FindNiceKeysActivity.this, FindNiceKeysActivity.this.getString(R.string.incorrect_password));
                 }
             }
 
             @Override
             public void onVerificationCancelled() {
                 // Keep the activity open if verification is cancelled
-                Toast.makeText(FindNiceKeysActivity.this, R.string.password_verification_cancelled, Toast.LENGTH_SHORT).show();
+                ToastUtils.showInfo(FindNiceKeysActivity.this, FindNiceKeysActivity.this.getString(R.string.password_verification_cancelled));
             }
         });
         dialog.show();
@@ -357,7 +357,7 @@ public class FindNiceKeysActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         if (isFinding.get()) {
-            Toast.makeText(this, R.string.stop_finding_progress_first, Toast.LENGTH_SHORT).show();
+            ToastUtils.showInfo(this, this.getString(R.string.stop_finding_progress_first));
             return;
         }
         if (hasExceededThreshold) {

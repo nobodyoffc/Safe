@@ -11,7 +11,7 @@ public class IndicesNames {
     public static final String CASH = "cash";
     public static final String OPRETURN = "opreturn";
     public static final String ADDRESS = "address";
-    public static final String MULTISIGN = "multisign";
+    public static final String MULTISIGN = "multisig";
     public static final String BLOCK_MARK = "block_mark";
     public static final String CID = "cid";
     public static final String CID_HISTORY = "cid_history";

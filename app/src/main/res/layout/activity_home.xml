@@ -125,6 +125,7 @@
                         android:tag="icon"
                         android:contentDescription="@string/menu_list"
                         android:background="@drawable/icon_background"
+                        android:src="@drawable/ic_list"
                         android:padding="12dp"/>
 
                     <TextView
@@ -156,6 +157,7 @@
                         android:tag="icon"
                         android:contentDescription="@string/menu_tools"
                         android:background="@drawable/icon_background"
+                        android:src="@drawable/ic_tools"
                         android:padding="12dp"/>
 
                     <TextView
@@ -187,6 +189,7 @@
                         android:tag="icon"
                         android:contentDescription="@string/menu_convert"
                         android:background="@drawable/icon_background"
+                        android:src="@drawable/ic_converter"
                         android:padding="12dp"/>
 
                     <TextView
@@ -214,15 +217,17 @@
                         android:layout_width="82dp"
                         android:layout_height="82dp"
                         android:tag="icon"
-                        android:contentDescription="@string/menu_multi_sign"
+                        android:contentDescription="@string/menu_multisign"
                         android:background="@drawable/icon_background"
-                        android:padding="12dp"/>
+                        android:src="@drawable/ic_multisign"
+                        android:padding="12dp"
+                        app:tint="@color/purple" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
-                        android:text="@string/menu_multi_sign"
+                        android:text="@string/menu_multisign"
                         android:textAlignment="center"/>
                 </LinearLayout>
 
@@ -245,15 +250,16 @@
                         android:layout_width="82dp"
                         android:layout_height="82dp"
                         android:tag="icon"
-                        android:contentDescription="@string/menu_sign_tx"
+                        android:contentDescription="@string/menu_tx"
                         android:background="@drawable/icon_background"
+                        android:src="@drawable/ic_tx"
                         android:padding="12dp"/>
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
-                        android:text="@string/menu_sign_tx"
+                        android:text="@string/menu_tx"
                         android:textAlignment="center"/>
                 </LinearLayout>
 
@@ -276,6 +282,7 @@
                         android:tag="icon"
                         android:contentDescription="@string/cash"
                         android:background="@drawable/icon_background"
+                        android:src="@drawable/ic_account"
                         android:padding="12dp"/>
 
                     <TextView
@@ -306,6 +313,7 @@
                         android:tag="icon"
                         android:contentDescription="@string/time_based_one_time_password"
                         android:background="@drawable/icon_background"
+                        android:src="@drawable/ic_totp"
                         android:padding="12dp"/>
 
                     <TextView
@@ -335,6 +343,7 @@
                         android:tag="icon"
                         android:contentDescription="@string/menu_secrets"
                         android:background="@drawable/icon_background"
+                        android:src="@drawable/ic_lock"
                         android:padding="12dp"/>
 
                     <TextView
@@ -364,6 +373,8 @@
                         android:tag="icon"
                         android:contentDescription="@string/menu_my_keys"
                         android:background="@drawable/icon_background"
+                        android:src="@drawable/ic_decrypt"
+                        android:tint="@color/grey"
                         android:padding="12dp"/>
 
                     <TextView
@@ -374,7 +385,59 @@
                         android:textAlignment="center"/>
                 </LinearLayout>
 
+                <!-- Pending TX (fourth row left) -->
+                <LinearLayout
+                    android:id="@+id/menu_pending_tx"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_row="3"
+                    android:layout_column="0"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:padding="8dp"
+                    android:background="?attr/selectableItemBackground">
 
+                    <FrameLayout
+                        android:layout_width="82dp"
+                        android:layout_height="82dp">
+
+                        <ImageView
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:tag="icon"
+                            android:contentDescription="@string/pending_tx"
+                            android:background="@drawable/icon_background"
+                            android:src="@drawable/ic_tx"
+                            android:padding="12dp"/>
+
+                        <TextView
+                            android:id="@+id/menu_pending_tx_badge"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="top|end"
+                            android:minWidth="22dp"
+                            android:paddingStart="6dp"
+                            android:paddingEnd="6dp"
+                            android:paddingTop="2dp"
+                            android:paddingBottom="2dp"
+                            android:background="@drawable/pending_badge_background"
+                            android:textColor="@android:color/white"
+                            android:textSize="12sp"
+                            android:textStyle="bold"
+                            android:gravity="center"
+                            android:visibility="gone"
+                            tools:ignore="HardcodedText"
+                            xmlns:tools="http://schemas.android.com/tools" />
+                    </FrameLayout>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="@string/pending_tx"
+                        android:textAlignment="center"/>
+                </LinearLayout>
 
             </GridLayout>
         </LinearLayout>

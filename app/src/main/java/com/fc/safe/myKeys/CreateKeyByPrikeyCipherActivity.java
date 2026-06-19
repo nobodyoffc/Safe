@@ -4,8 +4,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.app.AlertDialog;
-import android.widget.Toast;
-
 import androidx.annotation.Nullable;
 
 import com.fc.fc_ajdk.core.crypto.CryptoDataByte;
@@ -20,6 +18,7 @@ import com.fc.safe.ui.DetailFragment;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.fc.safe.utils.TextIconsUtils;
+import com.fc.safe.utils.ToastUtils;
 
 public class CreateKeyByPrikeyCipherActivity extends BaseCryptoActivity {
     private static final String TAG = "CreateKeyByPrikeyCipher";
@@ -122,12 +121,12 @@ public class CreateKeyByPrikeyCipherActivity extends BaseCryptoActivity {
         String label = labelInput.getText() != null ? labelInput.getText().toString() : "";
 
         if (prikeyCipher.isEmpty()) {
-            Toast.makeText(this, getString(R.string.private_key_cipher_is_empty), Toast.LENGTH_SHORT).show();
+            ToastUtils.showWarning(this, getString(R.string.private_key_cipher_is_empty));
             return;
         }
 
         if (password.isEmpty()) {
-            Toast.makeText(this, getString(R.string.password_is_empty), Toast.LENGTH_SHORT).show();
+            ToastUtils.showWarning(this, getString(R.string.password_is_empty));
             return;
         }
 
@@ -137,7 +136,7 @@ public class CreateKeyByPrikeyCipherActivity extends BaseCryptoActivity {
 
         byte[] prikey32 = KeyTools.getPrikey32(prikey);
         if(prikey32 == null){
-            Toast.makeText(this, getString(R.string.invalid_private_key), Toast.LENGTH_SHORT).show();
+            ToastUtils.showError(this, getString(R.string.invalid_private_key));
             return;
         }
 
@@ -189,12 +188,12 @@ public class CreateKeyByPrikeyCipherActivity extends BaseCryptoActivity {
         String label = labelInput.getText() != null ? labelInput.getText().toString() : "";
 
         if (prikeyCipher.isEmpty()) {
-            Toast.makeText(this, getString(R.string.private_key_cipher_is_empty), Toast.LENGTH_SHORT).show();
+            ToastUtils.showWarning(this, getString(R.string.private_key_cipher_is_empty));
             return null;
         }
 
         if (password.isEmpty()) {
-            Toast.makeText(this, getString(R.string.password_is_empty), Toast.LENGTH_SHORT).show();
+            ToastUtils.showWarning(this, getString(R.string.password_is_empty));
             return null;
         }
 
@@ -204,7 +203,7 @@ public class CreateKeyByPrikeyCipherActivity extends BaseCryptoActivity {
 
         byte[] prikey32 = KeyTools.getPrikey32(prikey);
         if(prikey32 == null){
-            Toast.makeText(this, getString(R.string.invalid_private_key), Toast.LENGTH_SHORT).show();
+            ToastUtils.showError(this, getString(R.string.invalid_private_key));
             return null;
         }
 
@@ -238,12 +237,12 @@ public class CreateKeyByPrikeyCipherActivity extends BaseCryptoActivity {
     private byte[] decryptPrikey(String prikeyCipher, String password) {
         CryptoDataByte cryptoDataByte = Decryptor.decryptByPassword(prikeyCipher, password);
         if(cryptoDataByte.getCode() != 0){
-            Toast.makeText(this, getString(R.string.failed_to_decrypt_private_key), Toast.LENGTH_SHORT).show();
+            ToastUtils.showError(this, getString(R.string.failed_to_decrypt_private_key));
             return null;
         }
         byte[] prikey = cryptoDataByte.getData();
         if (prikey == null) {
-            Toast.makeText(this, getString(R.string.failed_to_decrypt_private_key), Toast.LENGTH_SHORT).show();
+            ToastUtils.showError(this, getString(R.string.failed_to_decrypt_private_key));
             return null;
         }
         return prikey;

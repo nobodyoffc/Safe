@@ -9,14 +9,15 @@ import android.widget.TextView;
 import android.widget.Button;
 
 import com.fc.fc_ajdk.core.fch.RawTxInfo;
-import com.fc.fc_ajdk.core.fch.TxCreator;
+import com.fc.fc_ajdk.core.fch.TxHandler;
 import com.fc.fc_ajdk.data.fcData.KeyInfo;
 import com.fc.fc_ajdk.data.fcData.ReplyBody;
 import com.fc.fc_ajdk.utils.TimberLogger;
 import com.fc.safe.R;
 import com.fc.safe.home.BaseCryptoActivity;
 import com.fc.safe.tx.SignTxActivity;
-import com.fc.safe.utils.KeyCardManager;
+import com.fc.safe.utils.KeyCardContainer;
+import com.fc.safe.utils.ChooseMode;
 import com.google.android.material.textfield.TextInputEditText;
 
 import java.util.ArrayList;
@@ -45,7 +46,7 @@ public class BuildMultisignTxActivity extends BaseCryptoActivity {
     protected void initializeViews() {
         signaturesContainer = findViewById(R.id.signaturesContainer);
         jsonInput = findViewById(R.id.jsonInputContainer).findViewById(R.id.textInput);
-        jsonInput.setHint("Input the signed multisign TX JSONs");
+        jsonInput.setHint("Input the signed multisig TX JSONs");
         rawTxInfoList = new ArrayList<>();
         buildButton = findViewById(R.id.buildButton);
 
@@ -100,9 +101,9 @@ public class BuildMultisignTxActivity extends BaseCryptoActivity {
         signatureCount++;
         label.setText("Signature #" + signatureCount + " signed by:");
 
-        // Create KeyCardManager for this signature card
-        KeyCardManager keyCardManager = new KeyCardManager(this, keyCardContainer, null);
-        
+        // Create KeyCardContainer for this signature card
+        KeyCardContainer keyCardManager = new KeyCardContainer(this, keyCardContainer, ChooseMode.WITHOUT_CHOOSE);
+
         // Add key cards for each signer
         for (String fid : rawTxInfo.getFidSigMap().keySet()) {
             KeyInfo keyInfo = new KeyInfo(fid);
@@ -140,7 +141,7 @@ public class BuildMultisignTxActivity extends BaseCryptoActivity {
             jsonStrings[i] = rawTxInfoList.get(i).toJson();
         }
 
-        ReplyBody replyBody = TxCreator.mergeMultisignTxData(jsonStrings);
+        ReplyBody replyBody = new TxHandler().mergeMultisignTxData(jsonStrings);
         if (replyBody == null || replyBody.getCode() != 0) {
             showToast(getString(R.string.failed_to_merge_signatures, (replyBody != null ? replyBody.getMessage() : "Unknown error")));
             return;

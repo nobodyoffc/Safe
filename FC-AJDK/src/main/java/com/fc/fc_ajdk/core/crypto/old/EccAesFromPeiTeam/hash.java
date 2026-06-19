@@ -6,6 +6,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 
+@Deprecated
 public class hash {
     public static byte[] SHA256(String str) throws NoSuchAlgorithmException {
         MessageDigest digest;

@@ -4,9 +4,8 @@ import com.fc.fc_ajdk.core.crypto.Hash;
 import com.fc.fc_ajdk.data.fcData.FcEntity;
 import com.fc.fc_ajdk.data.fcData.KeyInfo;
 import com.fc.fc_ajdk.data.fchData.Cash;
-import com.fc.fc_ajdk.data.fchData.Multisign;
+import com.fc.fc_ajdk.data.fchData.Multisig;
 import com.fc.fc_ajdk.data.fchData.RawTxForCsV1;
-import com.fc.fc_ajdk.data.fchData.SendTo;
 import com.fc.fc_ajdk.utils.FchUtils;
 import com.fc.fc_ajdk.utils.Hex;
 import com.fc.fc_ajdk.utils.JsonUtils;
@@ -16,8 +15,6 @@ import com.google.gson.Gson;
 import org.bitcoinj.core.Transaction;
 import org.bitcoinj.params.MainNetParams;
 
-import javax.annotation.Nullable;
-import java.io.BufferedReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -26,12 +23,12 @@ public class RawTxInfo extends FcEntity {
     private String sender;
     private Double feeRate;
     private List<Cash> inputs;
-    private List<SendTo> outputs;
+    private List<Cash> outputs;
     private String opReturn;
     private String changeTo;
     private Long lockTime;
     private Long cd;
-    private Multisign multisign;
+    private Multisig multisig;
     private String ver;
     private KeyInfo senderInfo;
     private Long cdd;
@@ -43,16 +40,16 @@ public class RawTxInfo extends FcEntity {
 
     }
 
-    public RawTxInfo(byte[] rawTx, Multisign multisign, List<Cash> inputs) {
+    public RawTxInfo(byte[] rawTx, Multisig multisig, List<Cash> inputs) {
 //        this.rawTx = rawTx;
-        this.multisign = multisign;
+        this.multisig = multisig;
         this.inputs = inputs;
         this.id = Hex.toHex(Hash.sha256x2(rawTx));
     }
 
     public RawTxInfo(byte[] rawTx, RawTxInfo rawTxInfo) {
 //        this.rawTx = rawTx;
-        this.multisign = rawTxInfo.getMultisign();
+        this.multisig = rawTxInfo.getMultisign();
         this.inputs = rawTxInfo.getInputs();
         this.id = Hex.toHex(Hash.sha256x2(rawTx));
         this.feeRate = rawTxInfo.getFeeRate();
@@ -62,19 +59,19 @@ public class RawTxInfo extends FcEntity {
     }
 
     public RawTxInfo(String multisignJson, String cashListJson) {
-        this.multisign = new Gson().fromJson(multisignJson, Multisign.class);
+        this.multisig = new Gson().fromJson(multisignJson, Multisig.class);
         this.inputs = ObjectUtils.objectToList(cashListJson,Cash.class);//DataGetter.getCashList(cashList);
     }
 
 
-    public RawTxInfo(String sender, List<Cash> cashList, List<SendTo> sendToList, String opReturn, Long cd, Double feeRate, Multisign multisign, String ver) {
+    public RawTxInfo(String sender, List<Cash> cashList, List<Cash> sendToList, String opReturn, Long cd, Double feeRate, Multisig multisig, String ver) {
         super();
         this.sender = sender;
         this.setOutputs(sendToList);
         this.setOpReturn(opReturn);
         this.setCd(cd);
         this.setFeeRate(feeRate);
-        this.setMultisign(multisign);
+        this.setMultisign(multisig);
         this.setVer(ver);
         this.setInputs(Cash.makeCashListForPay(cashList));
     }
@@ -111,7 +108,7 @@ public class RawTxInfo extends FcEntity {
 
 
 //    public static RawTxInfo createMultisignTx(RawTxInfo rawTxInfo) {
-//        Transaction tx = TxCreator.createUnsignedTx(rawTxInfo, FchMainNetwork.get());
+//        Transaction tx = TxHandler.createUnsignedTx(rawTxInfo, FchMainNetwork.get());
 //        if(tx ==null)return null;
 //        byte[] rawTx = tx.bitcoinSerialize();
 //
@@ -119,9 +116,61 @@ public class RawTxInfo extends FcEntity {
 //    }
 
     @androidx.annotation.Nullable
-    public static Transaction createMultisignTx(RawTxInfo rawTxInfo, Multisign multisign, MainNetParams mainNetwork) {
-        rawTxInfo.setMultisign(multisign);
-        return TxCreator.createUnsignedTx(rawTxInfo, mainNetwork);
+    public static Transaction createMultisignTx(RawTxInfo rawTxInfo, Multisig multisig, MainNetParams mainNetwork) {
+        rawTxInfo.setMultisign(multisig);
+        return new TxHandler(mainNetwork).createTx(rawTxInfo, mainNetwork);
+    }
+
+    public static RawTxInfo fromTransaction(Transaction tx) {
+        if (tx == null) return null;
+
+        RawTxInfo rawTxInfo = new RawTxInfo();
+        rawTxInfo.setId(tx.getTxId().toString());
+        rawTxInfo.setVer("2");
+        rawTxInfo.setLockTime(tx.getLockTime());
+
+        List<Cash> inputs = new ArrayList<>();
+        for (org.bitcoinj.core.TransactionInput input : tx.getInputs()) {
+            Cash cash = new Cash();
+            cash.setBirthTxId(input.getOutpoint().getHash().toString());
+            cash.setBirthIndex((int) input.getOutpoint().getIndex());
+            if (input.getValue() != null) {
+                cash.setValue(input.getValue().getValue());
+            }
+            inputs.add(cash);
+        }
+        rawTxInfo.setInputs(inputs);
+
+        List<Cash> outputs = new ArrayList<>();
+        String opReturn = null;
+        String changeTo = null;
+
+        for (org.bitcoinj.core.TransactionOutput output : tx.getOutputs()) {
+            if (output.getScriptPubKey().isOpReturn()) {
+                byte[] opReturnData = output.getScriptPubKey().getChunks().get(1).data;
+                if (opReturnData != null) {
+                    opReturn = new String(opReturnData);
+                }
+            } else {
+                Cash cash = new Cash();
+                try {
+                    org.bitcoinj.core.Address address = output.getScriptPubKey().getToAddress(MainNetParams.get());
+                    cash.setOwner(address.toString());
+                    cash.setValue(output.getValue().getValue());
+                    outputs.add(cash);
+                    if (changeTo == null) {
+                        changeTo = address.toString();
+                    }
+                } catch (Exception ignored) {
+                }
+            }
+        }
+
+        rawTxInfo.setOutputs(outputs);
+        rawTxInfo.setOpReturn(opReturn);
+        rawTxInfo.setChangeTo(changeTo);
+
+        return rawTxInfo;
     }
 
     public Double getFeeRate() {
@@ -136,11 +185,11 @@ public class RawTxInfo extends FcEntity {
         this.inputs = inputs;
     }
 
-    public List<SendTo> getOutputs() {
+    public List<Cash> getOutputs() {
         return outputs;
     }
 
-    public void setOutputs(List<SendTo> outputs) {
+    public void setOutputs(List<Cash> outputs) {
         this.outputs = outputs;
     }
 
@@ -152,41 +201,22 @@ public class RawTxInfo extends FcEntity {
         this.opReturn = opReturn;
     }
 
-    public Multisign getMultisign() {
-        return multisign;
+    public Multisig getMultisign() {
+        return multisig;
     }
 
-    public void setMultisign(Multisign multisign) {
-        this.multisign = multisign;
+    public void setMultisign(Multisig multisig) {
+        this.multisig = multisig;
     }
 
-    public static RawTxInfo fromUserInput(BufferedReader br, @Nullable String sender) {
-        RawTxInfo rawTxInfo = new RawTxInfo();
-        if (sender == null) sender = Inputer.inputGoodFid(br, "Input the sender FID:");
-        rawTxInfo.setSender(sender);
-        System.out.println("Input the cashes to be spent...");
-        do {
-            Cash cash = new Cash();
-            cash.setBirthTxId(Inputer.inputString(br, "Input the birth tx id:"));
-            cash.setBirthIndex(Inputer.inputInt(br, "Input the birth index:", 0));
-            Double amount = Inputer.inputDouble(br, "Input the value:");
-            cash.setValue(FchUtils.coinToSatoshi(amount == null ? 0 : amount));
-            rawTxInfo.getInputs().add(cash);
-        } while (Inputer.askIfYes(br, "Input another input?"));
-
-        do {
-            SendTo sendTo = new SendTo();
-            sendTo.setFid(Inputer.inputString(br, "Input the fid you paying to:"));
-            sendTo.setAmount(Inputer.inputDouble(br, "Input the amount:"));
-            rawTxInfo.getOutputs().add(sendTo);
-        } while (Inputer.askIfYes(br, "Input another output?"));
-
-        rawTxInfo.setOpReturn(Inputer.inputString(br, "Input the message of OP_RETURN:"));
-        Double feeRate = Inputer.inputDouble(br, "Input the feeRate rate. Enter for default rate of 1 satoshi/byte:");
-        rawTxInfo.setFeeRate(feeRate == null ? TxCreator.DEFAULT_FEE_RATE : feeRate);
-
-        return rawTxInfo;
+    public Multisig getSenderMultisig() {
+        return multisig;
     }
+
+    public void setSenderMultisig(Multisig multisig) {
+        this.multisig = multisig;
+    }
+
 
     public static RawTxInfo fromRawTxForCs(String csTxJson)  {
         List<RawTxForCsV1> csTxList = JsonUtils.listFromJson(csTxJson, RawTxForCsV1.class);
@@ -210,7 +240,7 @@ public class RawTxInfo extends FcEntity {
         List<Cash> inputs = new ArrayList<>();
 
         // Process outputs
-        List<SendTo> outputs = new ArrayList<>();
+        List<Cash> outputs = new ArrayList<>();
 
         // Process message
         String msg = null;
@@ -226,8 +256,8 @@ public class RawTxInfo extends FcEntity {
                     inputs.add(cash);
                 }
                 case 2 -> {
-                    SendTo sendTo = new SendTo();
-                    sendTo.setFid(rawTx.getAddress());
+                    Cash sendTo = new Cash();
+                    sendTo.setOwner(rawTx.getAddress());
                     sendTo.setAmount(rawTx.getAmount());
                     outputs.add(sendTo);
                 }
@@ -268,9 +298,9 @@ public class RawTxInfo extends FcEntity {
         int j = 0;
         if (outputs != null) {
             for (j = 0; j < outputs.size(); j++) {
-                SendTo sendTo = outputs.get(j);
+                Cash sendTo = outputs.get(j);
                 RawTxForCsV1 rawTx = RawTxForCsV1.newOutput(
-                        sendTo.getFid(),
+                        sendTo.getOwner(),
                         sendTo.getAmount(),
                         j
                 );
@@ -288,7 +318,7 @@ public class RawTxInfo extends FcEntity {
     }
 
     public byte[] getRawTx() {
-        Transaction tx = TxCreator.createUnsignedTx(this, FchMainNetwork.MAINNETWORK);
+        Transaction tx = new TxHandler(FchMainNetwork.MAINNETWORK).createTx(this, FchMainNetwork.MAINNETWORK);
         if(tx==null)return null;
         return tx.bitcoinSerialize();
     }

@@ -2,7 +2,6 @@ package com.fc.safe.ui;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -13,16 +12,17 @@ import com.fc.fc_ajdk.config.Configure;
 import com.fc.fc_ajdk.core.crypto.Decryptor;
 import com.fc.fc_ajdk.core.crypto.Encryptor;
 import com.fc.fc_ajdk.data.fcData.KeyInfo;
-import com.fc.fc_ajdk.data.fcData.SecretDetail;
+import com.fc.fc_ajdk.data.feipData.Secret;
+import com.fc.fc_ajdk.utils.IdNameUtils;
 import com.fc.fc_ajdk.utils.TimberLogger;
 import com.fc.safe.R;
-import com.fc.safe.db.KeyInfoManager;
-import com.fc.safe.db.SecretManager;
-import com.fc.safe.initiate.ConfigureManager;
-import com.fc.safe.initiate.CheckPasswordActivity;
-import com.fc.fc_ajdk.utils.IdNameUtils;
 import com.fc.safe.db.DatabaseManager;
+import com.fc.safe.db.KeyInfoManager;
 import com.fc.safe.db.MultisignManager;
+import com.fc.safe.db.SecretManager;
+import com.fc.safe.initiate.CheckPasswordActivity;
+import com.fc.safe.initiate.ConfigureManager;
+import com.fc.safe.utils.ToastUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -104,7 +104,7 @@ public class ChangePasswordActivity extends AppCompatActivity {
                 // IMPORTANT: Read all data BEFORE changing password context
                 // This must happen while we're still in the old password context
                 Map<String,KeyInfo> keyInfoMap = KeyInfoManager.getInstance(this).getAllKeyInfos();
-                List<SecretDetail> secretList = SecretManager.getInstance(this).getAllSecretDetailList();
+                List<Secret> secretList = SecretManager.getInstance(this).getAllSecretDetailList();
 
                 // Re-encrypt all data with new symkey (still using old context to read)
                 reEncryptKeyInfoData(keyInfoMap, oldConfigure.getSymkey(), newSymkey);
@@ -135,14 +135,14 @@ public class ChangePasswordActivity extends AppCompatActivity {
 
                 runOnUiThread(() -> {
                     dismissWaitingDialog();
-                    Toast.makeText(this, R.string.password_changed, Toast.LENGTH_LONG).show();
+                    ToastUtils.showInfo(this, getString(R.string.password_changed));
                     setResult(RESULT_OK);
                     finish();
                 });
             } catch (Exception e) {
                 runOnUiThread(() -> {
                     dismissWaitingDialog();
-                    Toast.makeText(this, getString(R.string.error_during_password_change) + e.getMessage(), Toast.LENGTH_LONG).show();
+                    ToastUtils.showError(this, getString(R.string.error_during_password_change) + e.getMessage());
                     setResult(RESULT_CANCELED);
                     finish();
                 });
@@ -150,8 +150,8 @@ public class ChangePasswordActivity extends AppCompatActivity {
         }).start();
     }
 
-    private void reEncryptSecretData(List<SecretDetail> secretList, byte[] oldSymKey, byte[] newSymKey) {
-        for (SecretDetail secret : secretList) {
+    private void reEncryptSecretData(List<Secret> secretList, byte[] oldSymKey, byte[] newSymKey) {
+        for (Secret secret : secretList) {
             try {
                 String contentCipher = secret.getContentCipher();
                 if (contentCipher != null) {

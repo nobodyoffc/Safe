@@ -12,13 +12,14 @@ import android.widget.LinearLayout;
 
 import com.fc.fc_ajdk.core.crypto.KeyTools;
 import com.fc.fc_ajdk.data.fcData.KeyInfo;
-import com.fc.fc_ajdk.db.LocalDB;
+import com.fc.safe.db.LocalDB;
 import com.fc.fc_ajdk.utils.StringUtils;
 import com.fc.fc_ajdk.utils.TimberLogger;
 import com.fc.safe.R;
 import com.fc.safe.db.KeyInfoManager;
 import com.fc.safe.home.BaseCryptoActivity;
 import com.fc.safe.myKeys.ChooseKeyInfoActivity;
+import com.fc.safe.utils.ChooseMode;
 import com.fc.safe.utils.QRCodeGenerator;
 
 import java.util.List;
@@ -67,7 +68,7 @@ public class AddressConverterActivity extends BaseCryptoActivity {
         buttonContainer = findViewById(R.id.buttonContainer);
         
         setupIoIconsView(R.id.keyView, R.id.peopleAndScanIcons, false, true, true, false,
-                null, v -> showChooseKeyInfoDialog(true), () -> startQrScan(0), null);
+                null, v -> showChooseKeyInfoDialog(ChooseMode.CHOOSE_ONE_RETURN), () -> startQrScan(0), null);
             
         setupIoIconsView(R.id.resultView, R.id.makeQrIcon, true, false, false, false,
                 () -> {
@@ -127,7 +128,7 @@ public class AddressConverterActivity extends BaseCryptoActivity {
             return;
         }
 
-        Intent intent = ChooseKeyInfoActivity.newIntent(this, keyInfoList,true);
+        Intent intent = ChooseKeyInfoActivity.newIntent(this, keyInfoList,ChooseMode.CHOOSE_ONE_RETURN);
         chooseKeyLauncher.launch(intent);
     }
 

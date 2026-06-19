@@ -6,12 +6,12 @@ import android.os.Looper;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.fc.fc_ajdk.data.fcData.SecretDetail;
+import com.fc.fc_ajdk.data.feipData.Secret;
 import com.fc.safe.R;
 import com.fc.safe.db.SecretManager;
 import com.fc.safe.secret.ImportTotpActivity;
+import com.fc.safe.utils.ToastUtils;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -91,19 +91,19 @@ public class TotpActivity extends BaseCryptoActivity {
     private void loadTotpCards() {
         totpCardList.removeAllViews();
         totpCards.clear();
-        List<SecretDetail> allSecrets = SecretManager.getInstance(this).getAllSecretDetailList();
+        List<Secret> allSecrets = SecretManager.getInstance(this).getAllSecretDetailList();
         if(allSecrets == null) {
-            Toast.makeText(this, R.string.no_totp_found, Toast.LENGTH_LONG).show();
+            ToastUtils.showWarning(this, getString(R.string.no_totp_found));
             return;
         }
-        for (SecretDetail detail : allSecrets) {
+        for (Secret detail : allSecrets) {
             if ("TOTP".equalsIgnoreCase(detail.getType())) {
                 addTotpCard(detail);
             }
         }
     }
 
-    private void addTotpCard(SecretDetail detail) {
+    private void addTotpCard(Secret detail) {
         TotpCard card = new TotpCard(this, detail, System.currentTimeMillis());
         totpCardList.addView(card);
         totpCards.add(card);

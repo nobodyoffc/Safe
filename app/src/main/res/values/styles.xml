@@ -32,4 +32,26 @@
         <item name="android:layout_margin">8dp</item>
         <item name="android:layout_gravity">center</item>
     </style>
+
+    <!-- JSON Dialog Styles -->
+    <style name="JsonDialogTheme" parent="Theme.AppCompat.Light.Dialog">
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowBackground">@color/main_background</item>
+        <item name="android:windowMinWidthMajor">90%</item>
+        <item name="android:windowMinWidthMinor">90%</item>
+    </style>
+
+    <style name="JsonDialogTitle">
+        <item name="android:textColor">@color/main_background</item>
+        <item name="android:textSize">18sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="JsonDialogContent">
+        <item name="android:textColor">@color/text_color</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:typeface">monospace</item>
+        <item name="android:padding">8dp</item>
+        <item name="android:textIsSelectable">true</item>
+    </style>
 </resources> 

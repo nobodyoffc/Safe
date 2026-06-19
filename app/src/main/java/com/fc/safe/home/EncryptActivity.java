@@ -206,7 +206,7 @@ public class EncryptActivity extends BaseCryptoActivity {
             case "password" ->
                     new Encryptor().encryptByPassword(text.getBytes(), key.toCharArray());
             case "symKey" -> new Encryptor().encryptBySymkey(text.getBytes(), Hex.fromHex(key));
-            case "pubKey" -> new Encryptor(AlgorithmId.FC_EccK1AesCbc256_No1_NrC7)
+            case "pubKey" -> new Encryptor(AlgorithmId.FC_EccK1AesGcm256_No1_NrC7)
                     .encryptByAsyOneWay(text.getBytes(), Hex.fromHex(key));
             default -> throw new IllegalArgumentException("Unsupported key type: " + keyType);
         };

@@ -9,16 +9,10 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 
 import com.fc.fc_ajdk.core.fch.RawTxInfo;
-import com.fc.fc_ajdk.core.fch.TxCreator;
-import com.fc.fc_ajdk.data.fchData.RawTxForCsV1;
-import com.fc.fc_ajdk.utils.JsonUtils;
-import com.fc.fc_ajdk.utils.ObjectUtils;
 import com.fc.fc_ajdk.utils.TimberLogger;
 import com.fc.safe.R;
 import com.fc.safe.home.BaseCryptoActivity;
 import com.google.android.material.textfield.TextInputEditText;
-
-import java.util.List;
 
 public class ImportTxInfoActivity extends BaseCryptoActivity {
     private static final String TAG = "ImportTxInfoActivity";

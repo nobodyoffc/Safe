@@ -79,12 +79,7 @@
             android:name="com.fc.safe.myKeys.CreateSecretActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
-            
-        <activity
-            android:name="com.fc.safe.CreateKeyInfoByPrikeyActivity"
-            android:exported="false"
-            android:windowSoftInputMode="adjustResize" />
-            
+
         <activity
             android:name="com.fc.safe.ui.DetailActivity"
             android:exported="false" />
@@ -181,7 +176,7 @@
             android:windowSoftInputMode="adjustResize" />
 
         <activity
-            android:name="com.fc.safe.multisign.CreateMultisignIdActivity"
+            android:name="com.fc.safe.multisig.CreateMultisignIdActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
 
@@ -190,12 +185,12 @@
             android:exported="false" />
 
         <activity
-            android:name="com.fc.safe.multisign.CreateMultisignTxActivity"
+            android:name="com.fc.safe.multisig.CreateMultisignTxActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
 
         <activity
-            android:name="com.fc.safe.multisign.ChooseMultisignIdActivity"
+            android:name="com.fc.safe.multisig.ChooseMultisignIdActivity"
             android:exported="false"
             android:label="@string/choose_multisign_id"
             android:theme="@style/Theme.Freer" />
@@ -206,20 +201,20 @@
             android:windowSoftInputMode="adjustResize" />
 
         <activity
-            android:name="com.fc.safe.multisign.ImportMultisignTxActivity"
+            android:name="com.fc.safe.multisig.ImportMultisignTxActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
 
         <activity
-            android:name="com.fc.safe.multisign.SignMultisignTxActivity"
+            android:name="com.fc.safe.multisig.SignMultisignTxActivity"
             android:exported="false" 
             android:windowSoftInputMode="adjustResize"/>
 
         <activity
-            android:name="com.fc.safe.multisign.BuildMultisignTxActivity"
+            android:name="com.fc.safe.multisig.BuildMultisignTxActivity"
             android:exported="false"
             android:label="Build Multisign TX"
-            android:screenOrientation="portrait" />
+             />
 
         <activity
             android:name="com.fc.safe.home.CreateTxActivity"
@@ -312,10 +307,27 @@
             android:windowSoftInputMode="adjustResize" />
 
         <activity
+            android:name=".home.PendingTxListActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
+            android:name=".home.PendingTxDetailActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
             android:name=".tools.JsonConvertActivity"
             android:exported="false" 
             android:windowSoftInputMode="adjustResize"/>
-
+        <activity
+            android:name=".home.ToastActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize"/>
+        <activity
+            android:name=".secret.UpdateSecretActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize"/>
     </application>
 
 </manifest>

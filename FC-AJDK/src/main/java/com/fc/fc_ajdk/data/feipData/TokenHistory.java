@@ -1,7 +1,7 @@
 package com.fc.fc_ajdk.data.feipData;
 
 import com.fc.fc_ajdk.data.fcData.FcObject;
-import com.fc.fc_ajdk.data.fchData.SendTo;
+import com.fc.fc_ajdk.data.fchData.Cash;
 
 import java.util.List;
 
@@ -28,8 +28,8 @@ public class TokenHistory extends FcObject {
 	private String maxAmtPerIssue;
 	private String minCddPerIssue;
 	private String maxIssuesPerAddr;
-	private List<SendTo> issueTo;
-	private List<SendTo> transferTo;
+	private List<Cash> issueTo;
+	private List<Cash> transferTo;
 
 	public Long getHeight() {
 		return height;
@@ -175,19 +175,19 @@ public class TokenHistory extends FcObject {
 		this.maxIssuesPerAddr = maxIssuesPerAddr;
 	}
 
-	public List<SendTo> getIssueTo() {
+	public List<Cash> getIssueTo() {
 		return issueTo;
 	}
 
-	public void setIssueTo(List<SendTo> issueTo) {
+	public void setIssueTo(List<Cash> issueTo) {
 		this.issueTo = issueTo;
 	}
 
-	public List<SendTo> getTransferTo() {
+	public List<Cash> getTransferTo() {
 		return transferTo;
 	}
 
-	public void setTransferTo(List<SendTo> transferTo) {
+	public void setTransferTo(List<Cash> transferTo) {
 		this.transferTo = transferTo;
 	}
 

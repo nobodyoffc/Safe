@@ -5,23 +5,23 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
-import android.widget.Toast;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 
 import androidx.activity.OnBackPressedCallback;
 
+import com.fc.fc_ajdk.data.feipData.Secret;
 import com.fc.fc_ajdk.utils.Base32;
 import com.fc.safe.R;
 import com.fc.safe.home.BaseCryptoActivity;
 import com.fc.safe.utils.ToolbarUtils;
 import com.google.android.material.textfield.TextInputEditText;
-import com.fc.fc_ajdk.data.fcData.SecretDetail;
 import com.fc.safe.db.SecretManager;
 import com.fc.safe.initiate.ConfigureManager;
 import com.fc.fc_ajdk.core.crypto.Encryptor;
 import com.fc.safe.utils.TextIconsUtils;
 import com.fc.fc_ajdk.utils.BytesUtils;
+import com.fc.safe.utils.ToastUtils;
 
 public class CreateSecretActivity extends BaseCryptoActivity {
     private LinearLayout secretInfoContainer;
@@ -131,7 +131,7 @@ public class CreateSecretActivity extends BaseCryptoActivity {
     }
 
     private void setupTypeDropdown() {
-        SecretDetail.Type[] types = SecretDetail.Type.values();
+        Secret.Type[] types = Secret.Type.values();
         String[] displayNames = new String[types.length];
         for (int i = 0; i < types.length; i++) {
             displayNames[i] = types[i].displayName;
@@ -156,26 +156,26 @@ public class CreateSecretActivity extends BaseCryptoActivity {
 
         if(typeDisplay.equals("TOTP" )) {
             if(!com.fc.fc_ajdk.utils.Base32.isBase32(content)) {
-                Toast.makeText(this, getString(R.string.failed_to_save_totp_key_base32), Toast.LENGTH_SHORT).show();
+                ToastUtils.showError(this, getString(R.string.failed_to_save_totp_key_base32));
                 return;
             }
         }
 
         if (title.isEmpty() || content.isEmpty() || typeDisplay.isEmpty()) {
-            Toast.makeText(this, R.string.please_fill_required_fields, Toast.LENGTH_SHORT).show();
+            ToastUtils.showWarning(this, getString(R.string.please_fill_required_fields));
             return;
         }
 
         // Map display name back to enum name
-        SecretDetail.Type selectedType = null;
-        for (SecretDetail.Type t : SecretDetail.Type.values()) {
+        Secret.Type selectedType = null;
+        for (Secret.Type t : Secret.Type.values()) {
             if (t.displayName.equals(typeDisplay)) {
                 selectedType = t;
                 break;
             }
         }
         if (selectedType == null) {
-            Toast.makeText(this, R.string.invalid_type_selected, Toast.LENGTH_SHORT).show();
+            ToastUtils.showError(this, getString(R.string.invalid_type_selected));
             return;
         }
         String type = selectedType.getDisplayName(selectedType);
@@ -183,34 +183,35 @@ public class CreateSecretActivity extends BaseCryptoActivity {
         // Encrypt content
         byte[] symKey = ConfigureManager.getInstance().getSymkey();
         if (symKey == null) {
-            Toast.makeText(this, getString(R.string.symmetric_key_not_found_login_again), Toast.LENGTH_LONG).show();
+            ToastUtils.showError(this, getString(R.string.symmetric_key_not_found_login_again));
             return;
         }
         String contentCipher = Encryptor.encryptBySymkeyToJson(content.getBytes(), symKey);
 
-        SecretDetail secretDetail = new SecretDetail();
-        secretDetail.setTitle(title);
-        secretDetail.setMemo(memo);
-        secretDetail.setType(type);
-        secretDetail.setContent(content); // Optionally store plain content
-        secretDetail.setContentCipher(contentCipher);
+        Secret secret = new Secret();
+        secret.setTitle(title);
+        secret.setMemo(memo);
+        secret.setType(type);
+        secret.setContent(content); // Optionally store plain content
+        secret.setContentCipher(contentCipher);
         // Set content to null before saving to db
-        secretDetail.setContent(null);
+        secret.setContent(null);
+        secret.setOnChain(false);
 
-        secretDetail.checkIdWithCreate();
+        secret.checkIdWithCreate();
         SecretManager secretManager = SecretManager.getInstance(this);
-        boolean existed = secretManager.checkIfExisted(secretDetail.getId());
+        boolean existed = secretManager.checkIfExisted(secret.getId());
         if (existed) {
             new android.app.AlertDialog.Builder(this)
                 .setTitle(R.string.secret_existed_title)
                 .setMessage(R.string.secret_already_exists_message)
                 .setPositiveButton(R.string.replace, (dialog, which) -> {
-                    SecretManager.saveAndFinish(this, secretDetail);
+                    SecretManager.saveAndFinish(this, secret);
                 })
                 .setNegativeButton(R.string.cancel, null)
                 .show();
         } else {
-            SecretManager.saveAndFinish(this, secretDetail);
+            SecretManager.saveAndFinish(this, secret);
         }
     }
 

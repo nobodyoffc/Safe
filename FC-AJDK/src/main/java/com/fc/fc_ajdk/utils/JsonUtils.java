@@ -1,11 +1,8 @@
 package com.fc.fc_ajdk.utils;
 
-import com.fc.fc_ajdk.ui.Inputer;
-import com.fc.fc_ajdk.ui.Menu;
+
 import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
-import com.google.gson.stream.JsonReader;
-import com.google.gson.stream.JsonWriter;
 
 import java.io.*;
 import java.lang.reflect.Type;
@@ -441,34 +438,6 @@ public class JsonUtils {
         }
 
         return set;
-    }
-
-    public static <T> void showListInNiceJson(List<T> items, BufferedReader br) {
-        if (items == null || items.isEmpty()) {
-            System.out.println("No items to display.");
-            return;
-        }
-
-        // Create pretty-printing Gson instance once
-        Gson prettyGson = new GsonBuilder()
-            .setPrettyPrinting()
-            .disableHtmlEscaping()
-            .create();
-
-        boolean oneByOne = br != null && items.size() > 1 && Inputer.askIfYes(br, "Show them one by one with enter?");
-
-        for (int i = 0; i < items.size(); i++) {
-            T item = items.get(i);
-            System.out.println("\n=== Item " + (i + 1) + " of " + items.size() + " ===");
-            try {
-                String jsonOutput = prettyGson.toJson(item);
-                System.out.println(jsonOutput);
-                if(oneByOne) Menu.anyKeyToContinue(br);
-            } catch (Exception e) {
-                System.out.println("Error converting item to JSON: " + e.getMessage());
-                System.out.println("Raw toString(): " + item.toString());
-            }
-        }
     }
 
     public static <T> T fromJson(String string, Class<T> class1) {

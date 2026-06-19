@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Statistics bar showing loaded, total, and checked item counts -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/statistics_bar"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:paddingStart="8dp"
+    android:paddingEnd="8dp"
+    android:paddingBottom="16dp"
+    android:gravity="center_vertical">
+
+    <!-- Loaded Count -->
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="horizontal"
+
+        android:gravity="center_vertical|start">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/loaded"
+            android:textSize="14sp"
+            android:textColor="@color/hint"
+            android:layout_marginEnd="4dp" />
+
+        <TextView
+            android:id="@+id/stats_loaded_count"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="0"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:textColor="@color/field_name"
+            android:minWidth="30dp" />
+    </LinearLayout>
+
+    <!-- Total Count -->
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="horizontal"
+        android:gravity="center_vertical|center">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/total"
+            android:textSize="14sp"
+            android:textColor="@color/hint"
+            android:layout_marginEnd="4dp" />
+
+        <TextView
+            android:id="@+id/stats_total_count"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="0"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:textColor="@color/field_name"
+            android:minWidth="30dp" />
+    </LinearLayout>
+
+    <!-- Checked Count -->
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="horizontal"
+        android:gravity="center_vertical|end">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/checked"
+            android:textSize="14sp"
+            android:textColor="@color/hint"
+            android:layout_marginEnd="4dp" />
+
+        <TextView
+            android:id="@+id/stats_checked_count"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="0"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:textColor="@color/field_name"
+            android:minWidth="30dp" />
+    </LinearLayout>
+
+</LinearLayout>

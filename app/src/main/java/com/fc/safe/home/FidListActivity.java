@@ -7,12 +7,13 @@ import android.widget.LinearLayout;
 import com.fc.fc_ajdk.data.fcData.KeyInfo;
 import com.fc.safe.R;
 import com.fc.safe.SafeApplication;
-import com.fc.safe.utils.KeyCardManager;
+import com.fc.safe.utils.KeyCardContainer;
+import com.fc.safe.utils.ChooseMode;
 
 import java.util.List;
 
 public class FidListActivity extends BaseCryptoActivity {
-    private KeyCardManager keyCardManager;
+    private KeyCardContainer keyCardManager;
     private LinearLayout keyCardContainer;
     private Button clearButton;
     private Button deleteButton;
@@ -36,8 +37,8 @@ public class FidListActivity extends BaseCryptoActivity {
         deleteButton = findViewById(R.id.deleteButton);
         addButton = findViewById(R.id.addButton);
 
-        // Initialize KeyCardManager
-        keyCardManager = new KeyCardManager(this, keyCardContainer, false);
+        // Initialize KeyCardContainer
+        keyCardManager = new KeyCardContainer(this, keyCardContainer, ChooseMode.CHOOSE_MULTI_WITHOUT_EDIT);
         keyCardManager.setOnKeyListChangedListener(this::onKeyListChanged);
 
         // Load initial FIDs
@@ -82,7 +83,7 @@ public class FidListActivity extends BaseCryptoActivity {
     }
 
     private void updateButtonStates() {
-        boolean hasItems = !keyCardManager.getKeyInfoList().isEmpty();
+        boolean hasItems = !keyCardManager.getKeyList().isEmpty();
         boolean hasSelection = !keyCardManager.getSelectedKeys().isEmpty();
         
         clearButton.setEnabled(hasItems);

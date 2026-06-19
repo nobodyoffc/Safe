@@ -39,7 +39,7 @@ Functions:
 * Private key conversion
 * QR code scanning and encoding
 * Sign TX off-line
-* Manage multisign off_line
+* Manage multisig off_line
 
 Download: https://cid.cash/download/safe-v0.7.apk
 ! Still under testing, be sure to back up your private keys and secrets as soon as possible

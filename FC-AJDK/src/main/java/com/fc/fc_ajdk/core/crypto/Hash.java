@@ -84,9 +84,18 @@ public class Hash {
         return Hashing.sha512().hashBytes(Hashing.sha512().hashBytes(s.getBytes()).asBytes()).toString();
     }
 
+    public static byte[] hmacSha256(byte[] data, byte[] key) {
+        try {
+            javax.crypto.Mac mac = javax.crypto.Mac.getInstance("HmacSHA256");
+            mac.init(new javax.crypto.spec.SecretKeySpec(key, "HmacSHA256"));
+            return mac.doFinal(data);
+        } catch (Exception e) {
+            throw new RuntimeException("HmacSHA256 not available", e);
+        }
+    }
+
     public static byte[] getSign(byte[] text, byte[] symKey) {
-        byte[] bytes = BytesUtils.bytesMerger(text, symKey);
-        return Hash.sha256x2(bytes);
+        return hmacSha256(text, symKey);
     }
 
     public static String getSign(String text, byte[] symKey) {
@@ -98,13 +107,20 @@ public class Hash {
     public static String getSign(String symKey, String text) {
         byte[] textBytes = text.getBytes(StandardCharsets.UTF_8);
         byte[] keyBytes = BytesUtils.hexToByteArray(symKey);
-        byte[] bytes = BytesUtils.bytesMerger(textBytes, keyBytes);
-        System.out.println("----");
-        System.out.println("Content in hex to be signed: ");
-        System.out.println("----");
-        System.out.println(Hex.toHex(bytes));
-//        System.out.println("------");
-        byte[] signBytes = Hash.sha256x2(bytes);
+        byte[] signBytes = hmacSha256(textBytes, keyBytes);
+        return BytesUtils.bytesToHexStringBE(signBytes);
+    }
+
+    /** Legacy sign using SHA256x2(text||key) for backward compatibility */
+    public static byte[] getSignLegacy(byte[] text, byte[] symKey) {
+        byte[] bytes = BytesUtils.bytesMerger(text, symKey);
+        return Hash.sha256x2(bytes);
+    }
+
+    /** Legacy sign using SHA256x2(text||key) for backward compatibility */
+    public static String getSignLegacy(String text, byte[] symKey) {
+        byte[] textBytes = text.getBytes(StandardCharsets.UTF_8);
+        byte[] signBytes = getSignLegacy(textBytes, symKey);
         return BytesUtils.bytesToHexStringBE(signBytes);
     }
 

@@ -2,7 +2,7 @@ package com.fc.fc_ajdk.data.feipData;
 
 
 import com.fc.fc_ajdk.constants.Values;
-import com.fc.fc_ajdk.data.fchData.SendTo;
+import com.fc.fc_ajdk.data.fchData.Cash;
 
 import java.util.List;
 import java.util.Map;
@@ -27,8 +27,8 @@ public class TokenOpData {
     private String maxAmtPerIssue;
     private String minCddPerIssue;
     private String maxIssuesPerAddr;
-    private List<SendTo> issueTo;
-    private List<SendTo> transferTo;
+    private List<Cash> issueTo;
+    private List<Cash> transferTo;
 
     public enum Op {
         REGISTER(FeipOp.REGISTER),
@@ -88,7 +88,7 @@ public class TokenOpData {
         return data;
     }
 
-    public static TokenOpData makeIssue(String tokenId, List<SendTo> issueTo) {
+    public static TokenOpData makeIssue(String tokenId, List<Cash> issueTo) {
         TokenOpData data = new TokenOpData();
         data.setOp(Op.ISSUE.toLowerCase());
         data.setTokenId(tokenId);
@@ -96,7 +96,7 @@ public class TokenOpData {
         return data;
     }
 
-    public static TokenOpData makeTransfer(String tokenId, List<SendTo> transferTo) {
+    public static TokenOpData makeTransfer(String tokenId, List<Cash> transferTo) {
         TokenOpData data = new TokenOpData();
         data.setOp(Op.TRANSFER.toLowerCase());
         data.setTokenId(tokenId);
@@ -213,19 +213,19 @@ public class TokenOpData {
         this.minCddPerIssue = minCddPerIssue;
     }
 
-    public List<SendTo> getIssueTo() {
+    public List<Cash> getIssueTo() {
         return issueTo;
     }
 
-    public void setIssueTo(List<SendTo> issueTo) {
+    public void setIssueTo(List<Cash> issueTo) {
         this.issueTo = issueTo;
     }
 
-    public List<SendTo> getTransferTo() {
+    public List<Cash> getTransferTo() {
         return transferTo;
     }
 
-    public void setTransferTo(List<SendTo> transferTo) {
+    public void setTransferTo(List<Cash> transferTo) {
         this.transferTo = transferTo;
     }
 

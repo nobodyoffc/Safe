@@ -10,7 +10,7 @@ import androidx.annotation.NonNull;
 
 import com.fc.fc_ajdk.constants.Constants;
 import com.fc.fc_ajdk.core.fch.RawTxInfo;
-import com.fc.fc_ajdk.data.fchData.SendTo;
+import com.fc.fc_ajdk.data.fchData.Cash;
 import com.fc.fc_ajdk.utils.FchUtils;
 import com.fc.fc_ajdk.utils.TimberLogger;
 import com.fc.safe.SafeApplication;
@@ -29,7 +29,7 @@ public class AddOutputFromFidListDialog extends Dialog {
     private OnDoneListener onDoneListener;
 
     public interface OnDoneListener {
-        void onDone(List<SendTo> sendToList);
+        void onDone(List<Cash> sendToList);
     }
 
     public AddOutputFromFidListDialog(@NonNull Context context, RawTxInfo rawTxInfo, long rest) {
@@ -82,10 +82,10 @@ public class AddOutputFromFidListDialog extends Dialog {
                 return;
             }
 
-            // Create SendTo list
-            List<SendTo> sendToList = new java.util.ArrayList<>();
+            // Create Cash list
+            List<Cash> sendToList = new java.util.ArrayList<>();
             for (String fid : fidList) {
-                SendTo sendTo = new SendTo(fid, amount);
+                Cash sendTo = new Cash(fid, amount);
                 sendToList.add(sendTo);
                 rawTxInfo.getOutputs().add(sendTo);
             }
