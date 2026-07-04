@@ -1,4 +1,4 @@
-package com.fc.safe.multisign;
+package com.fc.safe.multisig;
 
 import android.content.Intent;
 import android.content.res.ColorStateList;
@@ -43,8 +43,8 @@ import com.fc.safe.home.BaseCryptoActivity;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CreateMultisignIdActivity extends BaseCryptoActivity {
-    private static final String TAG = "CreateMultisignIdActivity";
+public class CreateMultisigIdActivity extends BaseCryptoActivity {
+    private static final String TAG = "CreateMultisigIdActivity";
     private static final int QR_SCAN_KEY_REQUEST_CODE = 1001;
     
     private LinearLayout keyListContainer;
@@ -116,7 +116,7 @@ public class CreateMultisignIdActivity extends BaseCryptoActivity {
 
     @Override
     protected String getActivityTitle() {
-        return getString(R.string.create_multisign_fid);
+        return getString(R.string.create_multisig_fid);
     }
 
     @Override
@@ -365,7 +365,7 @@ public class CreateMultisignIdActivity extends BaseCryptoActivity {
             
             Multisig multisig = new TxHandler().createMultisign(pubkeyList, signerNumber);
             if(multisig ==null){
-                showToast(getString(R.string.failed_to_create_multisign_id));
+                showToast(getString(R.string.failed_to_create_multisig_id));
                 return;
             }
             // Set save time before adding to database
@@ -382,7 +382,7 @@ public class CreateMultisignIdActivity extends BaseCryptoActivity {
 
     private void showLabelDialog(Multisig multisig) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle(getString(R.string.enter_label_for_multisign_id));
+        builder.setTitle(getString(R.string.enter_label_for_multisig_id));
         
         View dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_multisign_label, null);
         builder.setView(dialogView);
@@ -405,7 +405,7 @@ public class CreateMultisignIdActivity extends BaseCryptoActivity {
                 multisignManager.commit();
                 
                 dialog.dismiss();
-                showToast(getString(R.string.multisign_id_created_successfully));
+                showToast(getString(R.string.multisig_id_created_successfully));
                 MultisignActivity.setNeedsRefresh(true);
                 finish();
             } catch (Exception e) {

@@ -51,7 +51,7 @@
     <string name="menu_convert">Convert</string>
     <string name="menu_tools">Tools</string>
     <string name="menu_tx">TX</string>
-    <string name="menu_multisign">Multisign</string>
+    <string name="menu_multisig">Multisig</string>
     <string name="menu_sign_words">Sign Words</string>
     <string name="menu_verify">Verify</string>
     <string name="menu_encrypt">Encrypt</string>
@@ -125,10 +125,10 @@
     <string name="format_base64">Base64</string>
     <string name="too_large_for_integer">Too large for integer format</string>
 
-    <string name="create_multisign_fid">Create Multisign FID</string>
-    <string name="create_multisign_tx">Create Multisign TX</string>
-    <string name="sign_multisign_tx">Sign Multisign TX</string>
-    <string name="build_multisign_tx">Build Multisign TX</string>
+    <string name="create_multisig_fid">Create Multisig FID</string>
+    <string name="create_multisig_tx">Create Multisig TX</string>
+    <string name="sign_multisig_tx">Sign Multisig TX</string>
+    <string name="build_multisig_tx">Build Multisig TX</string>
     <string name="required_signer_number">Required signer number</string>
     <string name="ending_with">Ending with</string>
     <string name="input_the_pubkey">Input the pubkey</string>
@@ -155,7 +155,7 @@
     <string name="import_tx">Import</string>
     <string name="add">Add</string>
     <string name="input_the_text_carved_on_chain">Input the text carved on chain</string>
-    <string name="sender_from_script_or_multisign">Sender from script or multisig JSON</string>
+    <string name="sender_from_script_or_multisig">Sender from script or multisig JSON</string>
     <string name="add_payee">Add payee</string>
     <string name="add_cash_to_spend">Add cash to spend</string>
     <string name="please_input_required_signer_number">Please input required signer number</string>
@@ -170,15 +170,15 @@
     <string name="fid">FID</string>
     <string name="avatar">Avatar</string>
 
-    <string name="choose_multisign_id">Choose Multisign ID</string>
-    <string name="no_multisign_found">No multisig found</string>
+    <string name="choose_multisig_id">Choose Multisig ID</string>
+    <string name="no_multisig_found">No multisig found</string>
     <string name="signed">Signed</string>
     <string name="sender">Sender</string>
     <string name="spending">Spending</string>
     <string name="send_to">Send to</string>
     <string name="unsigned">Unsigned</string>
 
-    <string name="confirm_multisign_tx">Confirm Multisign TX</string>
+    <string name="confirm_multisig_tx">Confirm Multisig TX</string>
 
     <string name="as_hex">Bytes in Hex</string>
 
@@ -191,12 +191,12 @@
     <string name="m_n">m/n</string>
     <string name="need_signs">Need Signs</string>
 
-    <string name="import_multisign_tx">Import Multisign TX</string>
+    <string name="import_multisig_tx">Import Multisig TX</string>
 
     <string name="build">Build</string>
     <string name="copy_result">Copy Result</string>
     <string name="built_you_can_broadcast_it">Built! You can broadcast it.</string>
-    <string name="failed_to_build_multisign_tx">Failed to build multisig TX.</string>
+    <string name="failed_to_build_multisig_tx">Failed to build multisig TX.</string>
     <string name="add_to_fid_list">Add to FID list</string>
     <string name="clear_fid_list">Clear FID list</string>
     <string name="added_to_fid_list">Added to FID list.</string>
@@ -350,7 +350,7 @@
     <string name="check_password">Check Password</string>
     <string name="please_enter_matching_characters">Please enter matching characters</string>
     <string name="no_totp_found">No TOTP found</string>
-    <string name="no_multisigns_found">No multisigs found.</string>
+    <string name="no_multisigs_found">No multisigs found.</string>
     <string name="please_input_text">Please input text</string>
     <string name="no_content_to_generate_qr_code">No content to generate QR code</string>
     <string name="no_key_available">No key available</string>
@@ -359,9 +359,9 @@
     <string name="json_converter">JSON Converter</string>
     <string name="menu_json_converter">JSON Convert</string>
     <string name="input_json">Input JSON string</string>
-    <string name="failed_to_parse_multisign">Failed to parse Multisign.</string>
-    <string name="input_the_script_or_multisign_or_select_a_multisign_fid">Input the script or Multisign. Or select a multisig FID.</string>
-    <string name="failed_to_create_multisign_tx">Failed to create multisig TX.</string>
+    <string name="failed_to_parse_multisig">Failed to parse Multisig.</string>
+    <string name="input_the_script_or_multisig_or_select_a_multisig_fid">Input the script or Multisig. Or select a multisig FID.</string>
+    <string name="failed_to_create_multisig_tx">Failed to create multisig TX.</string>
     <string name="failed_to_create_transaction_info">Failed to create transaction info</string>
     <string name="no_transaction_to_copy">No transaction to copy</string>
     <string name="error_initializing_home">Error initializing HomeActivity: %1$s</string>
@@ -397,8 +397,8 @@
     <string name="exported_to">Exported to: %1$s</string>
     <string name="failed_to_parse_json">Failed to parse JSON</string>
     <string name="keyname_is_inconsistent">KeyName is inconsistent</string>
-    <string name="multisign_cant_be_null">Multisign can\'t be null</string>
-    <string name="fid_of_multisign_cant_be_null">The FID of Multisign can\'t be null</string>
+    <string name="multisig_cant_be_null">Multisig can\'t be null</string>
+    <string name="fid_of_multisig_cant_be_null">The FID of Multisig can\'t be null</string>
     <string name="invalid_number_format">Invalid number format</string>
     <string name="invalid_date_format">Invalid date format</string>
     <string name="welcome_to_freeverse">Welcome to the Freeverse with %1$s</string>
@@ -459,10 +459,10 @@
     <string name="please_input_json_text">Please input JSON text</string>
     <string name="invalid_json_format">Invalid JSON format</string>
     <string name="selected_keys_have_no_public_keys">Selected keys have no public keys</string>
-    <string name="failed_to_create_multisign_id">Failed to create multisig ID.</string>
-    <string name="multisign_id_created_successfully">Multisign ID created successfully</string>
+    <string name="failed_to_create_multisig_id">Failed to create multisig ID.</string>
+    <string name="multisig_id_created_successfully">Multisig ID created successfully</string>
     <string name="please_input_json">Please input JSON</string>
-    <string name="invalid_multisign_data">Invalid multisig data</string>
+    <string name="invalid_multisig_data">Invalid multisig data</string>
     <string name="no_signatures_to_build">No signatures to build</string>
     <string name="failed_to_merge_signatures">Failed to merge signatures: %1$s</string>
     <string name="failed_to_build_transaction">Failed to build transaction</string>
@@ -473,8 +473,8 @@
     <string name="please_input_both_text_and_key">Please input both text and key</string>
     <string name="wrong_key">Wrong key.</string>
     <string name="failed_to_sign_words">Failed to sign words.</string>
-    <string name="loaded_multisigns">Loaded %1$d multisigs</string>
-    <string name="no_more_multisigns_to_load">No more multisigs to load</string>
+    <string name="loaded_multisigs">Loaded %1$d multisigs</string>
+    <string name="no_more_multisigs_to_load">No more multisigs to load</string>
     <string name="selected_key_has_no_id">Selected key has no ID</string>
     <string name="please_input_signature">Please input signature</string>
     <string name="symkey_required_for_sha256_signature">The symKey is required for SHA256 signature</string>
@@ -585,12 +585,12 @@
     <string name="failed_to_decrypt_private_key">Failed to decrypt private key</string>
     <string name="no_keys_selected">No keys selected</string>
     <string name="find_nice_keys">Find Nice Keys</string>
-    <string name="please_select_at_least_one_multisign">Please select at least one multisig</string>
+    <string name="please_select_at_least_one_multisig">Please select at least one multisig</string>
     <string name="tx_is_well_signed_build_it">The TX is well signed! Build it.</string>
     <string name="failed_to_get_prikey_of">Failed to get the priKey of %1$s</string>
-    <string name="selected_key_not_part_of_multisign">Selected key is not part of this multisig transaction</string>
+    <string name="selected_key_not_part_of_multisig">Selected key is not part of this multisig transaction</string>
     <string name="failed_to_get_key_info_of">Failed to get the key info of %1$s</string>
-    <string name="enter_label_for_multisign_id">Enter Label for Multisign ID</string>
+    <string name="enter_label_for_multisig_id">Enter Label for Multisig ID</string>
     <string name="selected_cashes_count">Selected: %1$d cashes</string>
     <string name="copied_cash_id">Copied cash ID: %1$s</string>
     <string name="copied_amount">Copied amount: %1$s</string>
@@ -608,7 +608,7 @@
     <string name="wif_uncompressed">WIF uncompressed</string>
     <string name="wif_compressed_with_ver_0">WIF compressed with ver 0</string>
     <string name="wif_compressed_without_ver">WIF compressed without ver</string>
-    <string name="failed_to_parse_script_to_multisign">Failed to parse script to multisig.</string>
+    <string name="failed_to_parse_script_to_multisig">Failed to parse script to multisig.</string>
     <string name="app_password_cannot_be_shown">App password can not be shown. Please keep it carefully.</string>
     
     <!-- Toast Messages -->

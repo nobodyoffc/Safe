@@ -25,7 +25,7 @@
         android:layout_height="wrap_content"
         android:gravity="center"
         android:padding="16dp"
-        android:text="@string/no_multisign_found"
+        android:text="@string/no_multisig_found"
         android:visibility="gone" />
 
     <LinearLayout

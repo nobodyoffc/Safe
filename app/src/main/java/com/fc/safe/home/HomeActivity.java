@@ -15,7 +15,6 @@ import com.fc.fc_ajdk.config.Configure;
 import com.fc.fc_ajdk.utils.TimberLogger;
 import com.fc.safe.R;
 import com.fc.safe.db.DatabaseManager;
-import com.fc.safe.db.PendingTxManager;
 import com.fc.safe.db.ToastManager;
 import com.fc.safe.initiate.ConfigureManager;
 import com.fc.safe.utils.IconCreator;
@@ -99,7 +98,7 @@ public class HomeActivity extends AppCompatActivity {
             generateIconForMenuItem(R.id.menu_totp, getString(R.string.menu_totp));
         //    generateIconForMenuItem(R.id.menu_test, getString(R.string.menu_test));
 //            generateIconForMenuItem(R.id.menu_decode, getString(R.string.menu_decode));
-            generateIconForMenuItem(R.id.menu_multisign, getString(R.string.menu_multisign));
+            generateIconForMenuItem(R.id.menu_multisign, getString(R.string.menu_multisig));
             generateIconForMenuItem(R.id.menu_sign_tx, getString(R.string.menu_tx));
             generateIconForMenuItem(R.id.menu_convert, getString(R.string.menu_convert));
             generateIconForMenuItem(R.id.menu_secrets, getString(R.string.menu_secrets));
@@ -269,17 +268,6 @@ public class HomeActivity extends AppCompatActivity {
                 TimberLogger.e(TAG, "menu_scan_qr view not found");
             }
 
-            // Pending TX
-            View pendingTxView = findViewById(R.id.menu_pending_tx);
-            if (pendingTxView != null) {
-                pendingTxView.setOnClickListener(v -> {
-                    Intent intent = new Intent(HomeActivity.this, PendingTxListActivity.class);
-                    startActivity(intent);
-                });
-            } else {
-                TimberLogger.e(TAG, "menu_pending_tx view not found");
-            }
-
             // Settings
             View settingsView = findViewById(R.id.menu_settings);
             if (settingsView != null) {
@@ -295,25 +283,4 @@ public class HomeActivity extends AppCompatActivity {
         }
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        refreshPendingTxBadge();
-    }
-
-    private void refreshPendingTxBadge() {
-        TextView badge = findViewById(R.id.menu_pending_tx_badge);
-        if (badge == null) return;
-        try {
-            int count = PendingTxManager.getInstance(this).pendingCount();
-            if (count > 0) {
-                badge.setText(count > 99 ? "99+" : String.valueOf(count));
-                badge.setVisibility(View.VISIBLE);
-            } else {
-                badge.setVisibility(View.GONE);
-            }
-        } catch (Exception e) {
-            badge.setVisibility(View.GONE);
-        }
-    }
 } 

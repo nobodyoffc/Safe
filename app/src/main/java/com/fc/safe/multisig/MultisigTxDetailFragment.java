@@ -1,4 +1,4 @@
-package com.fc.safe.multisign;
+package com.fc.safe.multisig;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -24,7 +24,7 @@ import com.fc.safe.utils.ChooseMode;
 
 import java.util.Map;
 
-public class MultisignTxDetailFragment extends Fragment {
+public class MultisigTxDetailFragment extends Fragment {
     private RawTxInfo rawTxInfo;
     private MultisignTxDetail multisignTxDetail;
     private LinearLayout senderContainer;
@@ -34,8 +34,8 @@ public class MultisignTxDetailFragment extends Fragment {
     private LinearLayout signedFidContainer;
     private LinearLayout unsignedFidContainer;
 
-    public static MultisignTxDetailFragment newInstance(RawTxInfo rawTxInfo) {
-        MultisignTxDetailFragment fragment = new MultisignTxDetailFragment();
+    public static MultisigTxDetailFragment newInstance(RawTxInfo rawTxInfo) {
+        MultisigTxDetailFragment fragment = new MultisigTxDetailFragment();
         fragment.rawTxInfo = rawTxInfo;
         fragment.multisignTxDetail = MultisignTxDetail.fromMultiSigData(rawTxInfo, fragment.getContext());
         return fragment;
@@ -70,7 +70,7 @@ public class MultisignTxDetailFragment extends Fragment {
         if (multisignTxDetail.getSender() == null || multisignTxDetail.getSender().isEmpty()) {
             return;
         }
-        MultisignKeyCardManager keyCardManager = new MultisignKeyCardManager(getContext(), senderContainer, false);
+        MultisigKeyCardManager keyCardManager = new MultisigKeyCardManager(getContext(), senderContainer, false);
         Multisig multisig = new Multisig();
         multisig.setId(multisignTxDetail.getSender());
         keyCardManager.addSenderKeyCard(multisig);

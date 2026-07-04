@@ -176,7 +176,7 @@
             android:windowSoftInputMode="adjustResize" />
 
         <activity
-            android:name="com.fc.safe.multisig.CreateMultisignIdActivity"
+            android:name="com.fc.safe.multisig.CreateMultisigIdActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
 
@@ -185,14 +185,14 @@
             android:exported="false" />
 
         <activity
-            android:name="com.fc.safe.multisig.CreateMultisignTxActivity"
+            android:name="com.fc.safe.multisig.CreateMultisigTxActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
 
         <activity
-            android:name="com.fc.safe.multisig.ChooseMultisignIdActivity"
+            android:name="com.fc.safe.multisig.ChooseMultisigIdActivity"
             android:exported="false"
-            android:label="@string/choose_multisign_id"
+            android:label="@string/choose_multisig_id"
             android:theme="@style/Theme.Freer" />
 
         <activity
@@ -201,17 +201,17 @@
             android:windowSoftInputMode="adjustResize" />
 
         <activity
-            android:name="com.fc.safe.multisig.ImportMultisignTxActivity"
+            android:name="com.fc.safe.multisig.ImportMultisigTxActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
 
         <activity
-            android:name="com.fc.safe.multisig.SignMultisignTxActivity"
+            android:name="com.fc.safe.multisig.SignMultisigTxActivity"
             android:exported="false" 
             android:windowSoftInputMode="adjustResize"/>
 
         <activity
-            android:name="com.fc.safe.multisig.BuildMultisignTxActivity"
+            android:name="com.fc.safe.multisig.BuildMultisigTxActivity"
             android:exported="false"
             android:label="Build Multisign TX"
              />

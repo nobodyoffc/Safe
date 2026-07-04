@@ -42,7 +42,7 @@
             android:textColor="@color/main_background"
             android:layout_marginBottom="8dp"
             android:textStyle="bold"
-            android:text="@string/create_multisign_fid" />
+            android:text="@string/create_multisig_fid" />
 
         <Button
             android:id="@+id/createTxButton"
@@ -52,7 +52,7 @@
             android:layout_weight="1"
             android:layout_marginBottom="8dp"
             android:textStyle="bold"
-            android:text="@string/create_multisign_tx" />
+            android:text="@string/create_multisig_tx" />
 
         <Button
             android:id="@+id/signTxButton"
@@ -62,7 +62,7 @@
             android:layout_weight="1"
             android:layout_marginBottom="8dp"
             android:textStyle="bold"
-            android:text="@string/sign_multisign_tx" />
+            android:text="@string/sign_multisig_tx" />
 
         <Button
             android:id="@+id/buildTxButton"
@@ -71,7 +71,7 @@
             android:layout_height="0dp"
             android:layout_weight="1"
             android:textStyle="bold"
-            android:text="@string/build_multisign_tx" />
+            android:text="@string/build_multisig_tx" />
 
     </LinearLayout>
 

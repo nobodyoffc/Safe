@@ -118,7 +118,7 @@ public class MultisignManager {
     public void addMultisign(String script,Context context) {
         Multisig multisig = Multisig.parseMultisignRedeemScript(script);
         if(multisig ==null){
-            ToastUtils.showError(context, context.getString(R.string.failed_to_parse_script_to_multisign));
+            ToastUtils.showError(context, context.getString(R.string.failed_to_parse_script_to_multisig));
             return;
         }
         multisig.setSaveTime(DateUtils.longToTime(System.currentTimeMillis(), DateUtils.TO_MINUTE));

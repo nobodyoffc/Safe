@@ -1,4 +1,4 @@
-package com.fc.safe.multisign;
+package com.fc.safe.multisig;
 
 import static com.fc.fc_ajdk.constants.Constants.COIN_TO_SATOSHI;
 
@@ -61,8 +61,8 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import com.fc.safe.utils.ToastUtils;
 
-public class CreateMultisignTxActivity extends BaseCryptoActivity {
-    private static final String TAG = "CreateMultisignTxActivity";
+public class CreateMultisigTxActivity extends BaseCryptoActivity {
+    private static final String TAG = "CreateMultisigTxActivity";
     public static final String EXTRA_TX_INFO_JSON = "extra_tx_info_json";
 
     private static final int QR_SCAN_TEXT_REQUEST_CODE = 1001;
@@ -177,7 +177,7 @@ public class CreateMultisignTxActivity extends BaseCryptoActivity {
         signMultisignTxLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
             result -> {
-                if (result.getResultCode() == SignMultisignTxActivity.RESULT_BUILT) {
+                if (result.getResultCode() == SignMultisigTxActivity.RESULT_BUILT) {
                     finish();  // Finish this activity when transaction is built
                 }
             }
@@ -202,7 +202,7 @@ public class CreateMultisignTxActivity extends BaseCryptoActivity {
         opreturnInput = opreturnContainer.findViewById(R.id.opreturnInput).findViewById(R.id.textInput);
         opreturnInput.setHint(R.string.input_the_text_carved_on_chain);
         multisignInput = keyContainer.findViewById(R.id.multisignIdInput).findViewById(R.id.keyInput);
-        multisignInput.setHint(R.string.sender_from_script_or_multisign);
+        multisignInput.setHint(R.string.sender_from_script_or_multisig);
 
         clearButton = findViewById(R.id.clearButton);
         importTxButton = findViewById(R.id.importTxButton);
@@ -266,7 +266,7 @@ public class CreateMultisignTxActivity extends BaseCryptoActivity {
                 @Override
                 public void onMyCashSelected() {
                     // Start CashActivity for selecting cash
-                    Intent intent = new Intent(CreateMultisignTxActivity.this, CashActivity.class);
+                    Intent intent = new Intent(CreateMultisigTxActivity.this, CashActivity.class);
                     intent.putExtra("select_mode", true);
                     startActivityForResult(intent, REQUEST_CODE_CHOOSE_CASH);
                 }
@@ -274,14 +274,14 @@ public class CreateMultisignTxActivity extends BaseCryptoActivity {
                 @Override
                 public void onInputSelected() {
                     // Show the original AddTxInputDialog
-                    AddTxInputDialog dialog = new AddTxInputDialog(CreateMultisignTxActivity.this, rawTxInfo);
+                    AddTxInputDialog dialog = new AddTxInputDialog(CreateMultisigTxActivity.this, rawTxInfo);
                     currentDialog = dialog;
                     dialog.setOnDoneListener(cash -> {
                         if(cash==null)return;
                         TimberLogger.i(TAG, "AddTxInputDialog done, cash: " + cash);
-                        TxInputCard card = new TxInputCard(CreateMultisignTxActivity.this);
+                        TxInputCard card = new TxInputCard(CreateMultisigTxActivity.this);
                         card.setCash(cash);
-                        card.setOnDeleteListener(CreateMultisignTxActivity.this::removeInputCard);
+                        card.setOnDeleteListener(CreateMultisigTxActivity.this::removeInputCard);
                         inputCards.add(card);
                         inputCardsContainer.addView(card, inputCardsContainer.getChildCount() - 1);
                         inputHint.setVisibility(View.GONE);
@@ -388,12 +388,12 @@ public class CreateMultisignTxActivity extends BaseCryptoActivity {
 
             if (rawTxInfo == null) {
                 TimberLogger.e(TAG, "Failed to create multisig TX");
-                Toast.makeText(this, getString(R.string.failed_to_create_multisign_tx), SafeApplication.TOAST_LASTING).show();
+                Toast.makeText(this, getString(R.string.failed_to_create_multisig_tx), SafeApplication.TOAST_LASTING).show();
                 return;
             }
 
-            // Start SignMultisignTxActivity
-            Intent intent = new Intent(this, SignMultisignTxActivity.class);
+            // Start SignMultisigTxActivity
+            Intent intent = new Intent(this, SignMultisigTxActivity.class);
             intent.putExtra(SignTxActivity.EXTRA_TX_INFO_JSON, rawTxInfo.toJsonWithSenderInfo());
             signMultisignTxLauncher.launch(intent);  // Use launcher instead of startActivity
         });
@@ -404,7 +404,7 @@ public class CreateMultisignTxActivity extends BaseCryptoActivity {
             rawTxInfo.setOpReturn(opreturnInput.getText().toString());
 
         if (multisignInput.getText() == null || multisignInput.getText().toString().isEmpty()) {
-            Toast.makeText(this, getString(R.string.input_the_script_or_multisign_or_select_a_multisign_fid),SafeApplication.TOAST_LASTING).show();
+            Toast.makeText(this, getString(R.string.input_the_script_or_multisig_or_select_a_multisig_fid),SafeApplication.TOAST_LASTING).show();
             return false;
         }
 
@@ -418,7 +418,7 @@ public class CreateMultisignTxActivity extends BaseCryptoActivity {
                 MultisignManager multisignManager = MultisignManager.getInstance(this);
                 multisig = multisignManager.getMultisignById(multisignText);
                 if (multisig == null) {
-                    Toast.makeText(this, getString(R.string.input_the_script_or_multisign_or_select_a_multisign_fid), SafeApplication.TOAST_LASTING).show();
+                    Toast.makeText(this, getString(R.string.input_the_script_or_multisig_or_select_a_multisig_fid), SafeApplication.TOAST_LASTING).show();
                     return false;
                 }
                 rawTxInfo.setMultisign(multisig);
@@ -430,7 +430,7 @@ public class CreateMultisignTxActivity extends BaseCryptoActivity {
             multisig = Multisig.fromJson(multisignText, Multisig.class);
             rawTxInfo.setMultisign(multisig);
         }else{
-            Toast.makeText(this, R.string.failed_to_parse_multisign, SafeApplication.TOAST_LASTING).show();
+            Toast.makeText(this, R.string.failed_to_parse_multisig, SafeApplication.TOAST_LASTING).show();
             return false;
         }
 
@@ -499,7 +499,7 @@ public class CreateMultisignTxActivity extends BaseCryptoActivity {
         }
 
         if(rawTxInfo.getMultisign()==null){
-            Toast.makeText(this, getString(R.string.failed_to_parse_multisign), SafeApplication.TOAST_LASTING).show();
+            Toast.makeText(this, getString(R.string.failed_to_parse_multisig), SafeApplication.TOAST_LASTING).show();
             return false;
         }
 
@@ -701,7 +701,7 @@ public class CreateMultisignTxActivity extends BaseCryptoActivity {
 
     @Override
     protected String getActivityTitle() {
-        return getString(R.string.create_multisign_tx);
+        return getString(R.string.create_multisig_tx);
     }
 
     @Override
@@ -755,7 +755,7 @@ public class CreateMultisignTxActivity extends BaseCryptoActivity {
 
     @Override
     protected void handleChooseKeyResult(Intent data) {
-        Map<String, Multisig> resultMap = ChooseMultisignIdActivity.getSelectedMultisignMap(data);
+        Map<String, Multisig> resultMap = ChooseMultisigIdActivity.getSelectedMultisignMap(data);
         if (!resultMap.isEmpty()) {
             // Hide keyboard
             View currentFocus = getCurrentFocus();
@@ -774,7 +774,7 @@ public class CreateMultisignTxActivity extends BaseCryptoActivity {
 
     @Override
     protected void setupKeyIcons(int inputId, int iconsId, int qrScanRequestCode) {
-        // For CreateMultisignTxActivity, use ChooseMultisignIdActivity
+        // For CreateMultisigTxActivity, use ChooseMultisigIdActivity
         setupIoIconsView(inputId, iconsId, false, true, true, false,
                 null,
             v -> {
@@ -784,7 +784,7 @@ public class CreateMultisignTxActivity extends BaseCryptoActivity {
                     InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
                     imm.hideSoftInputFromWindow(currentFocus.getWindowToken(), 0);
                 }
-                chooseMultisignLauncher.launch(ChooseMultisignIdActivity.createIntent(this, true));
+                chooseMultisignLauncher.launch(ChooseMultisigIdActivity.createIntent(this, true));
             },
             () -> startQrScan(qrScanRequestCode),
             null);

@@ -1,4 +1,4 @@
-package com.fc.safe.multisign;
+package com.fc.safe.multisig;
 
 import android.content.Intent;
 import android.view.LayoutInflater;
@@ -23,8 +23,8 @@ import com.google.android.material.textfield.TextInputEditText;
 import java.util.ArrayList;
 import java.util.List;
 
-public class BuildMultisignTxActivity extends BaseCryptoActivity {
-    private static final String TAG = "BuildMultisignTxActivity";
+public class BuildMultisigTxActivity extends BaseCryptoActivity {
+    private static final String TAG = "BuildMultisigTxActivity";
     private static final int QR_SCAN_TEXT_REQUEST_CODE = 1001;
     private LinearLayout signaturesContainer;
     private TextInputEditText jsonInput;
@@ -39,7 +39,7 @@ public class BuildMultisignTxActivity extends BaseCryptoActivity {
 
     @Override
     protected String getActivityTitle() {
-        return getString(R.string.build_multisign_tx);
+        return getString(R.string.build_multisig_tx);
     }
 
     @Override
@@ -79,7 +79,7 @@ public class BuildMultisignTxActivity extends BaseCryptoActivity {
         try {
             RawTxInfo rawTxInfo = RawTxInfo.fromJson(jsonStr, RawTxInfo.class);
             if (rawTxInfo == null || rawTxInfo.getFidSigMap() == null || rawTxInfo.getFidSigMap().isEmpty()) {
-                showToast(getString(R.string.invalid_multisign_data));
+                showToast(getString(R.string.invalid_multisig_data));
                 return;
             }
 
@@ -153,8 +153,8 @@ public class BuildMultisignTxActivity extends BaseCryptoActivity {
             return;
         }
 
-        // Launch SignMultisignTxActivity with the merged data
-        Intent intent = new Intent(this, SignMultisignTxActivity.class);
+        // Launch SignMultisigTxActivity with the merged data
+        Intent intent = new Intent(this, SignMultisigTxActivity.class);
         intent.putExtra(SignTxActivity.EXTRA_TX_INFO_JSON, finalRawTxInfo.toJsonWithSenderInfo());
         startActivity(intent);
     }

@@ -1,4 +1,4 @@
-package com.fc.safe.multisign;
+package com.fc.safe.multisig;
 
 import android.content.Context;
 import android.content.Intent;
@@ -24,8 +24,8 @@ import java.util.ArrayList;
 import java.util.List;
 import com.fc.safe.utils.ToastUtils;
 
-public class MultisignKeyCardManager {
-    private static final String TAG = "MultisignKeyCardManager";
+public class MultisigKeyCardManager {
+    private static final String TAG = "MultisigKeyCardManager";
     private final Context context;
     private final ViewGroup keyListContainer;
     private final List<Multisig> multisigList;
@@ -33,15 +33,15 @@ public class MultisignKeyCardManager {
     private final boolean withCheckBox;
     private final boolean isSingleChoice;
 
-    public MultisignKeyCardManager(Context context, LinearLayout keyListContainer) {
+    public MultisigKeyCardManager(Context context, LinearLayout keyListContainer) {
         this(context, keyListContainer, true, false);
     }
 
-    public MultisignKeyCardManager(Context context, LinearLayout keyListContainer, boolean withCheckBox) {
+    public MultisigKeyCardManager(Context context, LinearLayout keyListContainer, boolean withCheckBox) {
         this(context, keyListContainer, withCheckBox, false);
     }
 
-    public MultisignKeyCardManager(Context context, LinearLayout keyListContainer, boolean withCheckBox, boolean isSingleChoice) {
+    public MultisigKeyCardManager(Context context, LinearLayout keyListContainer, boolean withCheckBox, boolean isSingleChoice) {
         this.context = context;
         this.keyListContainer = keyListContainer;
         this.multisigList = new ArrayList<>();
@@ -123,7 +123,7 @@ public class MultisignKeyCardManager {
                         MultisignActivity.setNeedsRefresh(true);
                         break;
                     case 1: // Create TX
-                        Intent createTxIntent = new Intent(context, CreateMultisignTxActivity.class);
+                        Intent createTxIntent = new Intent(context, CreateMultisigTxActivity.class);
                         createTxIntent.putExtra("multisig", multisig);
                         RawTxInfo rawTxInfo = new RawTxInfo();
                         rawTxInfo.setMultisign(multisig);
@@ -206,7 +206,7 @@ public class MultisignKeyCardManager {
                         MultisignActivity.setNeedsRefresh(true);
                         break;
                     case 1: // Create TX
-                        Intent createTxIntent = new Intent(context, CreateMultisignTxActivity.class);
+                        Intent createTxIntent = new Intent(context, CreateMultisigTxActivity.class);
                         createTxIntent.putExtra("multisig", multisig);
                         RawTxInfo rawTxInfo = new RawTxInfo();
                         rawTxInfo.setMultisign(multisig);

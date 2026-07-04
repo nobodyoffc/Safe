@@ -22,7 +22,7 @@ import com.fc.safe.ui.PopupMenuHelper;
 import com.fc.safe.ui.WaitingDialog;
 import com.fc.safe.db.CashManager;
 import com.fc.safe.tx.dialog.CreateCashDialog;
-import com.fc.safe.multisign.CreateMultisignTxActivity;
+import com.fc.safe.multisig.CreateMultisigTxActivity;
 import com.fc.safe.utils.CashCardContainer;
 import com.fc.safe.utils.ToastUtils;
 import com.fc.safe.utils.ChooseMode;
@@ -522,9 +522,9 @@ public class CashActivity extends BaseCryptoActivity {
             
             // Check if sender FID starts with '3' (multisig address)
             if (ownerFid != null && ownerFid.startsWith("3")) {
-                // Start CreateMultisignTxActivity for multisig transaction
-                Intent intent = new Intent(CashActivity.this, CreateMultisignTxActivity.class);
-                intent.putExtra(CreateMultisignTxActivity.EXTRA_TX_INFO_JSON, rawTxInfoJson);
+                // Start CreateMultisigTxActivity for multisig transaction
+                Intent intent = new Intent(CashActivity.this, CreateMultisigTxActivity.class);
+                intent.putExtra(CreateMultisigTxActivity.EXTRA_TX_INFO_JSON, rawTxInfoJson);
                 startActivityForResult(intent, REQUEST_CREATE_TX);
             } else {
                 // Start CreateTxActivity for normal transaction

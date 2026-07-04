@@ -1,4 +1,4 @@
-package com.fc.safe.multisign;
+package com.fc.safe.multisig;
 
 import android.content.Context;
 import android.content.Intent;
@@ -14,8 +14,8 @@ import com.fc.safe.home.BaseCryptoActivity;
 import com.fc.safe.tx.SignTxActivity;
 import com.google.android.material.textfield.TextInputEditText;
 
-public class ImportMultisignTxActivity extends BaseCryptoActivity {
-    private static final String TAG = "ImportMultisignTxActivity";
+public class ImportMultisigTxActivity extends BaseCryptoActivity {
+    private static final String TAG = "ImportMultisigTxActivity";
     private static final int QR_SCAN_JSON_REQUEST_CODE = 1001;
 
     private LinearLayout jsonInputContainer;
@@ -83,7 +83,7 @@ public class ImportMultisignTxActivity extends BaseCryptoActivity {
 
     @Override
     protected String getActivityTitle() {
-        return getString(R.string.import_multisign_tx);
+        return getString(R.string.import_multisig_tx);
     }
 
     @Override
@@ -104,6 +104,6 @@ public class ImportMultisignTxActivity extends BaseCryptoActivity {
     }
 
     public static Intent createIntent(Context context) {
-        return new Intent(context, ImportMultisignTxActivity.class);
+        return new Intent(context, ImportMultisigTxActivity.class);
     }
 }

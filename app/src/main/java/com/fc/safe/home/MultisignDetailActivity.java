@@ -15,7 +15,7 @@ import com.fc.fc_ajdk.data.fcData.KeyInfo;
 import com.fc.safe.SafeApplication;
 import com.fc.safe.R;
 import com.fc.safe.db.MultisignManager;
-import com.fc.safe.multisign.CreateMultisignTxActivity;
+import com.fc.safe.multisig.CreateMultisigTxActivity;
 import com.fc.safe.ui.DetailFragment;
 import com.fc.safe.utils.KeyCardContainer;
 import com.fc.safe.utils.ChooseMode;
@@ -130,7 +130,7 @@ public class MultisignDetailActivity extends BaseCryptoActivity {
 
     private void setupCreateTxButton() {
         createTxButton.setOnClickListener(v -> {
-            Intent intent = new Intent(this, CreateMultisignTxActivity.class);
+            Intent intent = new Intent(this, CreateMultisigTxActivity.class);
             intent.putExtra("multisig", multisig);
             startActivity(intent);
         });
@@ -150,7 +150,7 @@ public class MultisignDetailActivity extends BaseCryptoActivity {
         });
 
         createTxButton.setOnClickListener(v -> {
-            Intent intent = new Intent(this, CreateMultisignTxActivity.class);
+            Intent intent = new Intent(this, CreateMultisigTxActivity.class);
             intent.putExtra("multisig", multisig);
             startActivity(intent);
         });

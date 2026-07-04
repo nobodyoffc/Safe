@@ -1,4 +1,4 @@
-package com.fc.safe.multisign;
+package com.fc.safe.multisig;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -26,7 +26,6 @@ import com.fc.safe.tx.SignTxActivity;
 import com.fc.safe.myKeys.ChooseKeyInfoActivity;
 import com.fc.safe.utils.KeyCardContainer;
 import com.fc.safe.utils.ChooseMode;
-import com.fc.safe.db.CashManager;
 import com.fc.safe.db.KeyInfoManager;
 import com.fc.safe.db.PendingTxManager;
 import com.fc.fc_ajdk.core.crypto.Hash;
@@ -34,7 +33,6 @@ import com.fc.fc_ajdk.core.fch.TxFingerprint;
 import com.fc.fc_ajdk.data.fchData.CashMark;
 import com.fc.fc_ajdk.data.fchData.PendingTx;
 import com.fc.fc_ajdk.data.fchData.TxInfo;
-import com.fc.fc_ajdk.utils.FchUtils;
 import com.fc.fc_ajdk.utils.TimberLogger;
 
 import java.util.ArrayList;
@@ -45,8 +43,8 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import com.fc.safe.utils.ToastUtils;
 
-public class SignMultisignTxActivity extends BaseCryptoActivity {
-    private static final String TAG = "SignMultisignTxActivity";
+public class SignMultisigTxActivity extends BaseCryptoActivity {
+    private static final String TAG = "SignMultisigTxActivity";
     public static final int RESULT_BUILT = 1002;  // Add result code constant
     private RawTxInfo rawTxInfo;
     private MultisignTxDetail multisignTxDetail;
@@ -68,7 +66,7 @@ public class SignMultisignTxActivity extends BaseCryptoActivity {
 
     @Override
     protected String getActivityTitle() {
-        return getString(R.string.sign_multisign_tx);
+        return getString(R.string.sign_multisig_tx);
     }
 
     @Override
@@ -130,7 +128,7 @@ public class SignMultisignTxActivity extends BaseCryptoActivity {
                                 Toast.makeText(this, getString(R.string.failed_to_get_prikey_of, chosenKeyInfo.getId()), SafeApplication.TOAST_LASTING).show();
                             }
                         } else {
-                            Toast.makeText(this, getString(R.string.selected_key_not_part_of_multisign), SafeApplication.TOAST_LASTING).show();
+                            Toast.makeText(this, getString(R.string.selected_key_not_part_of_multisig), SafeApplication.TOAST_LASTING).show();
                         }
                     }
                 }
@@ -198,7 +196,7 @@ public class SignMultisignTxActivity extends BaseCryptoActivity {
             if (isFullSigned) {
                 buildResult = new TxHandler().buildSchnorrMultiSignTx(rawTxInfo);
                 if(!Hex.isHexString(buildResult)){
-                    Toast.makeText(this, getString(R.string.failed_to_build_multisign_tx), SafeApplication.TOAST_LASTING).show();
+                    Toast.makeText(this, getString(R.string.failed_to_build_multisig_tx), SafeApplication.TOAST_LASTING).show();
                 } else{
                     isBuilt=true;
                     checkIsBuilt();
@@ -229,7 +227,7 @@ public class SignMultisignTxActivity extends BaseCryptoActivity {
         if (multisignTxDetail.getSender() == null || multisignTxDetail.getSender().isEmpty()) {
             return;
         }
-        MultisignKeyCardManager keyCardManager = new MultisignKeyCardManager(this, fragmentContainer, false);
+        MultisigKeyCardManager keyCardManager = new MultisigKeyCardManager(this, fragmentContainer, false);
         Multisig multisig = new Multisig();
         multisig.setId(multisignTxDetail.getSender());
         keyCardManager.addSenderKeyCard(multisig);

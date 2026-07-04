@@ -1,4 +1,4 @@
-package com.fc.safe.multisign;
+package com.fc.safe.multisig;
 
 import android.content.Context;
 import android.content.Intent;
@@ -20,14 +20,14 @@ import java.util.List;
 import java.util.Map;
 import com.fc.safe.utils.ToastUtils;
 
-public class ChooseMultisignIdActivity extends BaseCryptoActivity {
-    private static final String TAG = "ChooseMultisignIdActivity";
+public class ChooseMultisigIdActivity extends BaseCryptoActivity {
+    private static final String TAG = "ChooseMultisigIdActivity";
     private static final String EXTRA_SELECTED_P2SH = "selected_p2sh";
     private static final String EXTRA_IS_SINGLE_CHOICE = "is_single_choice";
     private static final int PAGE_SIZE = 20;
 
     private LinearLayout keyListContainer;
-    private MultisignKeyCardManager keyCardManager;
+    private MultisigKeyCardManager keyCardManager;
     private Button confirmButton;
     private Button cancelButton;
     private TextView emptyView;
@@ -36,7 +36,7 @@ public class ChooseMultisignIdActivity extends BaseCryptoActivity {
     private boolean isSingleChoice = false;
 
     public static Intent createIntent(Context context, boolean isSingleChoice) {
-        Intent intent = new Intent(context, ChooseMultisignIdActivity.class);
+        Intent intent = new Intent(context, ChooseMultisigIdActivity.class);
         intent.putExtra(EXTRA_IS_SINGLE_CHOICE, isSingleChoice);
         return intent;
     }
@@ -73,7 +73,7 @@ public class ChooseMultisignIdActivity extends BaseCryptoActivity {
         cancelButton = findViewById(R.id.cancelButton);
         emptyView = findViewById(R.id.emptyView);
         TimberLogger.i(TAG, "isSingleChoice value: " + isSingleChoice);
-        keyCardManager = new MultisignKeyCardManager(this, keyListContainer, true, isSingleChoice);
+        keyCardManager = new MultisigKeyCardManager(this, keyListContainer, true, isSingleChoice);
         TimberLogger.i(TAG, "initializeViews completed");
     }
 
@@ -95,7 +95,7 @@ public class ChooseMultisignIdActivity extends BaseCryptoActivity {
                     setResult(RESULT_OK, resultIntent);
                     finish();
                 } else {
-                    ToastUtils.showWarning(this, getString(R.string.please_select_at_least_one_multisign));
+                    ToastUtils.showWarning(this, getString(R.string.please_select_at_least_one_multisig));
                 }
             }
         });
@@ -147,7 +147,7 @@ public class ChooseMultisignIdActivity extends BaseCryptoActivity {
 
     @Override
     protected String getActivityTitle() {
-        return getString(R.string.choose_multisign_id);
+        return getString(R.string.choose_multisig_id);
     }
 
     @Override

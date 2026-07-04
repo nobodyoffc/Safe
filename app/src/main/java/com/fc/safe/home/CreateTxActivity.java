@@ -37,6 +37,7 @@ import com.fc.fc_ajdk.utils.TimberLogger;
 import com.fc.safe.SafeApplication;
 import com.fc.safe.R;
 import com.fc.safe.db.KeyInfoManager;
+import com.fc.safe.db.PendingTxManager;
 import com.fc.safe.tx.ImportTxInfoActivity;
 import com.fc.safe.tx.SignTxActivity;
 import com.fc.safe.tx.dialog.AddTxInputDialog;
@@ -70,6 +71,8 @@ public class CreateTxActivity extends BaseCryptoActivity {
     private LinearLayout opreturnContainer;
     private LinearLayout keyContainer;
     private LinearLayout buttonContainer;
+    private LinearLayout pendingTxBanner;
+    private TextView pendingTxBannerBadge;
 
     private List<TxInputCard> inputCards = new ArrayList<>();
     private List<TxOutputCard> outputCards = new ArrayList<>();
@@ -183,6 +186,10 @@ public class CreateTxActivity extends BaseCryptoActivity {
         inputHint = findViewById(R.id.inputHint);
         totalAndFeeText = findViewById(R.id.totalAndFeeText);
         totalInputText = findViewById(R.id.totalInputText);
+        pendingTxBanner = findViewById(R.id.pendingTxBanner);
+        pendingTxBannerBadge = findViewById(R.id.pendingTxBannerBadge);
+        pendingTxBanner.setOnClickListener(v ->
+            startActivity(new Intent(this, PendingTxListActivity.class)));
 
         opreturnInput = opreturnContainer.findViewById(R.id.opreturnInput).findViewById(R.id.textInput);
         opreturnInput.setHint(R.string.input_the_text_carved_on_chain);
@@ -745,6 +752,29 @@ public class CreateTxActivity extends BaseCryptoActivity {
         inputCards.clear();
         outputCards.clear();
         rawTxInfo = null;
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        refreshPendingTxBanner();
+    }
+
+    private void refreshPendingTxBanner() {
+        if (pendingTxBanner == null) return;
+        try {
+            int count = PendingTxManager.getInstance(this).pendingCount();
+            if (count > 0) {
+                if (pendingTxBannerBadge != null) {
+                    pendingTxBannerBadge.setText(count > 99 ? "99+" : String.valueOf(count));
+                }
+                pendingTxBanner.setVisibility(View.VISIBLE);
+            } else {
+                pendingTxBanner.setVisibility(View.GONE);
+            }
+        } catch (Exception e) {
+            pendingTxBanner.setVisibility(View.GONE);
+        }
     }
 
     @Override

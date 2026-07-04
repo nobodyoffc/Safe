@@ -49,7 +49,7 @@
     <string name="menu_convert">转换</string>
     <string name="menu_tools">工具</string>
     <string name="menu_tx">交易</string>
-    <string name="menu_multisign">多签</string>
+    <string name="menu_multisig">多签</string>
     <string name="menu_sign_words">签名</string>
     <string name="menu_verify">验签</string>
     <string name="menu_encrypt">加密</string>
@@ -126,10 +126,10 @@
     <string name="format_base64">Base64</string>
     <string name="too_large_for_integer">超出整数范围</string>
 
-    <string name="create_multisign_fid">新建多签地址</string>
-    <string name="create_multisign_tx">新建多签交易</string>
-    <string name="sign_multisign_tx">签署多签交易</string>
-    <string name="build_multisign_tx">完成多签交易</string>
+    <string name="create_multisig_fid">新建多签地址</string>
+    <string name="create_multisig_tx">新建多签交易</string>
+    <string name="sign_multisig_tx">签署多签交易</string>
+    <string name="build_multisig_tx">完成多签交易</string>
 
     <string name="required_signer_number">所需签名人数</string>
     <string name="ending_with">尾部字符</string>
@@ -157,7 +157,7 @@
     <string name="import_tx">导入</string>
     <string name="add">添加</string>
     <string name="input_the_text_carved_on_chain">输入要刻在链上的文本</string>
-    <string name="sender_from_script_or_multisign">多签地址的Script或P2SH</string>
+    <string name="sender_from_script_or_multisig">多签地址的Script或P2SH</string>
     <string name="add_cash_to_spend">添加现钞</string>
     <string name="please_input_required_signer_number">请输入必需的签名数量</string>
     <string name="invalid_signer_number">输入签名者总人数</string>
@@ -170,13 +170,13 @@
     <string name="amount">金额</string>
     <string name="fid">FID</string>
     <string name="avatar">头像</string>
-    <string name="no_multisign_found">没有发现多签</string>
+    <string name="no_multisig_found">没有发现多签</string>
     <string name="signed">已签</string>
     <string name="sender">发送者</string>
     <string name="spending">总额</string>
     <string name="send_to">付给</string>
     <string name="unsigned">未签名者</string>
-    <string name="confirm_multisign_tx">确认多重签名</string>
+    <string name="confirm_multisig_tx">确认多重签名</string>
     <string name="people">身份</string>
     <string name="import_the_tx_json">导入交易JSON</string>
     <string name="copy_tx">复制交易</string>
@@ -186,12 +186,12 @@
     <string name="m_n">m/n</string>
     <string name="need_signs">还需签名</string>
     <string name="add_payee">添加收款人</string>
-    <string name="choose_multisign_id">选择多签身份</string>
+    <string name="choose_multisig_id">选择多签身份</string>
     <string name="as_hex">先转为字节</string>
-    <string name="import_multisign_tx">导入多签交易</string>
+    <string name="import_multisig_tx">导入多签交易</string>
     <string name="copy_result">复制交易</string>
     <string name="built_you_can_broadcast_it">成功！可以广播交易了</string>
-    <string name="failed_to_build_multisign_tx">构建多签交易失败</string>
+    <string name="failed_to_build_multisig_tx">构建多签交易失败</string>
     <string name="build">组装</string>
     <string name="add_to_fid_list">加入名单</string>
     <string name="clear_fid_list">清空名单</string>
@@ -339,7 +339,7 @@
     <string name="please_enter_matching_characters">请输入匹配字符</string>
 
     <string name="no_totp_found">没有验证码</string>
-    <string name="no_multisigns_found">没有找到多签</string>
+    <string name="no_multisigs_found">没有找到多签</string>
     <string name="please_input_text">请输入文本</string>
     <string name="no_content_to_generate_qr_code">没有内容可生成二维码</string>
     <string name="no_key_available">没有可用的密钥</string>
@@ -347,9 +347,9 @@
     <string name="detail">详情</string>
     <string name="menu_json_converter">JSON转换</string>
     <string name="input_json">输入JSON字符串</string>
-    <string name="failed_to_parse_multisign">解析多签失败</string>
-    <string name="input_the_script_or_multisign_or_select_a_multisign_fid">输入脚本或多签JSON，或选择多签FID</string>
-    <string name="failed_to_create_multisign_tx">创建多签交易失败</string>
+    <string name="failed_to_parse_multisig">解析多签失败</string>
+    <string name="input_the_script_or_multisig_or_select_a_multisig_fid">输入脚本或多签JSON，或选择多签FID</string>
+    <string name="failed_to_create_multisig_tx">创建多签交易失败</string>
     <string name="failed_to_create_transaction_info">创建交易信息失败</string>
     <string name="no_transaction_to_copy">没有可复制的交易</string>
     <string name="json_converter">JSON转换器</string>
@@ -387,8 +387,8 @@
     <string name="exported_to">已导出到：%1$s</string>
     <string name="failed_to_parse_json">解析JSON失败</string>
     <string name="keyname_is_inconsistent">密钥名称不一致</string>
-    <string name="multisign_cant_be_null">多签不能为空</string>
-    <string name="fid_of_multisign_cant_be_null">多签的FID不能为空</string>
+    <string name="multisig_cant_be_null">多签不能为空</string>
+    <string name="fid_of_multisig_cant_be_null">多签的FID不能为空</string>
     <string name="invalid_number_format">无效的数字格式</string>
     <string name="invalid_date_format">无效的日期格式</string>
     <string name="welcome_to_freeverse">欢迎来到自由世界，%1$s</string>
@@ -425,8 +425,8 @@
     <string name="title">标题</string>
     <!-- Additional strings for showToast messages -->
     <string name="selected_keys_have_no_public_keys">选中的密钥没有公钥</string>
-    <string name="failed_to_create_multisign_id">创建多签ID失败</string>
-    <string name="multisign_id_created_successfully">多签ID创建成功</string>
+    <string name="failed_to_create_multisig_id">创建多签ID失败</string>
+    <string name="multisig_id_created_successfully">多签ID创建成功</string>
     <string name="number_of_bytes_length_must_be_positive">字节长度必须为正数</string>
     <string name="please_enter_a_public_key_or_address">请输入公钥或地址</string>
     <string name="error_converting">转换错误：%1$s</string>
@@ -434,8 +434,8 @@
     <string name="please_input_both_text_and_key">请输入文本和密钥</string>
     <string name="wrong_key">密钥错误</string>
     <string name="failed_to_sign_words">签名失败</string>
-    <string name="loaded_multisigns">已加载 %1$d 个多签</string>
-    <string name="no_more_multisigns_to_load">没有更多多签可加载</string>
+    <string name="loaded_multisigs">已加载 %1$d 个多签</string>
+    <string name="no_more_multisigs_to_load">没有更多多签可加载</string>
     <string name="selected_key_has_no_id">选中的密钥没有ID</string>
     <string name="please_input_signature">请输入签名</string>
     <string name="symkey_required_for_sha256_signature">SHA256签名需要对称密钥</string>
@@ -461,7 +461,7 @@
     <string name="failed_to_get_pubkey_of">获取公钥失败：%1$s</string>
     <string name="failed_to_merge_signatures">合并签名失败：%1$s</string>
     <string name="please_input_json">请输入JSON</string>
-    <string name="invalid_multisign_data">无效的多签数据</string>
+    <string name="invalid_multisig_data">无效的多签数据</string>
     <string name="invalid_json_format">无效的JSON格式</string>
     <string name="no_signatures_to_build">没有签名可组装</string>
     <string name="failed_to_build_transaction">组装交易失败</string>
@@ -567,12 +567,12 @@
     <string name="failed_to_decrypt_private_key">解密私钥失败</string>
     <string name="no_keys_selected">未选择密钥</string>
     <string name="find_nice_keys">搜索靓名</string>
-    <string name="please_select_at_least_one_multisign">请至少选择一个多签</string>
+    <string name="please_select_at_least_one_multisig">请至少选择一个多签</string>
     <string name="tx_is_well_signed_build_it">交易已完全签名！可以组装了。</string>
     <string name="failed_to_get_prikey_of">获取私钥失败：%1$s</string>
-    <string name="selected_key_not_part_of_multisign">选中的密钥不是此多签交易的成员</string>
+    <string name="selected_key_not_part_of_multisig">选中的密钥不是此多签交易的成员</string>
     <string name="failed_to_get_key_info_of">获取密钥信息失败：%1$s</string>
-    <string name="enter_label_for_multisign_id">输入多签ID标签</string>
+    <string name="enter_label_for_multisig_id">输入多签ID标签</string>
     <string name="selected_cashes_count">已选择：%1$d 张钞票</string>
     <string name="copied_cash_id">已复制钞票ID：%1$s</string>
     <string name="copied_amount">已复制金额：%1$s</string>
@@ -590,7 +590,7 @@
     <string name="wif_uncompressed">WIF非压缩</string>
     <string name="wif_compressed_with_ver_0">WIF压缩（版本0）</string>
     <string name="wif_compressed_without_ver">WIF压缩（无版本）</string>
-    <string name="failed_to_parse_script_to_multisign">解析脚本到多签失败。</string>
+    <string name="failed_to_parse_script_to_multisig">解析脚本到多签失败。</string>
     <string name="app_password_cannot_be_shown">应用密码无法显示，请妥善保管。</string>
     
     <!-- Toast Messages -->

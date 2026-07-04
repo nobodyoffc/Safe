@@ -11,13 +11,13 @@ import com.fc.safe.db.LocalDB;
 import com.fc.fc_ajdk.utils.TimberLogger;
 import com.fc.safe.R;
 import com.fc.safe.db.MultisignManager;
-import com.fc.safe.multisign.BuildMultisignTxActivity;
-import com.fc.safe.multisign.CreateMultisignIdActivity;
-import com.fc.safe.multisign.CreateMultisignTxActivity;
-import com.fc.safe.multisign.ImportMultisignTxActivity;
-import com.fc.safe.multisign.SignMultisignTxActivity;
+import com.fc.safe.multisig.BuildMultisigTxActivity;
+import com.fc.safe.multisig.CreateMultisigIdActivity;
+import com.fc.safe.multisig.CreateMultisigTxActivity;
+import com.fc.safe.multisig.ImportMultisigTxActivity;
+import com.fc.safe.multisig.SignMultisigTxActivity;
 import com.fc.safe.tx.SignTxActivity;
-import com.fc.safe.multisign.MultisignKeyCardManager;
+import com.fc.safe.multisig.MultisigKeyCardManager;
 
 import java.util.List;
 
@@ -31,7 +31,7 @@ public class MultisignActivity extends BaseCryptoActivity {
     private ScrollView idListContainer;
     private boolean isLoading = false;
     private MultisignManager multisignManager;
-    private MultisignKeyCardManager multisignCardManager;
+    private MultisigKeyCardManager multisignCardManager;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -40,7 +40,7 @@ public class MultisignActivity extends BaseCryptoActivity {
         TimberLogger.d(TAG, "MultisignManager initialized");
 
         initializeViews();
-        multisignCardManager = new MultisignKeyCardManager(this, multisignListContainer, false);
+        multisignCardManager = new MultisigKeyCardManager(this, multisignListContainer, false);
         setupScrollListener();
         
         // Load initial multisig cards
@@ -104,10 +104,10 @@ public class MultisignActivity extends BaseCryptoActivity {
             TimberLogger.d(TAG, "loadMultisigns: Adding " + multisigs.size() + " multisigs to container");
             multisignCardManager.addMultisignCards(multisignListContainer, multisigs);
             TimberLogger.d(TAG, "loadMultisigns: Container child count: " + multisignListContainer.getChildCount());
-            showToast(getString(R.string.loaded_multisigns, multisigs.size()));
+            showToast(getString(R.string.loaded_multisigs, multisigs.size()));
         } else {
             TimberLogger.d(TAG, "loadMultisigns: No more multisigs to load");
-            showToast(getString(R.string.no_more_multisigns_to_load));
+            showToast(getString(R.string.no_more_multisigs_to_load));
         }
         
         isLoading = false;
@@ -131,24 +131,24 @@ public class MultisignActivity extends BaseCryptoActivity {
     }
 
     private void handleCreateId() {
-        Intent intent = new Intent(this, CreateMultisignIdActivity.class);
+        Intent intent = new Intent(this, CreateMultisigIdActivity.class);
         startActivity(intent);
     }
 
     private void handleCreateTx() {
-        TimberLogger.d(TAG, "handleCreateTx: Launching CreateMultisignTxActivity");
-        Intent intent = new Intent(this, CreateMultisignTxActivity.class);
+        TimberLogger.d(TAG, "handleCreateTx: Launching CreateMultisigTxActivity");
+        Intent intent = new Intent(this, CreateMultisigTxActivity.class);
         startActivity(intent);
     }
 
     private void handleSignTx() {
-        TimberLogger.d(TAG, "handleSignTx: Launching ImportMultisignTxActivity");
-        Intent intent = ImportMultisignTxActivity.createIntent(this);
+        TimberLogger.d(TAG, "handleSignTx: Launching ImportMultisigTxActivity");
+        Intent intent = ImportMultisigTxActivity.createIntent(this);
         startActivityForResult(intent, REQUEST_CODE_IMPORT_MULTISIGN_TX);
     }
 
     private void handleBuildTx() {
-        Intent intent = new Intent(this, BuildMultisignTxActivity.class);
+        Intent intent = new Intent(this, BuildMultisigTxActivity.class);
         startActivity(intent);
     }
 
@@ -169,8 +169,8 @@ public class MultisignActivity extends BaseCryptoActivity {
         if (requestCode == REQUEST_CODE_IMPORT_MULTISIGN_TX && resultCode == RESULT_OK && data != null) {
             String multiSigDataJson = data.getStringExtra(SignTxActivity.EXTRA_TX_INFO_JSON);
 
-                // Launch SignMultisignTxActivity
-                Intent intent = new Intent(this, SignMultisignTxActivity.class);
+                // Launch SignMultisigTxActivity
+                Intent intent = new Intent(this, SignMultisigTxActivity.class);
                 intent.putExtra(SignTxActivity.EXTRA_TX_INFO_JSON, multiSigDataJson);
                 startActivity(intent);
         }
