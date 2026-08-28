@@ -35,7 +35,14 @@ public class SafeApplication extends Application {
         // Register activity lifecycle callbacks
         registerActivityLifecycleCallbacks(new android.app.Application.ActivityLifecycleCallbacks() {
             @Override
-            public void onActivityCreated(android.app.Activity activity, Bundle savedInstanceState) {}
+            public void onActivityCreated(android.app.Activity activity, Bundle savedInstanceState) {
+                // Mark every window as secure: prevents the contents (keys, secrets,
+                // transactions) from appearing in the recent-apps screenshot and blocks
+                // screenshots / screen recording while the app is in the foreground.
+                activity.getWindow().setFlags(
+                        android.view.WindowManager.LayoutParams.FLAG_SECURE,
+                        android.view.WindowManager.LayoutParams.FLAG_SECURE);
+            }
 
             @Override
             public void onActivityStarted(android.app.Activity activity) {}

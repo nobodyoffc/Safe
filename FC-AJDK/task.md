@@ -1,9 +1,9 @@
 # task
 
-[] 代码整理：db已完成
+[x] 代码整理：db已完成
 
-[] cash
-[] 文件加解密
+[x] cash
+[x] 文件加解密
 [x] 备份私钥格式压缩
 [x] export key page makeQR
 [x] first loading camera

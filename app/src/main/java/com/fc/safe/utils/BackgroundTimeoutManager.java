@@ -40,12 +40,16 @@ public class BackgroundTimeoutManager {
 
         Intent intent = new Intent(activity, CheckPasswordActivity.class);
         intent.putExtra("from_background_timeout", true);
-        // Use FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_CLEAR_TASK to ensure:
-        // 1. Password verification is required before continuing
-        // 2. If user enters a different password, CheckPasswordActivity will handle
-        //    clearing the stack and starting fresh (see lines 291-295 in CheckPasswordActivity)
-        // 3. If user enters the same password, they return to the normal flow
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        // Launch CheckPasswordActivity on TOP of the current task (do NOT clear it).
+        // SINGLE_TOP prevents stacking a second copy if one is somehow already present.
+        //
+        // Why not FLAG_ACTIVITY_CLEAR_TASK: clearing the task destroys the back stack,
+        // so when the user re-enters the SAME password there is nothing left to resume,
+        // which forces a re-authentication loop. By keeping the stack, a correct same
+        // password simply finish()es CheckPasswordActivity and the user returns to the
+        // exact page they were on. If a DIFFERENT password is entered, CheckPasswordActivity
+        // itself clears the task and starts HomeActivity fresh (see verifyPassword()).
+        intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
         activity.startActivity(intent);
     }
 } 

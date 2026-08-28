@@ -618,6 +618,9 @@
     <string name="generating_keys">正在生成密钥...</string>
     <string name="json_icon">JSON Icon</string>
     <string name="deleting">删除中...</string>
+    <string name="confirm_delete_title">确认删除</string>
+    <string name="confirm_delete_keys_message">确定要删除选中的 %1$d 个密钥吗？此操作无法撤销。</string>
+    <string name="confirm_delete_secrets_message">确定要删除选中的 %1$d 个私密信息吗？此操作无法撤销。</string>
     <string name="error_delete">删除错误</string>
     <string name="please_create_your_keys">请创建你的密钥</string>
     <string name="importing">导入中...</string>

@@ -1,5 +1,6 @@
 package com.fc.safe.home;
 
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -307,42 +308,13 @@ public class MyKeysActivity extends BaseCryptoActivity {
                 return;
             }
 
-            // Show waiting dialog during deletion
-            showWaitingDialog(getString(R.string.deleting));
-
-            // Perform deletion on background thread
-            new Thread(() -> {
-                try {
-                    // Implement delete functionality
-                    keyInfoManager.removeKeyInfos(chosenObjects);
-
-                    // Commit changes to disk
-                    keyInfoManager.commit();
-
-                    runOnUiThread(() -> {
-                        // Remove deleted items from the current list
-                        keyInfoList.removeAll(chosenObjects);
-
-                        // Remove from card container
-                        keyCardContainer.removeSelectedKeys();
-
-                        // Update button states
-                        updateButtonStates();
-
-                        // Dismiss waiting dialog
-                        dismissWaitingDialog();
-
-                        // Show confirmation message
-                        Toast.makeText(this, R.string.deleted , SafeApplication.TOAST_LASTING).show();
-                    });
-                } catch (Exception e) {
-                    TimberLogger.e(TAG, "Error deleting keys: %s", e.getMessage());
-                    runOnUiThread(() -> {
-                        dismissWaitingDialog();
-                        Toast.makeText(this, getString(R.string.error_delete), SafeApplication.TOAST_LASTING).show();
-                    });
-                }
-            }).start();
+            // Confirm before deleting to avoid accidental deletion
+            new AlertDialog.Builder(this)
+                    .setTitle(R.string.confirm_delete_title)
+                    .setMessage(getString(R.string.confirm_delete_keys_message, chosenObjects.size()))
+                    .setPositiveButton(R.string.delete, (dialog, which) -> deleteKeys(chosenObjects))
+                    .setNegativeButton(R.string.cancel, null)
+                    .show();
         });
 
         createNewButton.setOnClickListener(v -> {
@@ -386,6 +358,45 @@ public class MyKeysActivity extends BaseCryptoActivity {
                 updateStatisticsBar();
             });
         }
+    }
+
+    private void deleteKeys(List<KeyInfo> chosenObjects) {
+        // Show waiting dialog during deletion
+        showWaitingDialog(getString(R.string.deleting));
+
+        // Perform deletion on background thread
+        new Thread(() -> {
+            try {
+                // Implement delete functionality
+                keyInfoManager.removeKeyInfos(chosenObjects);
+
+                // Commit changes to disk
+                keyInfoManager.commit();
+
+                runOnUiThread(() -> {
+                    // Remove deleted items from the current list
+                    keyInfoList.removeAll(chosenObjects);
+
+                    // Remove from card container
+                    keyCardContainer.removeSelectedKeys();
+
+                    // Update button states
+                    updateButtonStates();
+
+                    // Dismiss waiting dialog
+                    dismissWaitingDialog();
+
+                    // Show confirmation message
+                    Toast.makeText(this, R.string.deleted , SafeApplication.TOAST_LASTING).show();
+                });
+            } catch (Exception e) {
+                TimberLogger.e(TAG, "Error deleting keys: %s", e.getMessage());
+                runOnUiThread(() -> {
+                    dismissWaitingDialog();
+                    Toast.makeText(this, getString(R.string.error_delete), SafeApplication.TOAST_LASTING).show();
+                });
+            }
+        }).start();
     }
 
     private void setupSortControls() {

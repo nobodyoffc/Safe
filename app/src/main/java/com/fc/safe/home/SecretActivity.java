@@ -1,5 +1,6 @@
 package com.fc.safe.home;
 
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -242,10 +243,19 @@ public class SecretActivity extends BaseCryptoActivity {
                 ToastUtils.showWarning(this, getString(R.string.no_items_selected));
                 return;
             }
-            secretManager.removeSecretDetails(chosenObjects);
-            secretManager.commit();
-            refreshList();
-            ToastUtils.showInfo(this, getString(R.string.deleted));
+
+            // Confirm before deleting to avoid accidental deletion
+            new AlertDialog.Builder(this)
+                    .setTitle(R.string.confirm_delete_title)
+                    .setMessage(getString(R.string.confirm_delete_secrets_message, chosenObjects.size()))
+                    .setPositiveButton(R.string.delete, (dialog, which) -> {
+                        secretManager.removeSecretDetails(chosenObjects);
+                        secretManager.commit();
+                        refreshList();
+                        ToastUtils.showInfo(this, getString(R.string.deleted));
+                    })
+                    .setNegativeButton(R.string.cancel, null)
+                    .show();
         });
 
         createNewButton.setOnClickListener(v -> {

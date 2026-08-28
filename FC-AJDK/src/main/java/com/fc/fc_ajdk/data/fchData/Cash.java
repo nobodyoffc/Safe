@@ -5,6 +5,12 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
+import com.google.gson.annotations.JsonAdapter;
 
 import com.fc.fc_ajdk.core.crypto.Hash;
 import com.fc.fc_ajdk.data.fcData.FcObject;
@@ -20,11 +26,42 @@ import static com.fc.fc_ajdk.constants.FieldNames.CD;
 import static com.fc.fc_ajdk.constants.FieldNames.CDD;
 import static com.fc.fc_ajdk.constants.FieldNames.ID;
 import static com.fc.fc_ajdk.constants.FieldNames.ISSUER;
+import static com.fc.fc_ajdk.constants.FieldNames.AMOUNT;
+import static com.fc.fc_ajdk.constants.FieldNames.FID;
 import static com.fc.fc_ajdk.constants.FieldNames.OWNER;
 import static com.fc.fc_ajdk.constants.FieldNames.VALID;
 import static com.fc.fc_ajdk.constants.FieldNames.VALUE;
 
+@JsonAdapter(Cash.CashJsonDeserializer.class)
 public class Cash extends FcObject {
+
+	/**
+	 * Accepts external TX JSON that uses "fid" instead of "owner" and "amount"
+	 * (in coins, number or string) instead of "value" (in satoshi).
+	 */
+	public static class CashJsonDeserializer implements JsonDeserializer<Cash> {
+		// PlainCash does not carry the @JsonAdapter annotation, so Gson parses it reflectively — no recursion.
+		private static class PlainCash extends Cash {}
+		private static final Gson PLAIN_GSON = new Gson();
+
+		@Override
+		public Cash deserialize(JsonElement json, java.lang.reflect.Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
+			if (json != null && json.isJsonObject()) {
+				JsonObject obj = json.getAsJsonObject();
+				if (!obj.has(OWNER) && obj.has(FID) && !obj.get(FID).isJsonNull()) {
+					obj.add(OWNER, obj.get(FID));
+				}
+				if (!obj.has(VALUE) && obj.has(AMOUNT) && obj.get(AMOUNT).isJsonPrimitive()) {
+					try {
+						obj.addProperty(VALUE, FchUtils.coinToSatoshi(obj.get(AMOUNT).getAsDouble()));
+					} catch (NumberFormatException e) {
+						throw new JsonParseException("Invalid amount: " + obj.get(AMOUNT), e);
+					}
+				}
+			}
+			return PLAIN_GSON.fromJson(json, PlainCash.class);
+		}
+	}
 
 	//calculated
 	private String owner; 	//address

@@ -479,7 +479,7 @@ public class CreateTxActivity extends BaseCryptoActivity {
     private boolean goodTxInfo(RawTxInfo rawTxInfo) {
         List<Cash> inputs = rawTxInfo.getInputs();
         for(Cash cash : inputs){
-            if(cash.getValue()<=0){
+            if(cash.getValue()==null || cash.getValue()<=0){
                 Toast.makeText(this, R.string.input_value_must_be_greater_than_0 , SafeApplication.TOAST_LASTING).show();
                 return false;
             }
@@ -487,7 +487,7 @@ public class CreateTxActivity extends BaseCryptoActivity {
                 Toast.makeText(this, R.string.invalid_txid , SafeApplication.TOAST_LASTING).show();
                 return false;
             }
-            if(cash.getBirthIndex()<0){
+            if(cash.getBirthIndex()==null || cash.getBirthIndex()<0){
                 Toast.makeText(this, R.string.invalid_index , SafeApplication.TOAST_LASTING).show();
                 return false;
             }
@@ -524,11 +524,11 @@ public class CreateTxActivity extends BaseCryptoActivity {
         // Only calculate fee if there are inputs or outputs
         if (!rawTxInfo.getInputs().isEmpty() || !rawTxInfo.getOutputs().isEmpty()) {
             for(Cash cash : rawTxInfo.getInputs()){
-                totalInput += cash.getValue();
+                if(cash.getValue()!=null) totalInput += cash.getValue();
             }
 
             for(Cash sendTo : rawTxInfo.getOutputs()){
-                totalOutput += FchUtils.coinToSatoshi(sendTo.getAmount());
+                if(sendTo.getAmount()!=null) totalOutput += FchUtils.coinToSatoshi(sendTo.getAmount());
             }
 
             if (rawTxInfo.getFeeRate() == null || rawTxInfo.getFeeRate() == 0) {

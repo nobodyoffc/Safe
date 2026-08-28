@@ -646,6 +646,9 @@
     <string name="json_icon">JSON Icon</string>
     <string name="generating_keys">Generating keys...</string>
     <string name="deleting">Deleting...</string>
+    <string name="confirm_delete_title">Confirm Delete</string>
+    <string name="confirm_delete_keys_message">Are you sure you want to delete the %1$d selected key(s)? This action cannot be undone.</string>
+    <string name="confirm_delete_secrets_message">Are you sure you want to delete the %1$d selected secret(s)? This action cannot be undone.</string>
     <string name="error_delete">Error in deleting</string>
     <string name="please_create_your_keys">Please create your keys</string>
     <string name="importing">Importing</string>
