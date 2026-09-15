@@ -1,5 +1,6 @@
 package com.fc.safe.secret;
 
+import com.fc.safe.utils.WaitingTask;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -166,23 +167,25 @@ public class ImportSecretActivity extends BaseCryptoActivity {
         });
 
         secretImportButton.setOnClickListener(v -> {
-            try {
-                if (isFileMode && currentFilePath != null) {
-                    File file = new File(currentFilePath);
-                    if (!file.exists()) {
-                        showToast(getString(R.string.file_not_found));
-                        return;
-                    }
+            File file = isFileMode && currentFilePath != null ? new File(currentFilePath) : null;
+            if (file != null && !file.exists()) {
+                showToast(getString(R.string.file_not_found));
+                return;
+            }
+            String jsonText = secretJsonInput.getText() != null ? secretJsonInput.getText().toString() : "";
+            // Every password cipher in a backup costs one Argon2id run, so import off the UI thread.
+            WaitingTask.run(this, getString(R.string.please_wait), () -> {
+                if (file != null) {
                     try (FileInputStream fis = new FileInputStream(file)) {
                         fcEntityImporter.importEntity(fis);
                     }
                 } else {
-                    String jsonText = secretJsonInput.getText() != null ? secretJsonInput.getText().toString() : "";
                     fcEntityImporter.importEntity(jsonText);
                 }
-            } catch (Exception e) {
-                showToast(getString(R.string.no_secret_found));
-            }
+                return true;
+            }, done -> {
+                if (done == null) showToast(getString(R.string.no_secret_found));
+            });
         });
     }
 
