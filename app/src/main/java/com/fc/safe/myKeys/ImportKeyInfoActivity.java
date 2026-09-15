@@ -1,5 +1,6 @@
 package com.fc.safe.myKeys;
 
+import com.fc.safe.utils.WaitingTask;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -175,23 +176,25 @@ public class ImportKeyInfoActivity extends BaseCryptoActivity {
         });
 
         keyInfoImportButton.setOnClickListener(v -> {
-            try {
-                if (isFileMode && currentFilePath != null) {
-                    java.io.File file = new java.io.File(currentFilePath);
-                    if (!file.exists()) {
-                        showToast(getString(R.string.file_not_found));
-                        return;
-                    }
+            java.io.File file = isFileMode && currentFilePath != null ? new java.io.File(currentFilePath) : null;
+            if (file != null && !file.exists()) {
+                showToast(getString(R.string.file_not_found));
+                return;
+            }
+            String jsonText = keyInfoJsonInput.getText() != null ? keyInfoJsonInput.getText().toString() : "";
+            // Every password cipher in a backup costs one Argon2id run, so import off the UI thread.
+            WaitingTask.run(this, getString(R.string.please_wait), () -> {
+                if (file != null) {
                     try (java.io.FileInputStream fis = new java.io.FileInputStream(file)) {
                         fcEntityImporter.importEntity(fis);
                     }
                 } else {
-                    String jsonText = keyInfoJsonInput.getText() != null ? keyInfoJsonInput.getText().toString() : "";
                     fcEntityImporter.importEntity(jsonText);
                 }
-            } catch (Exception e) {
-                ToastUtils.showError(this, R.string.no_key_info_found);
-            }
+                return true;
+            }, done -> {
+                if (done == null) ToastUtils.showError(this, R.string.no_key_info_found);
+            });
         });
     }
 
