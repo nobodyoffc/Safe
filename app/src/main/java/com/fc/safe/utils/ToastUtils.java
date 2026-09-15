@@ -1,6 +1,8 @@
 package com.fc.safe.utils;
 
 import android.content.Context;
+import android.os.Handler;
+import android.os.Looper;
 import android.widget.Toast;
 
 import com.fc.fc_ajdk.utils.TimberLogger;
@@ -8,6 +10,7 @@ import com.fc.safe.db.ToastManager;
 
 public class ToastUtils {
     private static final String TAG = "ToastUtils";
+    private static final Handler mainHandler = new Handler(Looper.getMainLooper());
     
     public static void makeText(Context context, CharSequence text) {
         makeText(context, text, Toast.LENGTH_SHORT, "INFO");
@@ -23,6 +26,11 @@ public class ToastUtils {
         // Guard against null context
         if (context == null) {
             TimberLogger.e(TAG, "Cannot show toast: context is null. Message: %s", text);
+            return;
+        }
+        if (Looper.myLooper() != Looper.getMainLooper()) {
+            // Toasts need the UI thread; background work such as an export may report through here.
+            mainHandler.post(() -> makeText(context, text, duration, level));
             return;
         }
 

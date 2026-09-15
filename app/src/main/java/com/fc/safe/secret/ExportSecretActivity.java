@@ -1,5 +1,6 @@
 package com.fc.safe.secret;
 
+import com.fc.safe.utils.WaitingTask;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
@@ -211,30 +212,36 @@ public class ExportSecretActivity extends BaseCryptoActivity {
 
     // New method to handle the actual export
     private void doExport(String password, String inputSymKeyStr) {
-        String result = generateExportResult(password);
-        if (result != null && !result.isEmpty()) {
-            displayResult(result);
-        }
-        updateButtonStates();
+        String encryptMethod = selectedEncryptMethod();
+        if (encryptMethod == null) return;
+        // Every encrypted item costs one Argon2id run, so build the export off the UI thread.
+        WaitingTask.run(this, getString(R.string.please_wait), () -> generateExportResult(password, encryptMethod), result -> {
+            if (result != null && !result.isEmpty()) {
+                displayResult(result);
+            }
+            updateButtonStates();
+        });
     }
 
     // Refactor generateExportResult to accept parameters
-    private String generateExportResult(String enteredPassword) {
+    /** @return the chosen encryption method, or null after asking the user to choose one. */
+    private String selectedEncryptMethod() {
+        if (currentPasswordButton != null && currentPasswordButton.isChecked()) {
+            return CURRENT_PASSWORD;
+        } else if (randomPasswordButton != null && randomPasswordButton.isChecked()) {
+            return RANDOM_PASSWORD;
+        } else if (noneButton != null && noneButton.isChecked()) {
+            return DON_T_ENCRYPT;
+        }
+        ToastUtils.showWarning(this, getString(R.string.select_encryption_method));
+        return null;
+    }
+
+    private String generateExportResult(String enteredPassword, String encryptMethod) {
         backupHeader = new BackupHeader();
         backupHeader.setTime(System.currentTimeMillis());
         backupHeader.setItems(secretList.size());
 
-        String encryptMethod;
-        if (currentPasswordButton != null && currentPasswordButton.isChecked()) {
-            encryptMethod = CURRENT_PASSWORD;
-        } else if (randomPasswordButton != null && randomPasswordButton.isChecked()) {
-            encryptMethod = RANDOM_PASSWORD;
-        } else if (noneButton != null && noneButton.isChecked()) {
-            encryptMethod = DON_T_ENCRYPT;
-        } else {
-            ToastUtils.showWarning(this, getString(R.string.select_encryption_method));
-            return null;
-        }
 
         String randomPassword = null;
         switch (encryptMethod) {
