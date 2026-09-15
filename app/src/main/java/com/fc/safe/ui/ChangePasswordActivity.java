@@ -11,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.fc.fc_ajdk.config.Configure;
 import com.fc.fc_ajdk.core.crypto.Decryptor;
 import com.fc.fc_ajdk.core.crypto.Encryptor;
+import com.fc.fc_ajdk.core.crypto.VaultKey;
 import com.fc.fc_ajdk.data.fcData.KeyInfo;
 import com.fc.fc_ajdk.data.feipData.Secret;
 import com.fc.fc_ajdk.utils.IdNameUtils;
@@ -19,6 +20,7 @@ import com.fc.safe.R;
 import com.fc.safe.db.DatabaseManager;
 import com.fc.safe.db.KeyInfoManager;
 import com.fc.safe.db.MultisignManager;
+import com.fc.safe.db.SafeVaultStore;
 import com.fc.safe.db.SecretManager;
 import com.fc.safe.initiate.CheckPasswordActivity;
 import com.fc.safe.initiate.ConfigureManager;
@@ -88,6 +90,10 @@ public class ChangePasswordActivity extends AppCompatActivity {
     }
 
     private void performPasswordChange(String newPassword) {
+        if (oldConfigure.getDekCipher() != null && !VaultKey.isLegacyName(oldConfigure.getPasswordName())) {
+            rewrapDataKey(newPassword);
+            return;
+        }
         showWaitingDialog("Re-encrypting all keys and secrets...");
         new Thread(() -> {
             Thread.currentThread().setName("PasswordChangeThread");
@@ -100,6 +106,11 @@ public class ChangePasswordActivity extends AppCompatActivity {
                 newConfigure.makeSymkeyFromPassword(newPasswordBytes);
                 newConfigure.setPasswordName(newPasswordName);
                 byte[] newSymkey = newConfigure.getSymkey();
+
+                // A migration that stopped part way left a copy under a vault id this change abandons.
+                if (oldConfigure.getPendingVaultId() != null) {
+                    new SafeVaultStore(this, oldConfigure).discard(oldConfigure.getPendingVaultId());
+                }
 
                 // IMPORTANT: Read all data BEFORE changing password context
                 // This must happen while we're still in the old password context
@@ -140,6 +151,35 @@ public class ChangePasswordActivity extends AppCompatActivity {
                     finish();
                 });
             } catch (Exception e) {
+                runOnUiThread(() -> {
+                    dismissWaitingDialog();
+                    ToastUtils.showError(this, getString(R.string.error_during_password_change) + e.getMessage());
+                    setResult(RESULT_CANCELED);
+                    finish();
+                });
+            }
+        }).start();
+    }
+
+    /** A vault with a data key keeps its records and storage; only the wrapping of the key changes. */
+    private void rewrapDataKey(String newPassword) {
+        showWaitingDialog("Changing password...");
+        new Thread(() -> {
+            Thread.currentThread().setName("PasswordChangeThread");
+            String oldDekCipher = oldConfigure.getDekCipher();
+            try {
+                oldConfigure.setDekCipher(VaultKey.wrap(oldConfigure.getSymkey(), ConfigureManager.toChars(newPassword.getBytes())));
+                ConfigureManager.getInstance().storeConfigure(this, oldConfigure);
+                ConfigureManager.getInstance().setConfigure(oldConfigure);
+
+                runOnUiThread(() -> {
+                    dismissWaitingDialog();
+                    ToastUtils.showInfo(this, getString(R.string.password_changed));
+                    setResult(RESULT_OK);
+                    finish();
+                });
+            } catch (Exception e) {
+                oldConfigure.setDekCipher(oldDekCipher);
                 runOnUiThread(() -> {
                     dismissWaitingDialog();
                     ToastUtils.showError(this, getString(R.string.error_during_password_change) + e.getMessage());

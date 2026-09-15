@@ -33,6 +33,7 @@
     <string name="incorrect_password">Incorrect password</string>
     <string name="verifying_password">Verifying password...</string>
     <string name="error_verifying_password">Error verifying password</string>
+    <string name="vault_migration_aborted">Your data still uses the old password protection, because %1$s cannot be decrypted. Remove or fix it, then unlock again to upgrade.</string>
 
     <!-- CreatePassword Activity -->
     <string name="create_password">Create Password</string>

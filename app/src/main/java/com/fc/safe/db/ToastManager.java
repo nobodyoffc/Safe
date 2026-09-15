@@ -144,10 +144,32 @@ public class ToastManager {
     
     private String getToastMessagesKey() {
         try {
-            String passwordName = ConfigureManager.getInstance().getConfigure().getPasswordName();
-            return passwordName + "_" + TOAST_MESSAGES_KEY_PREFIX;
+            return keyFor(ConfigureManager.getInstance().getConfigure().getPasswordName());
         }catch (Exception ignore){
             return null;
+        }
+    }
+
+    private static String keyFor(String vaultName) {
+        return vaultName + "_" + TOAST_MESSAGES_KEY_PREFIX;
+    }
+
+    /** Copies the toast history of one vault name to another, as a vault moves to a new id. */
+    public static void copyMessages(String fromVaultName, String toVaultName) {
+        try {
+            Object saved = Hawk.get(keyFor(fromVaultName));
+            if (saved != null) Hawk.put(keyFor(toVaultName), saved);
+        } catch (Exception e) {
+            TimberLogger.e(TAG, "Error copying toast messages: " + e.getMessage(), e);
+        }
+    }
+
+    /** Deletes the toast history kept under a vault name. */
+    public static void deleteMessages(String vaultName) {
+        try {
+            Hawk.delete(keyFor(vaultName));
+        } catch (Exception e) {
+            TimberLogger.e(TAG, "Error deleting toast messages: " + e.getMessage(), e);
         }
     }
 

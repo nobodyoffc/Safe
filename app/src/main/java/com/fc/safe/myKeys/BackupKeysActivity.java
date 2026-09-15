@@ -237,9 +237,7 @@ public class BackupKeysActivity extends BaseCryptoActivity {
                     return null;
                 }
                 byte[] passwordBytes = enteredPassword.getBytes();
-                String passwordName = IdNameUtils.makePasswordHashName(passwordBytes);
-                Configure configure = ConfigureManager.getInstance().getConfigure(this, passwordName);
-                if (configure == null || !passwordName.equals(configure.getPasswordName())) {
+                if (!ConfigureManager.getInstance().verifyPassword(passwordBytes)) {
                     ToastUtils.showError(this, getString(R.string.incorrect_password));
                     return null;
                 }

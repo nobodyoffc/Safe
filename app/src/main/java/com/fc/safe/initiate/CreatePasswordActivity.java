@@ -8,12 +8,13 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.fc.fc_ajdk.config.Configure;
-import com.fc.fc_ajdk.utils.IdNameUtils;
 import com.fc.fc_ajdk.utils.TimberLogger;
 import com.fc.safe.R;
+import com.fc.safe.db.CashManager;
 import com.fc.safe.db.DatabaseManager;
 import com.fc.safe.db.KeyInfoManager;
 import com.fc.safe.db.MultisignManager;
+import com.fc.safe.db.PendingTxManager;
 import com.fc.safe.db.SecretManager;
 import com.fc.safe.qr.QrCodeActivity;
 import com.fc.safe.ui.RemindDialog;
@@ -160,27 +161,45 @@ public class CreatePasswordActivity extends AppCompatActivity {
         }
 
         byte[] passwordBytes = password.getBytes();
-        String passwordName = IdNameUtils.makePasswordHashName(passwordBytes);
+        MaterialButton createButton = findViewById(R.id.createButton);
+        createButton.setEnabled(false);
 
-        // Create new Configure object
-        Configure configure = new Configure();
-        configure.makeSymkeyFromPassword(passwordBytes);
-        configure.setPasswordName(passwordName);
+        // The duplicate check and wrapping the new data key both run Argon2id, so keep them off the UI thread.
+        new Thread(() -> {
+            try {
+                if (ConfigureManager.getInstance().passwordExists(this, passwordBytes)) {
+                    runOnUiThread(() -> {
+                        createButton.setEnabled(true);
+                        showError(getString(R.string.password_already_exists));
+                    });
+                    return;
+                }
+                Configure configure = ConfigureManager.createConfigure(passwordBytes);
+                ConfigureManager.getInstance().storeConfigure(this, configure);
+                runOnUiThread(() -> openNewVault(configure));
+            } catch (Exception e) {
+                TimberLogger.e(TAG, "Error creating password: " + e.getMessage(), e);
+                runOnUiThread(() -> {
+                    createButton.setEnabled(true);
+                    showError(getString(R.string.error_with_message, e.getMessage()));
+                });
+            }
+        }).start();
+    }
 
-        // Get DatabaseManager instance
-        DatabaseManager dbManager = DatabaseManager.getInstance(this);
+    private void openNewVault(Configure configure) {
+        // The managers encrypt with the open vault's key, so set it before they initialize.
+        ConfigureManager.getInstance().setConfigure(configure);
 
-        // Set the new password name, which will trigger database cleanup if needed
-        dbManager.setCurrentPasswordName(passwordName);
+        // Set the new vault name, which will trigger database cleanup if needed
+        DatabaseManager.getInstance(this).setCurrentPasswordName(configure.getPasswordName());
 
-        // Reinitialize all managers with the new password
+        // Reinitialize all managers with the new vault
         KeyInfoManager.getInstance(this).initialize(this);
         SecretManager.getInstance(this).initialize(this);
         MultisignManager.getInstance(this).initialize(this);
-
-        // Store the Configure object in ConfigureManager
-        ConfigureManager.getInstance().setConfigure(configure);
-        ConfigureManager.getInstance().storeConfigure(this, configure);
+        CashManager.reset();
+        PendingTxManager.reset();
 
         // Check if this is from background timeout - if so, clear stack and go to HomeActivity
         boolean fromBackgroundTimeout = getIntent().getBooleanExtra("from_background_timeout", false);

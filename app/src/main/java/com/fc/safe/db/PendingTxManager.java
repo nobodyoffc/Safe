@@ -35,6 +35,21 @@ public class PendingTxManager {
         return instance;
     }
 
+    public static synchronized void reset() {
+        if (instance != null) {
+            if (instance.pendingTxDB != null) {
+                try {
+                    instance.pendingTxDB.close();
+                } catch (Exception e) {
+                    TimberLogger.e(TAG, "Error closing database on reset: " + e.getMessage());
+                }
+                instance.pendingTxDB = null;
+            }
+            instance = null;
+            TimberLogger.d(TAG, "PendingTxManager instance reset");
+        }
+    }
+
     public void initialize(Context context) {
         DatabaseManager dbManager = DatabaseManager.getInstance(context);
         if (pendingTxDB != null) {

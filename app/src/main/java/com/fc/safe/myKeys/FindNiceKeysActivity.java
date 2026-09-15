@@ -20,6 +20,7 @@ import com.fc.fc_ajdk.feature.avatar.AvatarMaker;
 import com.fc.fc_ajdk.utils.TimberLogger;
 import com.fc.safe.R;
 import com.fc.safe.initiate.ConfigureManager;
+import com.fc.safe.initiate.VaultUnlocker;
 import com.fc.safe.initiate.PasswordVerificationDialog;
 import com.fc.safe.utils.KeyCardContainer;
 import com.fc.safe.utils.ChooseMode;
@@ -190,13 +191,15 @@ public class FindNiceKeysActivity extends AppCompatActivity {
             showPasswordVerificationDialog(new PasswordVerificationDialog.PasswordVerificationListener() {
                 @Override
                 public void onPasswordVerified(byte[] passwordBytes) {
-                    if (ConfigureManager.getInstance().verifyPasswordName(passwordBytes)) {
-                        hasExceededThreshold = false; // Reset the flag after successful verification
-                        // Now that password is verified, start the finding process
-                        startFindingAfterVerification();
-                    } else {
-                        ToastUtils.showError(FindNiceKeysActivity.this, FindNiceKeysActivity.this.getString(R.string.incorrect_password));
-                    }
+                    VaultUnlocker.verifyPasswordAsync(FindNiceKeysActivity.this, passwordBytes, verified -> {
+                        if (verified) {
+                            hasExceededThreshold = false; // Reset the flag after successful verification
+                            // Now that password is verified, start the finding process
+                            startFindingAfterVerification();
+                        } else {
+                            ToastUtils.showError(FindNiceKeysActivity.this, FindNiceKeysActivity.this.getString(R.string.incorrect_password));
+                        }
+                    });
                 }
 
                 @Override
@@ -332,12 +335,14 @@ public class FindNiceKeysActivity extends AppCompatActivity {
         PasswordVerificationDialog dialog = new PasswordVerificationDialog(this, new PasswordVerificationDialog.PasswordVerificationListener() {
             @Override
             public void onPasswordVerified(byte[] passwordBytes) {
-                if (ConfigureManager.getInstance().verifyPasswordName(passwordBytes)) {
-                    hasExceededThreshold = false; // Reset the flag after successful verification
-                    FindNiceKeysActivity.super.finish();
-                } else {
-                    ToastUtils.showError(FindNiceKeysActivity.this, FindNiceKeysActivity.this.getString(R.string.incorrect_password));
-                }
+                VaultUnlocker.verifyPasswordAsync(FindNiceKeysActivity.this, passwordBytes, verified -> {
+                    if (verified) {
+                        hasExceededThreshold = false; // Reset the flag after successful verification
+                        FindNiceKeysActivity.super.finish();
+                    } else {
+                        ToastUtils.showError(FindNiceKeysActivity.this, FindNiceKeysActivity.this.getString(R.string.incorrect_password));
+                    }
+                });
             }
 
             @Override

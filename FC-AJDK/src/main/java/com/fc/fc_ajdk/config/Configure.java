@@ -27,6 +27,14 @@ public class Configure extends FcObject {
     protected String nonce;
     protected String passwordName;
     protected String passwordHash;
+    /** The vault's data key wrapped under the password (VaultKey). Null for a legacy vault that has not been moved yet. */
+    protected String dekCipher;
+    /** VaultMigration.State while a legacy vault is being moved to a data key; null once that is done. */
+    protected String vaultState;
+    /** The vault id a legacy vault is being moved to. */
+    protected String pendingVaultId;
+    /** The legacy password-derived name whose storage is still to be deleted. */
+    protected String legacyName;
     protected List<String> ownerList;  //Owners for servers.
     protected Map<String, KeyInfo> mainCidInfoMap; //Users for clients or accounts for servers.
     private String esAccountId;
@@ -172,6 +180,38 @@ public class Configure extends FcObject {
 
     public void setPasswordHash(String passwordHash) {
         this.passwordHash = passwordHash;
+    }
+
+    public String getDekCipher() {
+        return dekCipher;
+    }
+
+    public void setDekCipher(String dekCipher) {
+        this.dekCipher = dekCipher;
+    }
+
+    public String getVaultState() {
+        return vaultState;
+    }
+
+    public void setVaultState(String vaultState) {
+        this.vaultState = vaultState;
+    }
+
+    public String getPendingVaultId() {
+        return pendingVaultId;
+    }
+
+    public void setPendingVaultId(String pendingVaultId) {
+        this.pendingVaultId = pendingVaultId;
+    }
+
+    public String getLegacyName() {
+        return legacyName;
+    }
+
+    public void setLegacyName(String legacyName) {
+        this.legacyName = legacyName;
     }
 
     public static void setContext(Context androidContext) {

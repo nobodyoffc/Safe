@@ -12,12 +12,13 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import com.fc.fc_ajdk.config.Configure;
-import com.fc.fc_ajdk.utils.IdNameUtils;
 import com.fc.fc_ajdk.utils.TimberLogger;
 import com.fc.safe.R;
+import com.fc.safe.db.CashManager;
 import com.fc.safe.db.DatabaseManager;
 import com.fc.safe.db.KeyInfoManager;
 import com.fc.safe.db.MultisignManager;
+import com.fc.safe.db.PendingTxManager;
 import com.fc.safe.db.SecretManager;
 import com.fc.safe.db.ToastManager;
 import com.fc.safe.qr.QrCodeActivity;
@@ -238,12 +239,19 @@ public class CheckPasswordActivity extends AppCompatActivity {
         new Thread(() -> {
             try {
                 byte[] passwordBytes = enteredPassword.getBytes();
-                String passwordName = IdNameUtils.makePasswordHashName(passwordBytes);
-                Configure configure = ConfigureManager.getInstance().getConfigure(CheckPasswordActivity.this, passwordName);
+                // A password change keeps a legacy vault as it is; ChangePasswordActivity handles both kinds.
+                VaultUnlocker.Result unlocked = VaultUnlocker.unlock(CheckPasswordActivity.this, passwordBytes, !isForPasswordChange);
+                Configure configure = unlocked.configure;
+                String currentName = DatabaseManager.getInstance(CheckPasswordActivity.this).getCurrentPasswordName();
+                if (configure != null && isForPasswordChange && currentName != null
+                        && !currentName.equals(configure.getPasswordName())) {
+                    // Only the open vault's password can be changed here.
+                    configure = null;
+                }
 
                 if (configure != null) {
-                    configure.makeSymkeyFromPassword(passwordBytes);
-                    
+                    String passwordName = configure.getPasswordName();
+
                     if (isForPasswordChange) {
                         // For password change flow, only verify password without changing context
                         // Store the Configure object in ConfigureManager for the change password flow
@@ -270,6 +278,8 @@ public class CheckPasswordActivity extends AppCompatActivity {
                             KeyInfoManager.reset();
                             SecretManager.reset();
                             MultisignManager.reset();
+                            CashManager.reset();
+                            PendingTxManager.reset();
                             ToastManager.reset();
                         }
 
@@ -292,6 +302,9 @@ public class CheckPasswordActivity extends AppCompatActivity {
                         // Return to main thread to finish activity
                         runOnUiThread(() -> {
                             showLoading(false);
+                            if (unlocked.unreadableRecordId != null) {
+                                ToastUtils.showWarning(CheckPasswordActivity.this, getString(R.string.vault_migration_aborted, unlocked.unreadableRecordId));
+                            }
 
                             // Only clear the stack and go to HomeActivity if the password changed.
                             // If the same password is re-entered (e.g. after background timeout),
