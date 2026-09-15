@@ -821,9 +821,10 @@ public class Decryptor {
         }
 
         // AES-GCM and X25519-AES-GCM have built-in authentication, so sum is not required.
-        boolean isGcmAlgorithm = (algo == AlgorithmId.FC_EccK1AesGcm256_No1_NrC7
-                || algo == AlgorithmId.FC_X25519AesGcm256_No1_NrC7);
-        if(!isGcmAlgorithm && cryptoDataByte.getSum()==null) {
+        // AEAD algorithms (GCM, ChaCha20-Poly1305) authenticate via their own tag
+        // and carry no sum; the others must have one present.
+        boolean requiresSum = !algo.isAead();
+        if(requiresSum && cryptoDataByte.getSum()==null) {
             cryptoDataByte.setCodeMessage(CodeMessage.Code4011BadSum);
             return;
         }
@@ -851,11 +852,43 @@ public class Decryptor {
                 AesGcm256.decryptStream(is,os,cryptoDataByte);
             }
             case FC_X25519AesGcm256_No1_NrC7 -> {
-                symkey = X25519.asyKeyToSymkey(prikeyX,pubkeyY, iv);
+                try {
+                    symkey = com.fc.fc_ajdk.core.crypto.Algorithm.X25519AesGcm256.getInstance().asyKeyToSymkey(prikeyX,pubkeyY, iv);
+                } catch (Exception e) {
+                    cryptoDataByte.setCode(CodeMessage.Code1020OtherError);
+                    cryptoDataByte.setMessage(e.getMessage());
+                    return;
+                }
                 cryptoDataByte.setSymkey(symkey);
                 cryptoDataByte.setType(EncryptType.Symkey);
                 cryptoDataByte.setAlg(AlgorithmId.FC_AesGcm256_No1_NrC7);
                 AesGcm256.decryptStream(is,os,cryptoDataByte);
+            }
+            case FC_EccK1ChaCha20_No1_NrC7 -> {
+                try {
+                    symkey = com.fc.fc_ajdk.core.crypto.Algorithm.Ecc256K1ChaCha20.getInstance().asyKeyToSymkey(prikeyX,pubkeyY, iv);
+                } catch (Exception e) {
+                    cryptoDataByte.setCode(CodeMessage.Code1020OtherError);
+                    cryptoDataByte.setMessage(e.getMessage());
+                    return;
+                }
+                cryptoDataByte.setSymkey(symkey);
+                cryptoDataByte.setType(EncryptType.Symkey);
+                cryptoDataByte.setAlg(AlgorithmId.FC_ChaCha20_No1_NrC7);
+                com.fc.fc_ajdk.core.crypto.Algorithm.ChaCha20.decryptStream(is,os,cryptoDataByte);
+            }
+            case FC_EccK1ChaCha20Poly1305_No1_NrC7 -> {
+                try {
+                    symkey = com.fc.fc_ajdk.core.crypto.Algorithm.Ecc256K1ChaCha20Poly1305.getInstance().asyKeyToSymkey(prikeyX,pubkeyY, iv);
+                } catch (Exception e) {
+                    cryptoDataByte.setCode(CodeMessage.Code1020OtherError);
+                    cryptoDataByte.setMessage(e.getMessage());
+                    return;
+                }
+                cryptoDataByte.setSymkey(symkey);
+                cryptoDataByte.setType(EncryptType.Symkey);
+                cryptoDataByte.setAlg(AlgorithmId.FC_ChaCha20Poly1305_No1_NrC7);
+                com.fc.fc_ajdk.core.crypto.Algorithm.ChaCha20Poly1305.decryptStream(is,os,cryptoDataByte);
             }
             default -> {
                 symkey = EccAes256K1P7.asyKeyToSymkey(prikeyX,pubkeyY,iv);

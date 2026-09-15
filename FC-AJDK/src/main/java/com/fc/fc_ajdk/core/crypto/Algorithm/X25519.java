@@ -1,6 +1,5 @@
 package com.fc.fc_ajdk.core.crypto.Algorithm;
 
-import com.fc.fc_ajdk.core.crypto.Encryptor;
 
 import org.bouncycastle.crypto.agreement.X25519Agreement;
 import org.bouncycastle.crypto.params.X25519PrivateKeyParameters;
@@ -11,6 +10,7 @@ import java.util.Arrays;
 
 public class X25519 {
 
+    public static final String INFO = "hkdf";
     public static final int PRIVATE_KEY_SIZE = 32;
     public static final int PUBLIC_KEY_SIZE = 32;
     public static final int SHARED_SECRET_SIZE = 32;
@@ -35,17 +35,14 @@ public class X25519 {
         return sharedSecret;
     }
 
+    /** FTSP18/FTSP19 key derivation: HKDF-SHA512 over the shared secret, salted with the nonce, info "hkdf". */
     @NotNull
     public static byte[] sharedSecretToSymkey(byte[] sharedSecret, byte[] nonce) {
-        byte[] symkey;
-        byte[] secretHashWithNonce = new byte[sharedSecret.length + nonce.length];
-        System.arraycopy(nonce, 0, secretHashWithNonce, 0, nonce.length);
-        System.arraycopy(sharedSecret, 0, secretHashWithNonce, nonce.length, sharedSecret.length);
-        byte[] hash = Encryptor.sha512(secretHashWithNonce);
-
-        symkey = new byte[32];
-        System.arraycopy(hash, 0, symkey, 0, 32);
-        return symkey;
+        try {
+            return HKDF.hkdf(sharedSecret, nonce, INFO.getBytes(), 32);
+        } catch (Exception e) {
+            throw new IllegalStateException("HKDF failed", e);
+        }
     }
 
     public static byte[] asyKeyToSymkey(byte[] priKey, byte[] pubKey, byte[] iv) {

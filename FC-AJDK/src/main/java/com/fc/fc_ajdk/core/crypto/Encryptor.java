@@ -387,9 +387,9 @@ public class Encryptor {
         cryptoDataByte.setIv(iv);
 
         // Skip sum generation for AES-GCM algorithms (they have built-in authentication)
-        if(alg != FC_AesGcm256_No1_NrC7 &&
-                alg != FC_EccK1AesGcm256_No1_NrC7 &&
-                alg != FC_X25519AesGcm256_No1_NrC7) {
+        // AEAD algorithms (GCM, ChaCha20-Poly1305) authenticate via their own tag.
+        // Non-AEAD algorithms (CBC, raw ChaCha20) need the separate sum.
+        if(alg == null || !alg.isAead()) {
             cryptoDataByte.makeSum4();
         }
 
@@ -453,9 +453,9 @@ public class Encryptor {
 
             // Skip sum generation for AES-GCM algorithms (they have built-in authentication)
             AlgorithmId alg = cryptoDataByte.getAlg();
-            if(alg != FC_AesGcm256_No1_NrC7 &&
-                    alg != FC_EccK1AesGcm256_No1_NrC7 &&
-                    alg != FC_X25519AesGcm256_No1_NrC7) {
+            // AEAD algorithms (GCM, ChaCha20-Poly1305) authenticate via their own tag.
+            // EccAes256K1P7 already produced its own cipher-derived sum.
+            if(alg == null || (!alg.isAead() && alg != AlgorithmId.EccAes256K1P7_No1_NrC7)) {
                 cryptoDataByte.makeSum4();
             }
 
@@ -567,8 +567,49 @@ public class Encryptor {
             case EccAes256K1P7_No1_NrC7 -> {
                 symkey = EccAes256K1P7.asyKeyToSymkey(prikeyX, pubkeyY, cryptoDataByte.getIv());
                 cryptoDataByte.setSymkey(symkey);
+
+                // The legacy implementation is buffer-based: it takes the plaintext
+                // from the data field and produces both the cipher and its own
+                // cipher-derived sum, writing nothing to a stream. Bridge it onto
+                // the stream API here, or the caller receives an empty cipher.
+                // (Read manually: InputStream.readAllBytes needs API 33.)
+                byte[] plain;
+                try {
+                    ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+                    byte[] chunk = new byte[4096];
+                    for (int n; (n = is.read(chunk)) != -1; ) buffer.write(chunk, 0, n);
+                    plain = buffer.toByteArray();
+                } catch (IOException e) {
+                    cryptoDataByte.setCodeMessage(CodeMessage.Code4001FailedToEncrypt, e.getMessage());
+                    return cryptoDataByte;
+                }
+                cryptoDataByte.setData(plain);
+                cryptoDataByte.setDid(Hash.sha256x2(plain));
+
+                // aesEncrypt() wipes the private keys in place when it finishes.
+                // checkKeysMakeType() stored the caller's array by reference, so
+                // hand the legacy code a copy rather than destroying the caller's key.
+                if (cryptoDataByte.getPrikeyA() != null)
+                    cryptoDataByte.setPrikeyA(cryptoDataByte.getPrikeyA().clone());
+                if (cryptoDataByte.getPrikeyB() != null)
+                    cryptoDataByte.setPrikeyB(cryptoDataByte.getPrikeyB().clone());
+
                 EccAes256K1P7 ecc = new EccAes256K1P7();
-                ecc.aesEncrypt(cryptoDataByte);
+                ecc.aesEncrypt(cryptoDataByte);   // clears data, sets cipher and sum
+
+                byte[] eccCipher = cryptoDataByte.getCipher();
+                if (eccCipher == null) {
+                    if (cryptoDataByte.getCode() == null || cryptoDataByte.getCode() == 0)
+                        cryptoDataByte.setCodeMessage(CodeMessage.Code4001FailedToEncrypt,
+                                cryptoDataByte.getMessage());
+                    return cryptoDataByte;
+                }
+                try {
+                    os.write(eccCipher);
+                } catch (IOException e) {
+                    cryptoDataByte.setCodeMessage(CodeMessage.Code4001FailedToEncrypt, e.getMessage());
+                    return cryptoDataByte;
+                }
             }
             case FC_X25519AesGcm256_No1_NrC7 -> {
                 byte[] adjustedIv = adjustIvLength(iv, algorithmId);
@@ -610,6 +651,19 @@ public class Encryptor {
                 cryptoDataByte.setIv(adjustedIv);
                 encryptStreamBySymkey(is, os, symkey, adjustedIv, cryptoDataByte);
             }
+            case FC_EccK1ChaCha20Poly1305_No1_NrC7 -> {
+                byte[] adjustedIv = adjustIvLength(iv, algorithmId);
+                try {
+                    symkey = com.fc.fc_ajdk.core.crypto.Algorithm.Ecc256K1ChaCha20Poly1305.getInstance().asyKeyToSymkey(prikeyX, pubkeyY, adjustedIv);
+                } catch (Exception e) {
+                    cryptoDataByte.setCode(CodeMessage.Code1020OtherError);
+                    cryptoDataByte.setMessage(e.getMessage());
+                    return cryptoDataByte;
+                }
+                cryptoDataByte.setSymkey(symkey);
+                cryptoDataByte.setIv(adjustedIv);
+                encryptStreamBySymkey(is, os, symkey, adjustedIv, cryptoDataByte);
+            }
             case FC_EccK1AesCbc256_No1_NrC7 -> {
                 symkey = Ecc256K1AesCbc256.getInstance().asyKeyToSymkey(prikeyX, pubkeyY, iv);
                 cryptoDataByte.setSymkey(symkey);
@@ -626,7 +680,10 @@ public class Encryptor {
 
         cryptoDataByte.setType(type);
 
-        cryptoDataByte.set0CodeMessage();
+        // Preserve a failure reported by the symmetric layer instead of
+        // reporting success over it.
+        if(cryptoDataByte.getCode() == null || cryptoDataByte.getCode() == 0)
+            cryptoDataByte.set0CodeMessage();
 
         return cryptoDataByte;
     }
@@ -647,6 +704,12 @@ public class Encryptor {
 
             if(pubkeyB!=null)
                 cryptoDataByte.setPubkeyB(pubkeyB);
+
+            // A caller-supplied private key means both parties contribute a key
+            // pair. Mark it here: algorithms such as EccAes256K1P7 read the type
+            // during encryption, long before the caller sets it on the result.
+            if(cryptoDataByte.getType()==null && cryptoDataByte.getPubkeyB()!=null)
+                cryptoDataByte.setType(EncryptType.AsyTwoWay);
         }else {
             cryptoDataByte.setType(EncryptType.AsyOneWay);
 

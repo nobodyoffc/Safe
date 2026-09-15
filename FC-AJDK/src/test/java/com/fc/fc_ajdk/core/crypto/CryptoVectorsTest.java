@@ -1,5 +1,6 @@
 package com.fc.fc_ajdk.core.crypto;
 
+import com.fc.fc_ajdk.core.crypto.Algorithm.Bitcore;
 import com.fc.fc_ajdk.data.fcData.AlgorithmId;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -20,6 +21,7 @@ import java.util.Base64;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -129,6 +131,71 @@ public class CryptoVectorsTest {
             return;
         }
         fail("BUNDLE-T3-PASSWORD-GCM-ARGON2ID missing from bundle.json");
+    }
+
+    @Test
+    public void algorithms() throws Exception {
+        // Collect every failing vector, so one run shows the whole gap rather than the first entry.
+        java.util.List<String> failures = new java.util.ArrayList<>();
+        for (JsonElement e : vectors("algorithms.json")) {
+            JsonObject v = e.getAsJsonObject();
+            String id = str(v, "id");
+            boolean reject = "reject-decrypt".equals(str(v, "expect"));
+            CryptoDataByte result;
+            try {
+                result = decryptAlgorithmVector(v);
+            } catch (Throwable ex) {
+                if (!reject) failures.add(id + " threw " + ex);
+                continue;
+            }
+            boolean success = result != null && Integer.valueOf(0).equals(result.getCode());
+            if (reject) {
+                if (success) failures.add(id + ": tampered cipher reported success");
+            } else if (!success || result.getData() == null || !str(v, "plaintextHex").equals(toHex(result.getData()))) {
+                failures.add(id + ": code=" + (result == null ? null : result.getCode())
+                        + " message=" + (result == null ? null : result.getMessage())
+                        + " data=" + (result == null || result.getData() == null ? null : toHex(result.getData())));
+            }
+        }
+        if (!failures.isEmpty()) fail(failures.size() + " algorithm vectors failed:\n" + String.join("\n", failures));
+    }
+
+    private static CryptoDataByte decryptAlgorithmVector(JsonObject v) throws Exception {
+        String id = str(v, "id");
+        JsonObject secret = v.getAsJsonObject("secret");
+        byte[] prikey = secret.has("prikey") ? hex(secret, "prikey") : null;
+        Decryptor d = new Decryptor();
+        switch (str(v, "form")) {
+            case "json": {
+                String json = str(v, "cipherJson");
+                return switch (EncryptType.valueOf(str(v, "type"))) {
+                    case Symkey -> d.decryptJsonBySymkey(json, hex(secret, "symkey"));
+                    case Password -> d.decryptJsonByPassword(json, str(secret, "password").toCharArray());
+                    case AsyOneWay -> d.decryptJsonByAsyOneWay(json, prikey);
+                    case AsyTwoWay -> d.decryptJsonByAsyTwoWay(json, prikey, hex(secret, "pubkey"));
+                };
+            }
+            case "bundle": {
+                byte[] bundle = hex(v, "bundleHex");
+                CryptoDataByte parsed = CryptoDataByte.fromBundle(bundle);
+                assertNotNull(id, parsed);
+                assertEquals(id, AlgorithmId.fromDisplayName(str(v, "alg")), parsed.getAlg());
+                return switch (parsed.getType()) {
+                    case Symkey -> d.decryptBundleBySymkey(bundle, hex(secret, "symkey"));
+                    case Password -> d.decryptBundleByPassword(bundle, str(secret, "password").toCharArray());
+                    case AsyOneWay -> d.decryptBundleByAsyOneWay(bundle, prikey);
+                    case AsyTwoWay -> d.decryptBundleByAsyTwoWay(bundle, prikey, hex(secret, "pubkey"));
+                };
+            }
+            case "bitcoreEncbuf": {
+                CryptoDataByte r = new CryptoDataByte();
+                r.setData(Bitcore.decrypt(hex(v, "encbufHex"), prikey));
+                r.set0CodeMessage();
+                return r;
+            }
+            default:
+                throw new AssertionError("unknown form in " + id);
+        }
     }
 
     private static void assertDecrypted(JsonObject v, CryptoDataByte result) {
