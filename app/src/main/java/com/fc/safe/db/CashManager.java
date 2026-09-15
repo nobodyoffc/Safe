@@ -38,6 +38,21 @@ public class CashManager {
         return instance;
     }
 
+    public static synchronized void reset() {
+        if (instance != null) {
+            if (instance.cashDB != null) {
+                try {
+                    instance.cashDB.close();
+                } catch (Exception e) {
+                    TimberLogger.e(TAG, "Error closing database on reset: " + e.getMessage());
+                }
+                instance.cashDB = null;
+            }
+            instance = null;
+            TimberLogger.d(TAG, "CashManager instance reset");
+        }
+    }
+
     /**
      * Initializes the CashManager with the given context.
      * 

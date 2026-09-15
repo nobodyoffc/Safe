@@ -31,6 +31,7 @@
     <string name="incorrect_password">密码错误</string>
     <string name="verifying_password">正在验证密码...</string>
     <string name="error_verifying_password">验证密码时出错</string>
+    <string name="vault_migration_aborted">数据仍使用旧的密码保护，因为 %1$s 无法解密。请删除或修复它，然后重新解锁以完成升级。</string>
 
     <!-- CreatePassword Activity -->
     <string name="create_password">创建密码</string>

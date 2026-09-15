@@ -4,10 +4,13 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 import com.fc.fc_ajdk.config.Configure;
+import com.fc.fc_ajdk.core.crypto.VaultKey;
 import com.fc.fc_ajdk.utils.IdNameUtils;
 import com.fc.fc_ajdk.utils.JsonUtils;
 import com.fc.fc_ajdk.utils.TimberLogger;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -33,27 +36,39 @@ public class ConfigureManager {
     }
 
     /**
-     * Creates a new Configure object and stores it in SharedPreferences.
+     * Creates a new vault: a random data key wrapped under the password, stored under a random vault id.
+     * Runs Argon2id, so call it off the UI thread. The caller stores the result.
      * @param passwordBytes The password bytes
-     * @return The newly created Configure object
+     * @return The newly created Configure object, with its data key as the symkey
      */
     public static Configure createConfigure(byte[] passwordBytes) {
-        // Create a new Configure object
         Configure configure = new Configure();
+        byte[] dek = VaultKey.newDek();
+        configure.setDekCipher(VaultKey.wrap(dek, toChars(passwordBytes)));
+        configure.setSymkey(dek);
+        configure.setPasswordName(VaultKey.newVaultId());
 
-        // Generate nonce and symmetric key
-        byte[] symkey = Configure.getSymkeyFromPassword(passwordBytes);
-
-        // Set configure properties
-        configure.setSymkey(symkey);
-
-        // Generate password name and set it
-        String passwordName = IdNameUtils.makePasswordHashName(passwordBytes);
-        configure.setPasswordName(passwordName);
-
-        TimberLogger.d("ConfigMethods", "Created new configure for password: " + passwordName);
+        TimberLogger.d("ConfigMethods", "Created new vault: " + configure.getPasswordName());
 
         return configure;
+    }
+
+    /** The password as the characters VaultKey takes; the bytes come from {@code String.getBytes()}, which is UTF-8 on Android. */
+    public static char[] toChars(byte[] passwordBytes) {
+        return new String(passwordBytes, StandardCharsets.UTF_8).toCharArray();
+    }
+
+    /** @return every stored Configure by its vault name; never null. */
+    public static Map<String, Configure> loadConfigMap(Context context) {
+        SharedPreferences prefs = context.getApplicationContext().getSharedPreferences(CONFIG_PREFS_NAME, Context.MODE_PRIVATE);
+        Map<String, Configure> configMap = JsonUtils.jsonToMap(prefs.getString(CONFIG_KEY, "{}"), String.class, Configure.class);
+        return configMap != null ? configMap : new HashMap<>();
+    }
+
+    /** Writes the whole Configure map durably. @return false if the write failed. */
+    public static boolean commitConfigMap(Context context, Map<String, Configure> configMap) {
+        SharedPreferences prefs = context.getApplicationContext().getSharedPreferences(CONFIG_PREFS_NAME, Context.MODE_PRIVATE);
+        return prefs.edit().putString(CONFIG_KEY, JsonUtils.toJson(configMap)).commit();
     }
 
     /**
@@ -94,24 +109,13 @@ public class ConfigureManager {
             throw new IllegalArgumentException("Context is null");
         }
 
-        context = context.getApplicationContext();
-        
-        SharedPreferences prefs = context.getSharedPreferences(CONFIG_PREFS_NAME, Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = prefs.edit();
-        
-        // Get existing config map or create new one
-        String configJson = prefs.getString(CONFIG_KEY, "{}");
-        Map<String, Configure> configMap = JsonUtils.jsonToMap(configJson, String.class, Configure.class);
-        if (configMap == null) {
-            configMap = new HashMap<>();
-        }
-        
-        // Add or update the configure object
+        Map<String, Configure> configMap = loadConfigMap(context);
         configMap.put(configure.getPasswordName(), configure);
-        
-        // Save back to SharedPreferences
-        editor.putString(CONFIG_KEY, JsonUtils.toJson(configMap));
-        editor.apply();
+
+        // The wrapped data key lives only here, so the write must be durable before anyone relies on it.
+        if (!commitConfigMap(context, configMap)) {
+            throw new IllegalStateException("Failed to save the configuration");
+        }
     }
 
     /**
@@ -166,20 +170,27 @@ public class ConfigureManager {
     }
 
     /**
-     * Verifies if the input password matches the current password name.
+     * Verifies that the password opens the vault that is open now. For a vault with a data key this
+     * runs Argon2id, so call it off the UI thread.
      * @param passwordBytes The password bytes to verify
-     * @return true if the password name matches, false otherwise
+     * @return true if the password opens the open vault
      */
-    public boolean verifyPasswordName(byte[] passwordBytes) {
-        if (passwordBytes == null || configure == null) {
+    public boolean verifyPassword(byte[] passwordBytes) {
+        if (passwordBytes == null || configure == null || configure.getSymkey() == null) {
             return false;
         }
-        String inputPasswordName = IdNameUtils.makePasswordHashName(passwordBytes);
-        return inputPasswordName.equals(configure.getPasswordName());
+        byte[] key;
+        if (configure.getDekCipher() != null && !VaultKey.isLegacyName(configure.getPasswordName())) {
+            key = VaultKey.unwrap(configure.getDekCipher(), toChars(passwordBytes));
+        } else {
+            key = Configure.getSymkeyFromPassword(passwordBytes);
+        }
+        return key != null && MessageDigest.isEqual(key, configure.getSymkey());
     }
 
     /**
-     * Checks if a password already exists in the stored configurations.
+     * Checks if a password already opens a stored vault. Runs Argon2id once per vault with a data key,
+     * so call it off the UI thread.
      * @param context The application context
      * @param passwordBytes The password bytes to check
      * @return true if the password already exists, false otherwise
@@ -188,13 +199,18 @@ public class ConfigureManager {
         if (passwordBytes == null || context == null) {
             return false;
         }
-        
-        String passwordName = IdNameUtils.makePasswordHashName(passwordBytes);
-        SharedPreferences prefs = context.getSharedPreferences(CONFIG_PREFS_NAME, Context.MODE_PRIVATE);
-        String configJson = prefs.getString(CONFIG_KEY, "{}");
-        Map<String, Configure> configMap = JsonUtils.jsonToMap(configJson, String.class, Configure.class);
-        
-        return configMap != null && configMap.containsKey(passwordName);
+
+        Map<String, Configure> configMap = loadConfigMap(context);
+        if (configMap.containsKey(IdNameUtils.makePasswordHashName(passwordBytes))) {
+            return true;
+        }
+        char[] password = toChars(passwordBytes);
+        for (Map.Entry<String, Configure> entry : configMap.entrySet()) {
+            Configure stored = entry.getValue();
+            if (stored == null || VaultKey.isLegacyName(entry.getKey()) || stored.getDekCipher() == null) continue;
+            if (VaultKey.unwrap(stored.getDekCipher(), password) != null) return true;
+        }
+        return false;
     }
 
     /**
@@ -217,7 +233,7 @@ public class ConfigureManager {
             configMap.remove(passwordName);
             SharedPreferences.Editor editor = prefs.edit();
             editor.putString(CONFIG_KEY, JsonUtils.toJson(configMap));
-            editor.apply();
+            editor.commit();
         }
     }
 } 

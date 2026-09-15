@@ -113,11 +113,25 @@ public class ChangePasswordInputActivity extends AppCompatActivity {
             return;
         }
 
-        // Return the new password via Intent
-        Intent resultIntent = new Intent();
-        resultIntent.putExtra("new_password", password);
-        setResult(RESULT_OK, resultIntent);
-        finish();
+        MaterialButton createButton = findViewById(R.id.createButton);
+        createButton.setEnabled(false);
+        byte[] passwordBytes = password.getBytes();
+        // Checking the other vaults runs Argon2id once per vault, so keep it off the UI thread.
+        new Thread(() -> {
+            boolean exists = ConfigureManager.getInstance().passwordExists(this, passwordBytes);
+            runOnUiThread(() -> {
+                createButton.setEnabled(true);
+                if (exists) {
+                    showDuplicatePasswordDialog();
+                    return;
+                }
+                // Return the new password via Intent
+                Intent resultIntent = new Intent();
+                resultIntent.putExtra("new_password", password);
+                setResult(RESULT_OK, resultIntent);
+                finish();
+            });
+        }).start();
     }
 
     private boolean isPasswordValid(String password, String confirmPassword) {
@@ -138,13 +152,6 @@ public class ChangePasswordInputActivity extends AppCompatActivity {
 
         if (!password.equals(confirmPassword)) {
             showError("Passwords do not match");
-            return false;
-        }
-
-        // Check if password already exists
-        byte[] passwordBytes = password.getBytes();
-        if (ConfigureManager.getInstance().passwordExists(this, passwordBytes)) {
-            showDuplicatePasswordDialog();
             return false;
         }
 
