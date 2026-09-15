@@ -40,11 +40,6 @@ public class AesGcm256 {
 
 
     public static void decryptStream(InputStream inputStream, OutputStream outputStream, CryptoDataByte cryptoDataByte) {
-        // AEAD must buffer the full ciphertext and use cipher.doFinal() so the
-        // auth-tag failure (AEADBadTagException) surfaces. CipherOutputStream
-        // swallows that exception in close(), which would let tampered
-        // ciphertext decrypt to garbage with no error — the opposite of what
-        // GCM is for.
         Security.addProvider(new BouncyCastleProvider());
 
         if (cryptoDataByte == null) return;
@@ -63,6 +58,7 @@ public class AesGcm256 {
         }
 
         try {
+            // Read all ciphertext from input stream
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             byte[] buffer = new byte[4096];
             int bytesRead;
@@ -71,18 +67,23 @@ public class AesGcm256 {
             }
             byte[] ciphertext = baos.toByteArray();
 
+            // Initialize cipher with GCMParameterSpec for proper tag handling
             SecretKeySpec keySpec = new SecretKeySpec(key, "AES");
-            GCMParameterSpec gcmSpec = new GCMParameterSpec(128, iv);
+            GCMParameterSpec gcmSpec = new GCMParameterSpec(128, iv); // 128-bit auth tag
 
             Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding", "BC");
             cipher.init(Cipher.DECRYPT_MODE, keySpec, gcmSpec);
 
+            // Decrypt all at once - GCM needs full ciphertext for tag verification
             byte[] plaintext = cipher.doFinal(ciphertext);
+
+            // Write decrypted data to output stream
             outputStream.write(plaintext);
 
             if (cryptoDataByte.getCode() == null) {
                 cryptoDataByte.set0CodeMessage();
             }
+
         } catch (Exception e) {
             cryptoDataByte.setCodeMessage(CodeMessage.Code1029FailedToDecrypt, e.getMessage());
         }
@@ -102,13 +103,18 @@ public class AesGcm256 {
         try (ByteArrayInputStream bisCipher = new ByteArrayInputStream(cryptoDataByte.getCipher());
              ByteArrayOutputStream bosData = new ByteArrayOutputStream()) {
             decryptStream(bisCipher, bosData, cryptoDataByte);
-            byte[] data = bosData.toByteArray();
-            byte[] did = Hash.sha256x2(data);
 
-            cryptoDataByte.setDid(did);
-            // AES-GCM has built-in authentication, no need for additional sum check
-            cryptoDataByte.setData(data);
-            cryptoDataByte.set0CodeMessage();
+            // Only set success if no error occurred during decryption
+            if (cryptoDataByte.getCode() == null || cryptoDataByte.getCode() == 0) {
+                byte[] data = bosData.toByteArray();
+                byte[] did = Hash.sha256x2(data);
+
+                cryptoDataByte.setDid(did);
+                // AES-GCM has built-in authentication, no need for additional sum check
+                // If decryption succeeded without exception, authentication is valid
+                cryptoDataByte.setData(data);
+                cryptoDataByte.set0CodeMessage();
+            }
         } catch (IOException e) {
             cryptoDataByte = new CryptoDataByte();
             cryptoDataByte.setCodeMessage(10);

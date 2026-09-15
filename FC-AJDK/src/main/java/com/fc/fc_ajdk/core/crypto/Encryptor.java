@@ -270,6 +270,11 @@ public class Encryptor {
             if(cryptoDataByte.getKeyName() == null)
                 cryptoDataByte.makeKeyName(key);
 
+            // Preserve a failure reported by the cipher layer (e.g. wrong key
+            // length) instead of overwriting it with success and an empty cipher.
+            if(cryptoDataByte.getCode() != null && cryptoDataByte.getCode() != 0)
+                return cryptoDataByte;
+
             byte[] cipher = bosCipher.toByteArray();
 
             cryptoDataByte.setCipher(cipher);
@@ -388,7 +393,8 @@ public class Encryptor {
             cryptoDataByte.makeSum4();
         }
 
-        cryptoDataByte.set0CodeMessage();
+        if(cryptoDataByte.getCode() == null || cryptoDataByte.getCode() == 0)
+            cryptoDataByte.set0CodeMessage();
         return cryptoDataByte;
     }
 
@@ -454,7 +460,10 @@ public class Encryptor {
             }
 
             cryptoDataByte.setType(encryptType);
-            cryptoDataByte.setCodeMessage(CodeMessage.Code0Success);
+            // Preserve a failure reported by the encryption layer instead of
+            // reporting success over it.
+            if(cryptoDataByte.getCode() == null || cryptoDataByte.getCode() == 0)
+                cryptoDataByte.setCodeMessage(CodeMessage.Code0Success);
 
             return cryptoDataByte;
         } catch (IOException e) {

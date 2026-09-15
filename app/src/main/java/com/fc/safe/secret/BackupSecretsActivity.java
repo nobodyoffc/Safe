@@ -286,19 +286,19 @@ public class BackupSecretsActivity extends BaseCryptoActivity {
                     ToastUtils.showError(this, getString(R.string.incorrect_password));
                     return null;
                 }
-                backupHeader.setAlg(AlgorithmId.FC_AesCbc256_No1_NrC7.getDisplayName());
+                backupHeader.setAlg(AlgorithmId.FC_AesGcm256_No1_NrC7.getDisplayName());
                 backupHeader.setKeyName(IdNameUtils.makeKeyName(passwordBytes));
             }
             case RANDOM_PASSWORD -> {
                 randomPassword = Base32.toBase32(BytesUtils.getRandomBytes(8));
-                backupHeader.setAlg(AlgorithmId.FC_AesCbc256_No1_NrC7.getDisplayName());
+                backupHeader.setAlg(AlgorithmId.FC_AesGcm256_No1_NrC7.getDisplayName());
                 backupHeader.setKeyName(IdNameUtils.makeKeyName(randomPassword.getBytes()));
             }
             case DON_T_ENCRYPT -> {}
         }
 
         if (!encryptMethod.equals(DON_T_ENCRYPT)) {
-            backupHeader.setAlg(AlgorithmId.FC_AesCbc256_No1_NrC7.getDisplayName());
+            backupHeader.setAlg(AlgorithmId.FC_AesGcm256_No1_NrC7.getDisplayName());
             BackupKey backupKey = BackupKey.makeBackupKey(backupHeader, null, randomPassword,this);
             jsonList.add(JsonUtils.toNiceJson(backupKey));
         }

@@ -31,6 +31,10 @@ public class CryptoDataByte extends FcObject {
     private static final String ALG_PID_PREFIX_EccK1ChaCha20Poly1305 = "d1691132aee1";    //PID:d1691132aee137b59002552b2909f8a33b9cbfcbbf3ca12bad20965e2f968a59
     private static final String ALG_PID_PREFIX_BitCore = "e308bc027946";                  //PID:e308bc02794604f6819dd86ae89d56a70f48c5d17263287d90c6ae2b5320651d
 
+    // Whether toBundle() writes Password ciphers as type 4 (with a KDF id) instead of the
+    // legacy type 3. Stays false until every reader accepts type 4.
+    public static final boolean WRITE_PASSWORD_BUNDLE_WITH_KDF = false;
+
     private EncryptType type;
     private AlgorithmId alg;
     private Kdf kdf;
@@ -153,18 +157,15 @@ public class CryptoDataByte extends FcObject {
             return null; // Handle basic null checks early
         }
 
-        // For AES-GCM algorithms, sum is not required (built-in authentication)
-        boolean requiresSum = (alg != AlgorithmId.FC_AesGcm256_No1_NrC7 &&
-                              alg != AlgorithmId.FC_EccK1AesGcm256_No1_NrC7 &&
-                              alg != AlgorithmId.FC_X25519AesGcm256_No1_NrC7);
+        // Algorithms with built-in authentication (GCM, Poly1305) don't need a separate sum
+        boolean requiresSum = !alg.isAead();
 
         if (requiresSum && sum == null) {
             return null; // sum is required but missing for non-GCM algorithms
         }
 
-        if (type.equals(EncryptType.Symkey) || type.equals(EncryptType.Password)) {
-            if (keyName == null) return null;
-        }
+        // Only Symkey bundles carry keyName; Password bundles never have, so don't require it.
+        if (type.equals(EncryptType.Symkey) && keyName == null) return null;
 
         // Create algorithm byte array: the first 12 hex chars (6 bytes) of each
         // algorithm's on-chain protocol PID. See ALG_PID_PREFIX_* constants.
@@ -192,18 +193,24 @@ public class CryptoDataByte extends FcObject {
             // Write algBytes (6 bytes)
             outputStream.write(algBytes);
 
-            // Write EncryptType (1 byte)
-            outputStream.write(type.getNumber());
+            // Write EncryptType (1 byte). A Password cipher that knows its KDF is written as
+            // type 4 followed by the KDF id; otherwise as legacy type 3 with no KDF recorded.
+            boolean writeKdf = type == EncryptType.Password && kdf != null && WRITE_PASSWORD_BUNDLE_WITH_KDF;
+            outputStream.write(writeKdf ? CryptoConstants.BUNDLE_TYPE_PASSWORD_WITH_KDF : type.getNumber());
 
             // Conditionally write pubKeyA based on EncryptType
             if (type == EncryptType.AsyOneWay || type == EncryptType.AsyTwoWay) {
-                if (pubkeyA == null) return null;
+                if (pubkeyA == null) return null; // Check if pubKeyA is needed but not provided
                 outputStream.write(pubkeyA);
             }
 
             // Conditionally write keyName based on EncryptType
             if (type == EncryptType.Symkey) {
                 outputStream.write(keyName);
+            }
+
+            if (writeKdf) {
+                outputStream.write(kdf.getId());
             }
 
             // Write iv (12 or 16 bytes depending on algorithm)
@@ -220,6 +227,7 @@ public class CryptoDataByte extends FcObject {
             // Convert the output stream to a byte array
             return outputStream.toByteArray();
         } catch (IOException e) {
+            // Handle potential IO exceptions (shouldn't happen with ByteArrayOutputStream)
             return null;
         }
     }
@@ -244,16 +252,16 @@ public class CryptoDataByte extends FcObject {
     }
 
     public static CryptoDataByte fromBundle(byte[] bundle) {
-        if (bundle == null || bundle.length < 8) { // Minimum 6 for algBytes and 1 for type
+        if (bundle == null || bundle.length < CryptoConstants.ALG_BYTES_LENGTH + 2) {
             return null;
         }
         int offset = 0;
         CryptoDataByte cryptoData = new CryptoDataByte();
 
         // Extract the algorithm bytes
-        byte[] algBytes = new byte[6];
-        System.arraycopy(bundle, offset, algBytes, 0, 6);
-        offset += 6;
+        byte[] algBytes = new byte[CryptoConstants.ALG_BYTES_LENGTH];
+        System.arraycopy(bundle, offset, algBytes, 0, CryptoConstants.ALG_BYTES_LENGTH);
+        offset += CryptoConstants.ALG_BYTES_LENGTH;
         // Map algorithm bytes back to AlgorithmId. Both the new PID-based prefixes
         // and the legacy sequential prefixes are accepted so old ciphers still decrypt.
         AlgorithmId alg = switch (Hex.toHex(algBytes)) {
@@ -281,14 +289,18 @@ public class CryptoDataByte extends FcObject {
             default -> null;
         };
 
-        if (alg == null) return null;
+        if (alg == null) return null; // Return null if the algorithm ID isn't recognized
 
         cryptoData.setAlg(alg);
 
         // Extract the EncryptType byte
+        // Each field below is copied only if the bundle still holds it. The single minimum-length
+        // check above covers the algorithm and type, not the key, key name, IV or sum, so a short
+        // bundle threw ArrayIndexOutOfBounds instead of being rejected.
         byte typeByte = bundle[6];
         offset++;
-        EncryptType type = EncryptType.fromNumber(typeByte);
+        boolean hasKdfId = typeByte == CryptoConstants.BUNDLE_TYPE_PASSWORD_WITH_KDF;
+        EncryptType type = hasKdfId ? EncryptType.Password : EncryptType.fromNumber(typeByte);
 
         if (type == null) return null;
 
@@ -297,19 +309,29 @@ public class CryptoDataByte extends FcObject {
         // Check if pubKeyA exists for Asy
         if (type == EncryptType.AsyOneWay || type == EncryptType.AsyTwoWay) {
             // Determine public key size based on algorithm
-            int pubKeySize = (alg == AlgorithmId.FC_X25519AesGcm256_No1_NrC7) ? 32 : 33;
+            int pubKeySize = (alg == AlgorithmId.FC_X25519AesGcm256_No1_NrC7) ? CryptoConstants.PUBKEY_X25519_LENGTH : CryptoConstants.PUBKEY_COMPRESSED_LENGTH;
+            if (bundle.length < offset + pubKeySize) return null;
             byte[] pubKeyA = new byte[pubKeySize];
             System.arraycopy(bundle, offset, pubKeyA, 0, pubKeySize);
             cryptoData.setPubkeyA(pubKeyA);
             offset += pubKeySize;
         }
 
-        // Check if keyName exists for Symkey
+        // Check if keyName exists for Symkey or Password
         if (type == EncryptType.Symkey) {
-            byte[] keyName = new byte[6];
-            System.arraycopy(bundle, offset, keyName, 0, 6);
+            if (bundle.length < offset + CryptoConstants.KEY_NAME_LENGTH) return null;
+            byte[] keyName = new byte[CryptoConstants.KEY_NAME_LENGTH];
+            System.arraycopy(bundle, offset, keyName, 0, CryptoConstants.KEY_NAME_LENGTH);
             cryptoData.setKeyName(keyName);
-            offset += 6;
+            offset += CryptoConstants.KEY_NAME_LENGTH;
+        }
+
+        if (hasKdfId) {
+            if (bundle.length < offset + CryptoConstants.KDF_ID_LENGTH) return null;
+            Kdf kdf = Kdf.fromId(bundle[offset]);
+            if (kdf == null) return null; // An unregistered KDF can't be decrypted; reject rather than guess.
+            cryptoData.setKdf(kdf);
+            offset += CryptoConstants.KDF_ID_LENGTH;
         }
 
         // Extract iv (length depends on algorithm: 12 bytes for GCM/ChaCha20, 16 bytes for CBC)
@@ -317,18 +339,19 @@ public class CryptoDataByte extends FcObject {
                                 alg == AlgorithmId.FC_EccK1AesGcm256_No1_NrC7 ||
                                 alg == AlgorithmId.FC_X25519AesGcm256_No1_NrC7 ||
                                 alg == AlgorithmId.FC_ChaCha20_No1_NrC7 ||
-                                alg == AlgorithmId.FC_EccK1ChaCha20_No1_NrC7);
+                                alg == AlgorithmId.FC_EccK1ChaCha20_No1_NrC7 ||
+                                alg == AlgorithmId.FC_ChaCha20Poly1305_No1_NrC7 ||
+                                alg == AlgorithmId.FC_EccK1ChaCha20Poly1305_No1_NrC7);
 
-        int ivLength = uses12ByteIv ? 12 : 16;
+        int ivLength = uses12ByteIv ? CryptoConstants.IV_LENGTH_GCM : CryptoConstants.IV_LENGTH_CBC;
+        if (bundle.length < offset + ivLength) return null;
         byte[] iv = new byte[ivLength];
         System.arraycopy(bundle, offset, iv, 0, ivLength);
         cryptoData.setIv(iv);
         offset += ivLength;
 
-        // For AES-GCM algorithms, sum is not included (built-in authentication)
-        boolean hasSum = (alg != AlgorithmId.FC_AesGcm256_No1_NrC7 &&
-                         alg != AlgorithmId.FC_EccK1AesGcm256_No1_NrC7 &&
-                         alg != AlgorithmId.FC_X25519AesGcm256_No1_NrC7);
+        // Algorithms with built-in authentication (GCM, Poly1305) don't include a separate sum
+        boolean hasSum = !alg.isAead();
 
         // Calculate cipher length dynamically. BitCore carries the full 32-byte
         // HMAC-SHA256 tag as its sum; other algorithms use a 4-byte sum.
@@ -338,7 +361,7 @@ public class CryptoDataByte extends FcObject {
         else sumLength = CryptoConstants.SUM_LENGTH;
         int cipherLength = bundle.length - offset - sumLength;
 
-        if (cipherLength <= 0) return null;
+        if (cipherLength <= 0) return null; // Sanity check to ensure we have a valid cipher length
 
         // Extract cipher
         byte[] cipher = new byte[cipherLength];

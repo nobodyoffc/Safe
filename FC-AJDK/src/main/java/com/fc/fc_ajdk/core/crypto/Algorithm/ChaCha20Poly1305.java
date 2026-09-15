@@ -22,6 +22,9 @@ public class ChaCha20Poly1305 {
     private static final String TRANSFORMATION = "ChaCha20-Poly1305";
     private static final int TAG_LENGTH_BITS = CryptoConstants.GCM_TAG_LENGTH_BITS;
 
+    /**
+     * Encrypt data using ChaCha20-Poly1305 with provided key and IV.
+     */
     public static CryptoDataByte encrypt(InputStream inputStream, OutputStream outputStream,
                                          byte[] key, byte[] iv, CryptoDataByte cryptoDataByte) {
         if (cryptoDataByte == null) {
@@ -73,6 +76,7 @@ public class ChaCha20Poly1305 {
                 cryptoDataByte.setType(EncryptType.Symkey);
             }
 
+            // No sum needed — Poly1305 tag is part of the ciphertext output
             cryptoDataByte.set0CodeMessage();
             return cryptoDataByte;
 
@@ -88,6 +92,9 @@ public class ChaCha20Poly1305 {
         return encrypt((InputStream) bisMsg, (OutputStream) bosCipher, key, iv, cryptoDataByte);
     }
 
+    /**
+     * Decrypt data using ChaCha20-Poly1305.
+     */
     public static CryptoDataByte decrypt(CryptoDataByte cryptoDataByte) {
         byte[] cipherBytes = cryptoDataByte.getCipher();
         if (cipherBytes == null) {
@@ -113,6 +120,9 @@ public class ChaCha20Poly1305 {
         }
     }
 
+    /**
+     * Decrypt stream using ChaCha20-Poly1305.
+     */
     public static void decryptStream(InputStream inputStream, OutputStream outputStream,
                                      CryptoDataByte cryptoDataByte) {
         byte[] key = cryptoDataByte.getSymkey();
@@ -139,14 +149,20 @@ public class ChaCha20Poly1305 {
 
             var hasherIn = Hashing.sha256().newHasher();
 
-            try (CipherOutputStream cos = new CipherOutputStream(outputStream, cipher)) {
-                byte[] buffer = new byte[4096];
-                int bytesRead;
-                while ((bytesRead = inputStream.read(buffer)) != -1) {
-                    hasherIn.putBytes(buffer, 0, bytesRead);
-                    cos.write(buffer, 0, bytesRead);
-                }
+            // Buffer the ciphertext and use doFinal() rather than CipherOutputStream:
+            // CipherOutputStream.close() swallows AEADBadTagException, which would let
+            // a tampered ciphertext through as a successful decryption.
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            byte[] buffer = new byte[4096];
+            int bytesRead;
+            while ((bytesRead = inputStream.read(buffer)) != -1) {
+                hasherIn.putBytes(buffer, 0, bytesRead);
+                baos.write(buffer, 0, bytesRead);
             }
+
+            // Throws AEADBadTagException if the Poly1305 tag does not verify.
+            byte[] plaintext = cipher.doFinal(baos.toByteArray());
+            outputStream.write(plaintext);
 
             byte[] cipherId = Decryptor.sha256(hasherIn.hash().asBytes());
             cryptoDataByte.setCipherId(cipherId);

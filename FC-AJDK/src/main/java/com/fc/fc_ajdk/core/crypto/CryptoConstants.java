@@ -20,6 +20,11 @@ public final class CryptoConstants {
     public static final int PUBKEY_COMPRESSED_SIZE = 33;
     public static final int PUBKEY_COMPRESSED_LENGTH = 33;
     public static final int PUBKEY_X25519_LENGTH = 32;
+    public static final int KDF_ID_LENGTH = 1;
+
+    // Bundle type byte for EncryptType.Password with a recorded KDF id (FTSP30).
+    // Type byte 3 remains the legacy Password layout, which records no KDF.
+    public static final byte BUNDLE_TYPE_PASSWORD_WITH_KDF = 4;
     public static final int PUBKEY_UNCOMPRESSED_SIZE = 65;
 
     // Hash sizes (bytes)

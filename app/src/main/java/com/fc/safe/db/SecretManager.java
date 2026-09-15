@@ -100,7 +100,7 @@ public class SecretManager {
         initialSecret.setSaveTime(DateUtils.longToTime(System.currentTimeMillis(),DateUtils.TO_MINUTE));
         byte[] symkey = ConfigureManager.getInstance().getSymkey();
             if(symkey!=null){
-                CryptoDataByte result = new Encryptor(AlgorithmId.FC_AesCbc256_No1_NrC7).encryptBySymkey(initialSecret.getContent().getBytes(),symkey);
+                CryptoDataByte result = new Encryptor(AlgorithmId.FC_AesGcm256_No1_NrC7).encryptBySymkey(initialSecret.getContent().getBytes(),symkey);
                 if(result!=null && result.getCode()==0 && result.getCipher()!=null){
                     initialSecret.setContentCipher(result.toJson());
                     initialSecret.setContent(null);
