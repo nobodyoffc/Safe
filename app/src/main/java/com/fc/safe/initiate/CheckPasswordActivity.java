@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ProgressBar;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
@@ -22,6 +21,7 @@ import com.fc.safe.db.PendingTxManager;
 import com.fc.safe.db.SecretManager;
 import com.fc.safe.db.ToastManager;
 import com.fc.safe.qr.QrCodeActivity;
+import com.fc.safe.ui.WaitingDialog;
 import com.google.android.material.textfield.TextInputLayout;
 import com.fc.safe.utils.ToolbarUtils;
 import com.fc.safe.utils.ToastUtils;
@@ -31,7 +31,7 @@ public class CheckPasswordActivity extends AppCompatActivity {
     
     private EditText passwordInput;
     private TextInputLayout passwordInputLayout;
-    private View loadingContainer;
+    private WaitingDialog waitingDialog;
     private Button verifyButton;
     private Button createPasswordButton;
     private Button clearButton;
@@ -82,7 +82,6 @@ public class CheckPasswordActivity extends AppCompatActivity {
         // Initialize UI components
         passwordInputLayout = findViewById(R.id.passwordInputLayout);
         passwordInput = findViewById(R.id.password_input);
-        loadingContainer = findViewById(R.id.loading_container);
         verifyButton = findViewById(R.id.verify_button);
         createPasswordButton = findViewById(R.id.create_password_button);
         clearButton = findViewById(R.id.clear_button);
@@ -195,7 +194,10 @@ public class CheckPasswordActivity extends AppCompatActivity {
     
     private void showLoading(boolean show) {
         if (show) {
-            loadingContainer.setVisibility(View.VISIBLE);
+            if (waitingDialog == null) {
+                waitingDialog = new WaitingDialog(this, getString(R.string.verifying_password));
+            }
+            waitingDialog.show();
             verifyButton.setEnabled(false);
             createPasswordButton.setEnabled(false);
             clearButton.setEnabled(false);
@@ -213,7 +215,7 @@ public class CheckPasswordActivity extends AppCompatActivity {
                 imm.hideSoftInputFromWindow(passwordInput.getWindowToken(), 0);
             }
         } else {
-            loadingContainer.setVisibility(View.GONE);
+            dismissWaitingDialog();
             verifyButton.setEnabled(true);
             createPasswordButton.setEnabled(true);
             clearButton.setEnabled(true);
@@ -224,6 +226,18 @@ public class CheckPasswordActivity extends AppCompatActivity {
         }
     }
     
+    private void dismissWaitingDialog() {
+        if (waitingDialog != null && waitingDialog.isShowing()) {
+            waitingDialog.dismiss();
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        dismissWaitingDialog();
+        super.onDestroy();
+    }
+
     private void verifyPassword() {
         String enteredPassword = passwordInput.getText().toString();
         
