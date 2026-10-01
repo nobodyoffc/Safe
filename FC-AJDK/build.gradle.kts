@@ -21,6 +21,15 @@ android {
     buildFeatures {
         buildConfig = true
     }
+
+    // Argon2id in C for Kdf (see src/main/cpp/CMakeLists.txt).
+    ndkVersion = "27.1.12297006"
+    externalNativeBuild {
+        cmake {
+            path = file("src/main/cpp/CMakeLists.txt")
+            version = "3.22.1"
+        }
+    }
 }
 
 dependencies {
