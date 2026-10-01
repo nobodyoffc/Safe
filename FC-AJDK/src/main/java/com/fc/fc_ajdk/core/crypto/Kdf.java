@@ -13,6 +13,7 @@ import org.bouncycastle.crypto.params.Argon2Parameters;
 
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 
 /**
  * Password-based key derivation functions supported for EncryptType.Password.
@@ -67,6 +68,17 @@ public enum Kdf {
                         .withParallelism(ARGON2ID_PARALLELISM)
                         .withSalt(salt)
                         .build();
+                if (NativeArgon2.isAvailable() && salt.length >= NativeArgon2.MIN_SALT_LENGTH) {
+                    // The bytes BouncyCastle would hash, so both give the same key.
+                    byte[] passwordBytes = params.getCharToByteConverter().convert(password);
+                    try {
+                        byte[] out = NativeArgon2.argon2id(passwordBytes, salt, ARGON2ID_ITERATIONS,
+                                ARGON2ID_MEMORY_KIB, ARGON2ID_PARALLELISM, DERIVED_KEY_LEN);
+                        if (out != null) return out;
+                    } finally {
+                        Arrays.fill(passwordBytes, (byte) 0);
+                    }
+                }
                 Argon2BytesGenerator gen = new Argon2BytesGenerator();
                 gen.init(params);
                 byte[] out = new byte[DERIVED_KEY_LEN];
