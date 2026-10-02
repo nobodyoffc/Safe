@@ -42,29 +42,34 @@ public class SafeApplication extends Application {
                 activity.getWindow().setFlags(
                         android.view.WindowManager.LayoutParams.FLAG_SECURE,
                         android.view.WindowManager.LayoutParams.FLAG_SECURE);
+                BackgroundTimeoutManager.onActivityCreated(activity);
             }
 
             @Override
-            public void onActivityStarted(android.app.Activity activity) {}
+            public void onActivityStarted(android.app.Activity activity) {
+                BackgroundTimeoutManager.onActivityStarted(activity);
+            }
 
             @Override
             public void onActivityResumed(android.app.Activity activity) {
-                BackgroundTimeoutManager.onAppForeground(activity);
+                BackgroundTimeoutManager.onActivityResumed(activity);
             }
 
             @Override
-            public void onActivityPaused(android.app.Activity activity) {
-                BackgroundTimeoutManager.onAppBackground();
-            }
+            public void onActivityPaused(android.app.Activity activity) {}
 
             @Override
-            public void onActivityStopped(android.app.Activity activity) {}
+            public void onActivityStopped(android.app.Activity activity) {
+                BackgroundTimeoutManager.onActivityStopped(activity);
+            }
 
             @Override
             public void onActivitySaveInstanceState(android.app.Activity activity, Bundle outState) {}
 
             @Override
-            public void onActivityDestroyed(android.app.Activity activity) {}
+            public void onActivityDestroyed(android.app.Activity activity) {
+                BackgroundTimeoutManager.onActivityDestroyed(activity);
+            }
         });
     }
 
