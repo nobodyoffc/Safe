@@ -59,7 +59,7 @@ public class MainActivity extends AppCompatActivity {
     private void initiate() {
 
         // Show security guidelines dialog before creating password
-            RemindDialog dialog = new RemindDialog(this, getString(R.string.safe_v_by_no1_nrc7)+"\n\n"+getString(R.string.offline_notation));
+            RemindDialog dialog = new RemindDialog(this, getString(R.string.safe_v_by_no1_nrc7, BuildConfig.VERSION_NAME)+"\n\n"+getString(R.string.offline_notation));
             dialog.setOnDismissListener(dialogInterface -> {
                 if (!hasLaunchedPasswordActivity) {
                     hasLaunchedPasswordActivity = true;

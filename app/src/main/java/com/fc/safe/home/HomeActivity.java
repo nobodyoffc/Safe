@@ -13,6 +13,7 @@ import androidx.core.widget.NestedScrollView;
 
 import com.fc.fc_ajdk.config.Configure;
 import com.fc.fc_ajdk.utils.TimberLogger;
+import com.fc.safe.BuildConfig;
 import com.fc.safe.R;
 import com.fc.safe.db.DatabaseManager;
 import com.fc.safe.db.ToastManager;
@@ -62,7 +63,7 @@ public class HomeActivity extends AppCompatActivity {
             TextView safeTextView = findViewById(R.id.safe_text);
             if (safeTextView != null) {
                 safeTextView.setOnClickListener(v -> {
-                    RemindDialog dialog = new RemindDialog(this, getString(R.string.safe_v_by_no1_nrc7)+"\n\n"+getString(R.string.offline_notation));
+                    RemindDialog dialog = new RemindDialog(this, getString(R.string.safe_v_by_no1_nrc7, BuildConfig.VERSION_NAME)+"\n\n"+getString(R.string.offline_notation));
                     dialog.show();
                 });
             }

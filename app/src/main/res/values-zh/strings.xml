@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">密库</string>
-    <string name="safe_v_by_no1_nrc7">密库 v2.2 By No1_NrC7</string>
+    <string name="safe_v_by_no1_nrc7">密库 v%1$s By No1_NrC7</string>
 
     <string name="scan_notification">点击扫描按钮开始扫描二维码。</string>
     <string name="make">生成</string>

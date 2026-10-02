@@ -10,14 +10,35 @@ android {
         applicationId = "com.fc.safe"
         minSdk = 28
         targetSdk = 34
-        versionCode = 104
-        versionName = "1.4"
+        versionCode = 203
+        versionName = "2.3"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    signingConfigs {
+        create("release") {
+            // Credentials live outside the repo, in ~/.gradle/gradle.properties.
+            // Nothing here falls back to the debug key: a release that cannot be
+            // signed privately fails in packageRelease instead of shipping.
+            val storePath = providers.gradleProperty("SAFE_RELEASE_STORE_FILE").orNull
+            if (!storePath.isNullOrBlank()) {
+                storeFile = file(storePath)
+                storePassword = providers.gradleProperty("SAFE_RELEASE_STORE_PASSWORD").orNull
+                keyAlias = providers.gradleProperty("SAFE_RELEASE_KEY_ALIAS").orNull
+                keyPassword = providers.gradleProperty("SAFE_RELEASE_KEY_PASSWORD").orNull
+            }
+            // v3 carries a rotation proof, so this key can be replaced later
+            // without forcing every user to uninstall. minSdk 28 makes v1 dead weight.
+            enableV1Signing = false
+            enableV2Signing = true
+            enableV3Signing = true
+        }
+    }
+
     buildTypes {
         release {
+            signingConfig = signingConfigs.getByName("release")
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
