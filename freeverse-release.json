@@ -1,0 +1,41 @@
+{
+  "github" : "nobodyoffc/Safe",
+  "codes" : [
+    {
+      "desc" : "Safe for Android: offline key management, offline TX and multisig signing, secrets and TOTP for Freecash, crypto-tools.",
+      "protocols" : [
+        "FBP0",
+        "FTSP0",
+        "FVEP0"
+      ],
+      "name" : "Safe",
+      "langs" : [
+        "Java"
+      ],
+      "path" : "."
+    }
+  ],
+  "apps" : [
+    {
+      "types" : [
+        "wallet",
+        "offline"
+      ],
+      "desc" : "Safe for Android: offline key management, transaction and multisig signing, secrets and TOTP for Freecash.",
+      "os" : "android",
+      "localNames" : {
+        "en" : "Safe"
+      },
+      "stdName" : "safe",
+      "codes" : [
+        "Safe"
+      ],
+      "protocols" : [
+        "FBP0",
+        "FTSP0",
+        "FVEP0"
+      ],
+      "asset" : "Safe-*.apk"
+    }
+  ]
+}
