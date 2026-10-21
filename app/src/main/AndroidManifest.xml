@@ -116,26 +116,6 @@
             android:theme="@style/Theme.Freer" />
 
         <activity
-            android:name="com.fc.safe.myKeys.CreateKeyByPubkeyActivity"
-            android:exported="false"
-            android:windowSoftInputMode="adjustResize" />
-
-        <activity
-            android:name="com.fc.safe.myKeys.CreateKeyByFidActivity"
-            android:exported="false"
-            android:windowSoftInputMode="adjustResize" />
-
-        <activity
-            android:name="com.fc.safe.myKeys.CreateKeyByPrikeyActivity"
-            android:exported="false"
-            android:windowSoftInputMode="adjustResize" />
-
-        <activity
-            android:name="com.fc.safe.myKeys.CreateKeyByPrikeyCipherActivity"
-            android:exported="false"
-            android:windowSoftInputMode="adjustResize" />
-
-        <activity
             android:name="com.fc.safe.myKeys.RandomNewKeysActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
@@ -260,7 +240,7 @@
             android:windowSoftInputMode="adjustResize" />
 
         <activity
-            android:name="com.fc.safe.myKeys.ImportKeyInfoActivity"
+            android:name="com.fc.safe.myKeys.ImportKeyActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
 
@@ -293,8 +273,6 @@
             android:name=".home.AddFidActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
-
-
 
         <activity
             android:name=".home.CashActivity"

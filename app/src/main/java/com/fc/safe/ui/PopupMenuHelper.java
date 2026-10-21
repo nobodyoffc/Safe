@@ -13,17 +13,13 @@ import com.fc.safe.utils.ToastUtils;
 import com.fc.safe.db.DatabaseManager;
 import com.fc.safe.home.ArticleDisplayActivity;
 import com.fc.safe.initiate.ConfigureManager;
-import com.fc.safe.myKeys.CreateKeyByFidActivity;
 import com.fc.safe.myKeys.CreateKeyByPhraseActivity;
-import com.fc.safe.myKeys.CreateKeyByPrikeyActivity;
-import com.fc.safe.myKeys.CreateKeyByPrikeyCipherActivity;
-import com.fc.safe.myKeys.CreateKeyByPubkeyActivity;
 import com.fc.safe.myKeys.RandomNewKeysActivity;
 import com.fc.safe.myKeys.FindNiceKeysActivity;
 import com.fc.safe.tools.PrikeyConverterActivity;
 import com.fc.safe.tools.PubkeyConverterActivity;
 import com.fc.safe.tools.AddressConverterActivity;
-import com.fc.safe.myKeys.ImportKeyInfoActivity;
+import com.fc.safe.myKeys.ImportKeyActivity;
 import com.fc.safe.secret.ImportSecretActivity;
 import com.fc.safe.tools.JsonConvertActivity;
 
@@ -84,43 +80,14 @@ public class PopupMenuHelper {
     }
 
     private void setupCreateKeyMenuItems(View popupView) {
-        TextView fromPriKey = popupView.findViewById(R.id.from_pri_key);
-        TextView fromPriKeyCipher = popupView.findViewById(R.id.from_pri_key_cipher);
-        TextView fromPubKey = popupView.findViewById(R.id.from_pub_key);
-        TextView inputFid = popupView.findViewById(R.id.input_fid);
-        TextView findNiceFid = popupView.findViewById(R.id.find_nice_fid);
-        TextView createNewKeys = popupView.findViewById(R.id.create_new_keys);
-        TextView fromPhrase = popupView.findViewById(R.id.input_phrase);
         TextView importKeys = popupView.findViewById(R.id.import_keys);
+        TextView findNiceFid = popupView.findViewById(R.id.find_nice_fid);
+        TextView fromPhrase = popupView.findViewById(R.id.input_phrase);
+        TextView createNewKeys = popupView.findViewById(R.id.create_new_keys);
 
-        createNewKeys.setOnClickListener(v -> {
+        importKeys.setOnClickListener(v -> {
             popupWindow.dismiss();
-            context.startActivity(new Intent(context, RandomNewKeysActivity.class));
-        });
-
-        fromPhrase.setOnClickListener(v -> {
-            popupWindow.dismiss();
-            context.startActivity(new Intent(context, CreateKeyByPhraseActivity.class));
-        });
-
-        fromPriKey.setOnClickListener(v -> {
-            popupWindow.dismiss();
-            context.startActivity(new Intent(context, CreateKeyByPrikeyActivity.class));
-        });
-
-        fromPriKeyCipher.setOnClickListener(v -> {
-            popupWindow.dismiss();
-            context.startActivity(new Intent(context, CreateKeyByPrikeyCipherActivity.class));
-        });
-
-        fromPubKey.setOnClickListener(v -> {
-            popupWindow.dismiss();
-            context.startActivity(new Intent(context, CreateKeyByPubkeyActivity.class));
-        });
-
-        inputFid.setOnClickListener(v -> {
-            popupWindow.dismiss();
-            context.startActivity(new Intent(context, CreateKeyByFidActivity.class));
+            context.startActivity(new Intent(context, ImportKeyActivity.class));
         });
 
         findNiceFid.setOnClickListener(v -> {
@@ -128,9 +95,14 @@ public class PopupMenuHelper {
             context.startActivity(new Intent(context, FindNiceKeysActivity.class));
         });
 
-        importKeys.setOnClickListener(v -> {
+        fromPhrase.setOnClickListener(v -> {
             popupWindow.dismiss();
-            context.startActivity(new Intent(context, ImportKeyInfoActivity.class));
+            context.startActivity(new Intent(context, CreateKeyByPhraseActivity.class));
+        });
+
+        createNewKeys.setOnClickListener(v -> {
+            popupWindow.dismiss();
+            context.startActivity(new Intent(context, RandomNewKeysActivity.class));
         });
     }
 
@@ -235,7 +207,7 @@ public class PopupMenuHelper {
 
         importKeys.setOnClickListener(v -> {
             popupWindow.dismiss();
-            context.startActivity(new Intent(context, ImportKeyInfoActivity.class));
+            context.startActivity(new Intent(context, ImportKeyActivity.class));
         });
 
         importSecrets.setOnClickListener(v -> {

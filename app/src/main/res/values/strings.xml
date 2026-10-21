@@ -255,6 +255,21 @@
     <string name="no_secret_found">No secret found.</string>
 
     <string name="import_keys">Import keys</string>
+    <string name="input_key_hint">Prikey, pubkey, FID, cipher or key JSON</string>
+    <string name="please_input_a_key">Input a key first</string>
+    <string name="key_detected_prikey">Private key → %1$s</string>
+    <string name="key_detected_pubkey">Public key → %1$s. Watch-only: it can\'t sign.</string>
+    <string name="key_detected_fid">FID. Watch-only: it can\'t sign.</string>
+    <string name="key_detected_cipher">Encrypted. Input its password.</string>
+    <string name="key_detected_backup">Key backup. Tap save to import.</string>
+    <string name="key_non_password_cipher">Encrypted, but not with a password. It can\'t be imported here.</string>
+    <string name="key_bad_prikey">Looks like a prikey, but it isn\'t valid. Check for a typo.</string>
+    <string name="key_bad_pubkey">Looks like a public key, but it isn\'t valid. Check for a typo.</string>
+    <string name="key_bad_fid">Looks like an FID, but the checksum is wrong. Check for a typo.</string>
+    <string name="key_multiple">One key at a time. Use a key backup JSON for several.</string>
+    <string name="key_unrecognized">Not a recognized key. For a phrase, use %1$s.</string>
+    <string name="key_backup_no_preview">A key backup can\'t be previewed. Tap save to import it.</string>
+    <string name="decrypting">Decrypting…</string>
     <string name="input_the_key_info_json">Input the key JSON.</string>
     <string name="no_key_info_found">No key found.</string>
     <string name="security_guidelines">Security Guidelines</string>

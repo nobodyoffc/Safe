@@ -60,6 +60,11 @@ public class FcEntityImporter<T extends FcEntity> {
         this.type = type;
     }
 
+    /** A password already known, so password ciphers open without asking for it. */
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
     public List<T> importEntity(String jsonText) {
         if (jsonText.isEmpty()) {
             listener.onImportError("Please input JSON text");
