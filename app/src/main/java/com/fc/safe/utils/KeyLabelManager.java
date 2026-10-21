@@ -36,7 +36,7 @@ public class KeyLabelManager {
 
     public void showLabelInputDialog(KeyInfo keyInfo, AtomicInteger remainingKeys) {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
-        builder.setTitle("Enter Label for Key");
+        builder.setTitle(context.getString(R.string.enter_label_for_key));
         
         View dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_key_label, null);
         builder.setView(dialogView);
@@ -58,7 +58,7 @@ public class KeyLabelManager {
             TimberLogger.e(TAG, "Failed to create avatar for key ID %s: %s", keyInfo.getId(), e.getMessage());
         }
 
-        builder.setPositiveButton("OK", (dialog, which) -> {
+        builder.setPositiveButton(context.getString(R.string.ok), (dialog, which) -> {
             String label = labelInput.getText().toString().trim();
             if (!label.isEmpty()) {
                 keyInfo.setLabel(label);
@@ -96,7 +96,7 @@ public class KeyLabelManager {
             }).start();
         });
 
-        builder.setNegativeButton("Cancel", (dialog, which) -> {
+        builder.setNegativeButton(context.getString(R.string.cancel), (dialog, which) -> {
             dialog.cancel();
             ((androidx.appcompat.app.AppCompatActivity) context).finish();
         });
@@ -131,7 +131,7 @@ public class KeyLabelManager {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
 
         int remaining = keyQueue.size() - currentKeyIndex;
-        builder.setTitle("Enter Label for Key (" + remaining + " remaining)");
+        builder.setTitle(context.getString(R.string.enter_label_for_key_remaining, remaining));
 
         View dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_key_label, null);
         builder.setView(dialogView);
@@ -153,7 +153,7 @@ public class KeyLabelManager {
             TimberLogger.e(TAG, "Failed to create avatar for key ID %s: %s", keyInfo.getId(), e.getMessage());
         }
 
-        builder.setPositiveButton("OK", (dialog, which) -> {
+        builder.setPositiveButton(context.getString(R.string.ok), (dialog, which) -> {
             String label = labelInput.getText().toString().trim();
             if (!label.isEmpty()) {
                 keyInfo.setLabel(label);
@@ -199,7 +199,7 @@ public class KeyLabelManager {
             }).start();
         });
 
-        builder.setNegativeButton("Cancel", (dialog, which) -> {
+        builder.setNegativeButton(context.getString(R.string.cancel), (dialog, which) -> {
             dialog.cancel();
             // Cancel all remaining dialogs and finish activity
             keyQueue = null;
@@ -213,7 +213,7 @@ public class KeyLabelManager {
 
     public void showEditLabelDialog(KeyInfo keyInfo, Runnable onLabelUpdated) {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
-        builder.setTitle("Edit Label");
+        builder.setTitle(context.getString(R.string.edit_label));
 
         View dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_key_label, null);
         builder.setView(dialogView);

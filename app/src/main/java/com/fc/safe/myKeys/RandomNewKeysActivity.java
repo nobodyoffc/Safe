@@ -42,7 +42,7 @@ public class RandomNewKeysActivity extends AppCompatActivity {
         checkboxAll = findViewById(R.id.checkbox_all);
 
         // Set up toolbar
-        ToolbarUtils.setupToolbar(this, "Random New Keys");
+        ToolbarUtils.setupToolbar(this, getString(R.string.random_keys));
 
         // Show waiting dialog and generate keys
         showWaitingDialog();

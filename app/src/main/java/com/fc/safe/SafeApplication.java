@@ -39,9 +39,12 @@ public class SafeApplication extends Application {
                 // Mark every window as secure: prevents the contents (keys, secrets,
                 // transactions) from appearing in the recent-apps screenshot and blocks
                 // screenshots / screen recording while the app is in the foreground.
-                activity.getWindow().setFlags(
-                        android.view.WindowManager.LayoutParams.FLAG_SECURE,
-                        android.view.WindowManager.LayoutParams.FLAG_SECURE);
+                // Debug builds skip it so tutorial videos can be recorded.
+                if (!BuildConfig.DEBUG) {
+                    activity.getWindow().setFlags(
+                            android.view.WindowManager.LayoutParams.FLAG_SECURE,
+                            android.view.WindowManager.LayoutParams.FLAG_SECURE);
+                }
                 BackgroundTimeoutManager.onActivityCreated(activity);
             }
 

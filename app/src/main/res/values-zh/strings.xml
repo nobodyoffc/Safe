@@ -258,7 +258,7 @@
 4. 建议使用无网的扫描二维码设备，物理备份私钥、密语，至少2个备份并分别放置，定期检查。\n\n
 5. 一旦本设备遗失或可能被刺探破解，请立即使用备份私钥将资产转移到安全的地址上。\n\n
 6. 采用密语生成私钥时，密语应尽量长、复杂、包含多种类型字符，切勿使用名言诗句等。记住，您面对的是全世界拥有巨大算力和高超技能的黑客。\n\n
-7. 本设备密语产生私钥的算法为SHA256哈希计算得到，您可以用第三方工具上测试，但且勿使用测试私钥保存资产，切勿用存资产的密语做在线测试。\n\n
+7. 用密语生成私钥时，请选择 Argon2id：它计算慢且占用内存，黑客每猜一次都要付出时间和内存。SHA256 速度快，无法抵御暴力破解，仅用于兼容已有的 SHA256 派生私钥。切勿用存资产的密语做在线测试。\n\n
 8. 您可以在安全可信的外部设备中产生私钥，通过扫描或手工输入的方式导入密库。这个环节的安全性将取决于私钥的来源和您的操作。\n\n
 9. 助记词使私钥安全策略更加复杂，因此，密库不支持助记词，可将第三方设备上导出的私钥导入密库使用。\n\n
 10. 再次强调：私钥、密语绝不可泄露或丢失，设备必须离线，这是密库存在的意义。\n\n
@@ -589,6 +589,9 @@
     <string name="selected_key_not_part_of_multisig">选中的密钥不是此多签交易的成员</string>
     <string name="failed_to_get_key_info_of">获取密钥信息失败：%1$s</string>
     <string name="enter_label_for_multisig_id">输入多签ID标签</string>
+    <string name="enter_label_for_key">输入密钥标签</string>
+    <string name="enter_label_for_key_remaining">输入密钥标签（还剩 %d 个）</string>
+    <string name="edit_label">修改标签</string>
     <string name="selected_cashes_count">已选择：%1$d 张钞票</string>
     <string name="copied_cash_id">已复制钞票ID：%1$s</string>
     <string name="copied_amount">已复制金额：%1$s</string>
