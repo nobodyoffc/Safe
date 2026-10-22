@@ -35,9 +35,12 @@
             <TextView
                 android:id="@+id/totpOpt"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="48dp"
                 android:layout_weight="1"
                 android:textSize="32sp"
+                android:autoSizeTextType="uniform"
+                android:autoSizeMinTextSize="16sp"
+                android:autoSizeMaxTextSize="32sp"
                 android:textStyle="bold"
                 android:textColor="@color/field_name"
                 android:gravity="start|center_vertical"
@@ -45,7 +48,6 @@
                 android:background="@android:color/transparent"
                 android:clickable="true"
                 android:focusable="true"
-                android:ellipsize="end"
                 android:paddingStart="50dp"
                 android:maxLines="1" />
 

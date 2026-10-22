@@ -227,6 +227,7 @@
     <string name="secret_already_exists_message">This secret has been existed. Replace it?</string>
     <string name="secret_saved_successfully">Secret saved!</string>
     <string name="secrets_saved_successfully">%d secrets saved!</string>
+    <string name="n_keys_saved">%d keys saved!</string>
     <string name="keys_saved_successfully">Key saved!</string>
     <string name="input_the_title">Input the title</string>
     <string name="input_the_content">Input the content</string>

@@ -215,6 +215,7 @@
     <string name="secret_already_exists_message">该秘密已存在，替换吗？</string>
     <string name="secret_saved_successfully">秘密已保存</string>
     <string name="secrets_saved_successfully">%d 秘密已保存</string>
+    <string name="n_keys_saved">已保存 %d 个密钥</string>
     <string name="input_the_title">输入标题</string>
     <string name="input_the_content">输入内容</string>
     <string name="input_the_memo">输入备忘</string>
@@ -411,6 +412,7 @@
     <string name="encrypt_by">加密自：</string>
     <string name="don_t_encrypt">不加密</string>
     <string name="current_password">当前密码</string>
+    <string name="random_password">随机密码</string>
     <string name="to_hex">转Hex</string>
     <string name="base58_new">Base58新格式</string>
     <string name="mnemonic">助记词</string>

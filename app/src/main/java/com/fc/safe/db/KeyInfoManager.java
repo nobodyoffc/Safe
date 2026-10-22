@@ -259,7 +259,7 @@ public class KeyInfoManager {
     private static void processKeyInfoSequentially(Activity activity, KeyInfoManager keyInfoManager, List<KeyInfo> keyInfoList, byte[] symkey, int index, int savedCount) {
         if (index >= keyInfoList.size()) {
             keyInfoManager.commit();
-            ToastUtils.showInfo(activity, activity.getString(R.string.secrets_saved_successfully, savedCount));
+            ToastUtils.showInfo(activity, activity.getString(R.string.n_keys_saved, savedCount));
             activity.setResult(Activity.RESULT_OK);
             activity.finish();
             return;
@@ -288,7 +288,7 @@ public class KeyInfoManager {
                     processKeyInfoSequentially(activity, keyInfoManager, keyInfoList, symkey, index + 1, savedCount);
                 } else if (choice == UserConfirmDialog.Choice.STOP) {
                     keyInfoManager.commit();
-                    ToastUtils.showInfo(activity, activity.getString(R.string.secrets_saved_successfully, savedCount));
+                    ToastUtils.showInfo(activity, activity.getString(R.string.n_keys_saved, savedCount));
                     activity.setResult(Activity.RESULT_OK);
                     activity.finish();
                 }
