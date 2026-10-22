@@ -412,7 +412,6 @@
     <string name="failed_to_save_file">Failed to save file</string>
     <string name="exported_to">Exported to: %1$s</string>
     <string name="failed_to_parse_json">Failed to parse JSON</string>
-    <string name="keyname_is_inconsistent">KeyName is inconsistent</string>
     <string name="multisig_cant_be_null">Multisig can\'t be null</string>
     <string name="fid_of_multisig_cant_be_null">The FID of Multisig can\'t be null</string>
     <string name="invalid_number_format">Invalid number format</string>

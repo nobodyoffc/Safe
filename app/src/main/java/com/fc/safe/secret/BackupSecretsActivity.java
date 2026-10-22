@@ -294,13 +294,11 @@ public class BackupSecretsActivity extends BaseCryptoActivity {
                     return null;
                 }
                 backupHeader.setAlg(AlgorithmId.FC_AesGcm256_No1_NrC7.getDisplayName());
-                backupHeader.makeKeyName(enteredPassword.toCharArray());
             }
             case RANDOM_PASSWORD -> {
                 randomPassword = BackupKey.makeRandomPassword();
                 pendingRandomPassword = randomPassword;
                 backupHeader.setAlg(AlgorithmId.FC_AesGcm256_No1_NrC7.getDisplayName());
-                backupHeader.makeKeyName(randomPassword.toCharArray());
             }
             case DON_T_ENCRYPT -> {}
         }

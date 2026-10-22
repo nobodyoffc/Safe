@@ -402,7 +402,6 @@
     <string name="failed_to_save_file">保存文件失败</string>
     <string name="exported_to">已导出到：%1$s</string>
     <string name="failed_to_parse_json">解析JSON失败</string>
-    <string name="keyname_is_inconsistent">密钥名称不一致</string>
     <string name="multisig_cant_be_null">多签不能为空</string>
     <string name="fid_of_multisig_cant_be_null">多签的FID不能为空</string>
     <string name="invalid_number_format">无效的数字格式</string>

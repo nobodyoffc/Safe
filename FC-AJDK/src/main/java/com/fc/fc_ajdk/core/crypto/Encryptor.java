@@ -107,14 +107,8 @@ public class Encryptor {
         CryptoDataByte cryptoDataByte = encryptBySymkey(msg,symkey,iv);
         cryptoDataByte.setType(EncryptType.Password);
         cryptoDataByte.setKdf(kdf);
-        return cryptoDataByte;
-    }
-
-    public CryptoDataByte encryptByPasswordHash(@NotNull byte[] msg, @NotNull byte[] passwordHash){
-        byte[] iv = generateRandomIv();
-        byte[] symkey = Decryptor.sha256(BytesUtils.addByteArray(passwordHash, iv));
-        CryptoDataByte cryptoDataByte = encryptBySymkey(msg,symkey,iv);
-        cryptoDataByte.setType(EncryptType.Password);
+        // The derived key changes with every salt, so a name for it would identify nothing.
+        cryptoDataByte.setKeyName(null);
         return cryptoDataByte;
     }
 
@@ -161,6 +155,7 @@ public class Encryptor {
 //        cryptoDataByte.setSymkey(key);
         cryptoDataByte.setType(EncryptType.Password);
         cryptoDataByte.setKdf(kdf);
+        cryptoDataByte.setKeyName(null);
 
         return cryptoDataByte;
     }
@@ -230,14 +225,6 @@ public class Encryptor {
         byte[] iv = generateRandomIv();
         CryptoDataByte cryptoDataByte = encryptBySymkey(msg,key, iv);
         if(cryptoDataByte.getCode()!=0)return null;
-        return cryptoDataByte.toBundle();
-    }
-    public byte[] encryptToBundleByPassword(@NotNull byte[] msg, @NotNull char[] password){
-        byte[] iv = generateRandomIv();
-        byte[] symkey = kdf.deriveSymkey(password, iv);
-        CryptoDataByte cryptoDataByte = encryptBySymkey(msg,symkey, iv);
-        if(cryptoDataByte.getCode()!=0)return null;
-        cryptoDataByte.setKdf(kdf);
         return cryptoDataByte.toBundle();
     }
 

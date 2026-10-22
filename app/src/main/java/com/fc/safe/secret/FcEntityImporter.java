@@ -107,13 +107,6 @@ public class FcEntityImporter<T extends FcEntity> {
             }
         }
 
-        if(backupKey!=null && backupHeader!=null){
-            if(!backupKey.getKeyName().equals(backupHeader.getKeyName())){
-                ToastUtils.showError(context, context.getString(R.string.keyname_is_inconsistent));
-                return null;
-            }
-        }
-
         finalTList.addAll(tList);
 
         for(CryptoDataByte cryptoDataByte:cryptoDataByteList){

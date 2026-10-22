@@ -8,6 +8,7 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -30,6 +31,8 @@ public class RandomPasswordDialog extends Dialog {
         setContentView(R.layout.dialog_random_password);
         if (getWindow() != null) {
             getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            getWindow().setLayout((int) (context.getResources().getDisplayMetrics().widthPixels * 0.95),
+                    WindowManager.LayoutParams.WRAP_CONTENT);
         }
         setCancelable(false);
         setCanceledOnTouchOutside(false);
