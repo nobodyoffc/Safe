@@ -25,10 +25,7 @@ import com.fc.fc_ajdk.core.crypto.Decryptor;
 import com.fc.fc_ajdk.core.crypto.Encryptor;
 import com.fc.fc_ajdk.data.fcData.AlgorithmId;
 import com.fc.fc_ajdk.data.feipData.Secret;
-import com.fc.fc_ajdk.utils.Base32;
-import com.fc.fc_ajdk.utils.BytesUtils;
 import com.fc.fc_ajdk.utils.Hex;
-import com.fc.fc_ajdk.utils.IdNameUtils;
 import com.fc.fc_ajdk.utils.JsonUtils;
 import com.fc.fc_ajdk.utils.TimberLogger;
 import com.fc.safe.R;
@@ -37,6 +34,7 @@ import com.fc.safe.home.BaseCryptoActivity;
 import com.fc.safe.initiate.ConfigureManager;
 import com.fc.safe.models.BackupHeader;
 import com.fc.safe.models.BackupKey;
+import com.fc.safe.ui.RandomPasswordDialog;
 import com.fc.safe.ui.SingleInputActivity;
 import com.fc.safe.utils.QRCodeGenerator;
 import com.fc.safe.utils.ToastUtils;
@@ -69,6 +67,8 @@ public class BackupSecretsActivity extends BaseCryptoActivity {
     private RadioButton noneButton;
     private static final int REQUEST_CODE_PASSWORD = 3001;
     private BackupHeader backupHeader = null;
+    /** The random password of the last export, to show once it has finished. */
+    private String pendingRandomPassword = null;
     private static final int PERMISSION_REQUEST_STORAGE = 1001;
 
     @Override
@@ -230,6 +230,7 @@ public class BackupSecretsActivity extends BaseCryptoActivity {
             if (filePath != null) {
                 displayFilePath(filePath);
                 ToastUtils.showInfo(this, getString(R.string.exported_to, filePath));
+                if (pendingRandomPassword != null) new RandomPasswordDialog(this, pendingRandomPassword).show();
             }
             updateButtonStates();
         });
@@ -280,6 +281,7 @@ public class BackupSecretsActivity extends BaseCryptoActivity {
 
 
         String randomPassword = null;
+        pendingRandomPassword = null;
         switch (encryptMethod) {
             case CURRENT_PASSWORD -> {
                 if (enteredPassword == null || enteredPassword.isEmpty()) {
@@ -292,12 +294,13 @@ public class BackupSecretsActivity extends BaseCryptoActivity {
                     return null;
                 }
                 backupHeader.setAlg(AlgorithmId.FC_AesGcm256_No1_NrC7.getDisplayName());
-                backupHeader.setKeyName(IdNameUtils.makeKeyName(passwordBytes));
+                backupHeader.makeKeyName(enteredPassword.toCharArray());
             }
             case RANDOM_PASSWORD -> {
-                randomPassword = Base32.toBase32(BytesUtils.getRandomBytes(8));
+                randomPassword = BackupKey.makeRandomPassword();
+                pendingRandomPassword = randomPassword;
                 backupHeader.setAlg(AlgorithmId.FC_AesGcm256_No1_NrC7.getDisplayName());
-                backupHeader.setKeyName(IdNameUtils.makeKeyName(randomPassword.getBytes()));
+                backupHeader.makeKeyName(randomPassword.toCharArray());
             }
             case DON_T_ENCRYPT -> {}
         }

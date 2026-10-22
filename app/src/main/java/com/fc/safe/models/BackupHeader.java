@@ -1,13 +1,17 @@
 package com.fc.safe.models;
 
+import com.fc.fc_ajdk.core.crypto.Kdf;
 import com.fc.fc_ajdk.data.fcData.FcObject;
+import com.fc.fc_ajdk.utils.BytesUtils;
 import com.fc.fc_ajdk.utils.DateUtils;
+import com.fc.fc_ajdk.utils.Hex;
 
 public class BackupHeader extends FcObject {
     private String time;
     private Integer items;
     private Integer qrCodes;
     private String keyName;
+    private String keyNameSalt;
     private String alg;
     private String tClass;
 
@@ -53,6 +57,24 @@ public class BackupHeader extends FcObject {
 
     public void setKeyName(String keyName) {
         this.keyName = keyName;
+    }
+
+    /**
+     * Names the key by the start of an Argon2id hash of the password. A fast hash here would let
+     * anyone holding the header test password guesses without paying for Argon2id.
+     */
+    public void makeKeyName(char[] password) {
+        byte[] salt = BytesUtils.getRandomBytes(16);
+        keyNameSalt = Hex.toHex(salt);
+        keyName = Hex.toHex(Kdf.Argon2id_No1_NrC7.deriveSymkey(password, salt)).substring(0, 12);
+    }
+
+    public String getKeyNameSalt() {
+        return keyNameSalt;
+    }
+
+    public void setKeyNameSalt(String keyNameSalt) {
+        this.keyNameSalt = keyNameSalt;
     }
 
     public String getAlg() {

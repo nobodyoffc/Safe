@@ -410,7 +410,6 @@
     <string name="welcome_to_freeverse">欢迎来到自由世界，%1$s</string>
     <string name="builder_shares_didnt_sum_up">构建者份额总和不是100%。请重置。</string>
     <string name="encrypt_by">加密自：</string>
-    <string name="random_password">随机密码</string>
     <string name="don_t_encrypt">不加密</string>
     <string name="current_password">当前密码</string>
     <string name="to_hex">转Hex</string>
@@ -496,6 +495,10 @@
     <string name="keys_loaded">公钥已加载</string>
     <string name="failed_to_decrypt">解密失败</string>
     <string name="copied_to_clipboard">已复制</string>
+    <string name="copy_password">复制密码</string>
+    <string name="i_have_saved_it">我已保存</string>
+    <string name="keep_random_password_apart">请将此密码与导出的数据分开保存。同时拥有两者的人就能读取数据。导出的数据不包含此密码，且不会再次显示。</string>
+    <string name="random_password_kept_apart">密码已在导出时单独显示，未与此数据保存在一起。</string>
     <string name="failed_to_initiate">初始化失败</string>
     <string name="error_launching_homeactivity">加载主页失败</string>
     <string name="no_id_found_for_avatar">没有制作头像所需的ID</string>

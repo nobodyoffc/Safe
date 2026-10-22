@@ -466,6 +466,10 @@
     <string name="keys_loaded">" keys loaded."</string>
     <string name="failed_to_decrypt">"Failed to decrypt. "</string>
     <string name="copied_to_clipboard">Copied to clipboard</string>
+    <string name="copy_password">Copy password</string>
+    <string name="i_have_saved_it">I\'ve saved it</string>
+    <string name="keep_random_password_apart">Keep this password apart from the exported data. Anyone who has both can read it. The export does not contain this password, and it will not be shown again.</string>
+    <string name="random_password_kept_apart">The password was shown once at export and is kept apart from this data.</string>
     <string name="failed_to_initiate">Failed to initiate.</string>
     <string name="error_launching_homeactivity">"Error launching HomeActivity. "</string>
     <string name="no_id_found_for_avatar">No ID found for avatar</string>
