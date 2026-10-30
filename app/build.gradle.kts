@@ -10,8 +10,8 @@ android {
         applicationId = "com.fc.safe"
         minSdk = 28
         targetSdk = 34
-        versionCode = 204
-        versionName = "2.4"
+        versionCode = 205
+        versionName = "2.5"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
